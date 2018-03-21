@@ -9,6 +9,7 @@ function [ wave ] = transmit(f, A, omega, t, sampling_rate)
     if nargin < 2   A = 20;                  end;
     if nargin < 1   f = 1000;               end;
 	dur = (1: t*sampling_rate)/sampling_rate;
+	% This should be cos or it won't work.
     wave = A*sin(2*pi*f*dur + omega); 
 	sound(wave, sampling_rate);
     pause(t);
