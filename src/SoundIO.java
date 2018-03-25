@@ -1,4 +1,4 @@
-package AcousticNetwork
+package AcousticNetwork;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-class SoundIO{
+public class SoundIO{
 	private int sample_rate_;
 	private AudioFormat format_;
 	private DataLine.Info o_info_;
@@ -27,11 +27,12 @@ class SoundIO{
 	private final int FRAMESIZE = 2;
 	private final int BYTESIZE = 8;
 
-	public SoundIO(int sr) throws LineUnavailableException{
-		this.sample_rate_ = sr;
+	public void SoundIO() throws Exception{
 		this.format_ = 
-			new AudioFormat(sample_rate_, FRAMESIZE * BYTESIZE, 1, true, true);
-
+			new AudioFormat(44100, FRAMESIZE*BYTESIZE, 1, true, true);
+		this.setUpDevice();
+	}
+	protected void setUpDevice() throws Exception{
 		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_);
 		this.i_info_ = new DataLine.Info(TargetDataLine.class, format_);
 		
@@ -130,4 +131,9 @@ class SoundIO{
 		File f = new File(path);
 		AudioSystem.write(stream, Type.WAVE, f);		
 	}
+
+	public static void main(String[] args){
+		System.out.println("Hello world.");
+	}
 }
+

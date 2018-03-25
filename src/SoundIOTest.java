@@ -1,5 +1,7 @@
 import AcousticNetwork.SoundIO;
+
 class SoundIOTest{
+
 	// Try modify this to test.
 	public static void main(String[] args) throws Exception{
 		double dur = 4;
@@ -11,7 +13,7 @@ class SoundIOTest{
 			wave[i] = 
 				0.5*(Math.sin(2*Math.PI*1000*t) + Math.sin(2*Math.PI*10000*t));
 		}
-		SoundIO sound_io = new SoundIO(sample_rate);
+		SoundIO sound_io = new SoundIO();
 
 		String path = "../wav/record1_41.wav";
 		sound_io.play_file(path);
