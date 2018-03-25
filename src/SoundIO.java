@@ -1,3 +1,5 @@
+package AcousticNetwork
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -90,9 +92,11 @@ class SoundIO{
 		int byte_cnt = sample_cnt * this.FRAMESIZE;
 		ByteBuffer in = ByteBuffer.allocate(byte_cnt);
 
-		System.out.println("Recording...");
+		System.out.printf(
+			"Recording for %3.2fs...",
+			(double) sample_cnt / sample_rate_);
 		i_line_.read(in.array(), 0, byte_cnt);
-		System.out.println("Record finished.");
+		System.out.println("Recording finished.");
 
 		return byteBufToDouble(in);
 	}
@@ -113,7 +117,7 @@ class SoundIO{
 		ByteBuffer buf = ByteBuffer.allocate(byte_cnt);
 		int r = dst.read(buf.array(), 0, byte_cnt);
 		System.out.printf(
-			"%d samples(%4.3fs) read from file, now playing...",
+			"%d samples(%3.2fs) read from file, now playing...",
 			r / FRAMESIZE, 
 			(double)r / sample_rate_ / FRAMESIZE);
 		play(buf);
@@ -125,26 +129,5 @@ class SoundIO{
 		AudioInputStream stream = new AudioInputStream(in, format_, buf.capacity());
 		File f = new File(path);
 		AudioSystem.write(stream, Type.WAVE, f);		
-	}
-
-	// Try modify this to test.
-	public static void main(String[] args) throws Exception{
-		double dur = 4;
-		int sample_rate = 44100;
-		int sample_cnt = (int) (dur * sample_rate);
-		double[] wave = new double[sample_cnt];
-		for (int i=0; i<sample_cnt; i++){
-			double t = (double) i / sample_rate;
-			wave[i] = 
-				0.5*(Math.sin(2*Math.PI*1000*t) + Math.sin(2*Math.PI*10000*t));
-		}
-		SoundIO sound_io = new SoundIO(sample_rate);
-
-		//String path = "../wav/record1_41.wav";
-		//sound_io.play_file(path);
-		//sound_io.sound(wave);
-		//wave = sound_io.record(100000);
-		//sound_io.sound(wave);
-		sound_io.save_file(wave, "t.wav");
 	}
 }
