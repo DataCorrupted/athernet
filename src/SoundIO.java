@@ -57,7 +57,7 @@ class SoundIO{
 		// descructor, but funny thing is, there is no such a thing
 		// in Java, as memory is managed by java, not the programmer.
 	}
-	public ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
+	private ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
 		int len = arr.length;
 		ByteBuffer out = ByteBuffer.allocate(len * FRAMESIZE);
 		for (int i=0; i<len; i++){
@@ -69,7 +69,7 @@ class SoundIO{
 		}
 		return out;
 	}
-	public double[] byteBufToDouble(ByteBuffer buf){
+	private double[] byteBufToDouble(ByteBuffer buf){
 		int cap = buf.capacity();
 		double[] out = new double[cap];
 		for (int i=0; i < cap / FRAMESIZE; i++){
