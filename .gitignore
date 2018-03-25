@@ -4,3 +4,4 @@ out/*
 .idea/*
 *.fig
 *.class
+wav/*

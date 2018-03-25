@@ -71,8 +71,8 @@ end
 
 
 %% Receiver
-[soundTrack,fs] = audioread('sample_track.wav');
-% output_track = soundTrack'; 
+[soundTrack,fs] = audioread('record4.wav');
+output_track = soundTrack'; 
 RxFIFO = output_track;
 
 power = 0;
@@ -109,7 +109,6 @@ for i = 1:length(RxFIFO)
             syncPower_localMax = 0;
             syncFIFO = zeros(1, length(syncFIFO));
             state = 1;  
-
             tempBuffer = RxFIFO(start_index+1:i);
             decodeFIFO = tempBuffer;
         end
