@@ -108,7 +108,7 @@ public class SoundIO{
 		return this.record((int)(time * sample_rate_));
 	}
 
-	public void play_file(String path)
+	public double[] read_file(String path)
 		throws UnsupportedAudioFileException, IOException, LineUnavailableException{
 		File f = new File(path);
 		AudioInputStream src = AudioSystem.getAudioInputStream(f);
@@ -120,10 +120,10 @@ public class SoundIO{
 		ByteBuffer buf = ByteBuffer.allocate(byte_cnt);
 		int r = dst.read(buf.array(), 0, byte_cnt);
 		System.out.printf(
-			"%d samples(%3.2fs) read from file, now playing...",
+			"%d samples(%3.2fs) read from file.",
 			r / FRAMESIZE, 
 			(double)r / sample_rate_ / FRAMESIZE);
-		play(buf);
+		return byteBufToDouble(buf);
 	}
 	public void save_file(double[] arr, String path) throws Exception{
 		// Not sure why it uses input stream for output.
