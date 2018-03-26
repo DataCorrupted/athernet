@@ -27,10 +27,14 @@ public class SoundIO{
 	private final int FRAMESIZE = 2;
 	private final int BYTESIZE = 8;
 
-	public void SoundIO() throws Exception{
+	public SoundIO() throws Exception{
+		this(44100);
+	}
+
+	public SoundIO(int sr) throws Exception{
 		this.format_ = 
 			new AudioFormat(44100, FRAMESIZE*BYTESIZE, 1, true, true);
-		this.setUpDevice();
+		this.setUpDevice();		
 	}
 	protected void setUpDevice() throws Exception{
 		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_);
@@ -42,7 +46,6 @@ public class SoundIO{
 			throw new LineUnavailableException();
 		}
 		this.o_line_ = (SourceDataLine)AudioSystem.getLine(o_info_);
-
 		if (!AudioSystem.isLineSupported(this.i_info_)){
 			System.out.println(
 				"Line matching " + this.o_info_ + " is not supported.");
@@ -54,7 +57,6 @@ public class SoundIO{
 		
 		i_line_.start();
 		o_line_.start();
-
 		// Now this is disturbing. 
 		// I should shut the lines down by calling close() in the
 		// descructor, but funny thing is, there is no such a thing
@@ -85,9 +87,9 @@ public class SoundIO{
 		play(doubleToByteBuf(arr));
 	}
 	private void play(ByteBuffer out) throws LineUnavailableException {
-		o_line_.write(out.array(), 0, out.capacity());
+		this.o_line_.write(out.array(), 0, out.capacity());
 		// Drain every data in the buffer before it's closed.
-		o_line_.drain();
+		this.o_line_.drain();
 	}
 	public double[] record(int sample_cnt){
 		int byte_cnt = sample_cnt * this.FRAMESIZE;

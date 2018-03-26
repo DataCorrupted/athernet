@@ -16,9 +16,9 @@ class SoundIOTest{
 		SoundIO sound_io = new SoundIO();
 
 		String path = "../wav/record1_41.wav";
-		sound_io.play_file(path);
-		//sound_io.sound(wave);
-		wave = sound_io.record(100000);
+		//sound_io.play_file(path);
+		sound_io.sound(wave);
+		//wave = sound_io.record(100000);
 		//sound_io.sound(wave);
 		//sound_io.save_file(wave, "t.wav");
 	}
