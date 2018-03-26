@@ -32,8 +32,9 @@ public class SoundIO{
 	}
 
 	public SoundIO(int sr) throws Exception{
+		sample_rate_ = sr;
 		this.format_ = 
-			new AudioFormat(44100, FRAMESIZE*BYTESIZE, 1, true, true);
+			new AudioFormat(sample_rate_, FRAMESIZE*BYTESIZE, 1, true, true);
 		this.setUpDevice();		
 	}
 	protected void setUpDevice() throws Exception{
@@ -55,17 +56,17 @@ public class SoundIO{
 		o_line_.open(this.format_);
 		i_line_.open(this.format_);
 		
-		i_line_.start();
-		o_line_.start();
+		//i_line_.start();
+		//o_line_.start();
 		// Now this is disturbing. 
 		// I should shut the lines down by calling close() in the
 		// descructor, but funny thing is, there is no such a thing
 		// in Java, as memory is managed by java, not the programmer.
 	}
 	private ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
-		int len = arr.length;
-		ByteBuffer out = ByteBuffer.allocate(len * FRAMESIZE);
-		for (int i=0; i<len; i++){
+		int sampele_cnt = arr.length;
+		ByteBuffer out = ByteBuffer.allocate(sampele_cnt * FRAMESIZE);
+		for (int i=0; i<sampele_cnt; i++){
 			if (Math.abs(arr[i]) > 1){
 				arr[i] = (arr[i] < 0) ? -1:1;
 				System.out.printf("Warn on data frame %d, value too large, fixed to MAX value\n", i);
@@ -76,8 +77,10 @@ public class SoundIO{
 	}
 	private double[] byteBufToDouble(ByteBuffer buf){
 		int cap = buf.capacity();
-		double[] out = new double[cap];
-		for (int i=0; i < cap / FRAMESIZE; i++){
+		int sample_cnt = cap / FRAMESIZE;
+		double[] out = new double[sample_cnt];
+		// Two bytes each time.
+		for (int i=0; i < sample_cnt; i++){
 			out[i] = (double) buf.getShort() / Short.MAX_VALUE;
 		}	
 		return out;	
@@ -87,20 +90,22 @@ public class SoundIO{
 		play(doubleToByteBuf(arr));
 	}
 	private void play(ByteBuffer out) throws LineUnavailableException {
+		this.o_line_.start();
 		this.o_line_.write(out.array(), 0, out.capacity());
 		// Drain every data in the buffer before it's closed.
 		this.o_line_.drain();
+		this.o_line_.close();
 	}
 	public double[] record(int sample_cnt){
 		int byte_cnt = sample_cnt * this.FRAMESIZE;
 		ByteBuffer in = ByteBuffer.allocate(byte_cnt);
-
+		i_line_.start();
 		System.out.printf(
-			"Recording for %3.2fs...",
+			"Recording for %3.2fs...\n",
 			(double) sample_cnt / sample_rate_);
 		i_line_.read(in.array(), 0, byte_cnt);
 		System.out.println("Recording finished.");
-
+		i_line_.close();
 		return byteBufToDouble(in);
 	}
 
@@ -112,15 +117,16 @@ public class SoundIO{
 		throws UnsupportedAudioFileException, IOException, LineUnavailableException{
 		File f = new File(path);
 		AudioInputStream src = AudioSystem.getAudioInputStream(f);
+		
 		AudioFormat src_format = src.getFormat();
 		AudioInputStream dst = AudioSystem.getAudioInputStream(this.format_, src);
 
 		int byte_cnt = (int) dst.getFrameLength() / src_format.getFrameSize() * FRAMESIZE;
-
 		ByteBuffer buf = ByteBuffer.allocate(byte_cnt);
+		
 		int r = dst.read(buf.array(), 0, byte_cnt);
 		System.out.printf(
-			"%d samples(%3.2fs) read from file.",
+			"%d samples(%3.2fs) read from file.\n",
 			r / FRAMESIZE, 
 			(double)r / sample_rate_ / FRAMESIZE);
 		return byteBufToDouble(buf);
@@ -128,14 +134,15 @@ public class SoundIO{
 	public void save_file(double[] arr, String path) throws Exception{
 		// Not sure why it uses input stream for output.
 		ByteBuffer buf = doubleToByteBuf(arr);
+		//this.play(buf);
 		InputStream in = new ByteArrayInputStream(buf.array());
-		AudioInputStream stream = new AudioInputStream(in, format_, buf.capacity());
+
+		// Streaming uses sample as counting unit.
+		AudioInputStream stream = 
+			new AudioInputStream(in, format_, buf.capacity()/FRAMESIZE);
 		File f = new File(path);
 		AudioSystem.write(stream, Type.WAVE, f);		
 	}
 
-	public static void main(String[] args){
-		System.out.println("Hello world.");
-	}
 }
 
