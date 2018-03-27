@@ -2,7 +2,7 @@ package AcousticNetwork;
 
 import java.io.FileOutputStream;
 
-class FileO{
+public class FileO{
 	public static final int bin = 0;
 	public static final int text01 = 1;
 
@@ -16,7 +16,7 @@ class FileO{
 		file_format_ = file_format;
 		o_file_ = new FileOutputStream(path);
 	}
-	public void getBytes(byte[] f) throws Exception{
+	public void putBytes(byte[] f) throws Exception{
 		if (file_format_ == FileO.text01){
 			f = bitsToText01(f);
 		}

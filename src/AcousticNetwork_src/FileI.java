@@ -2,7 +2,7 @@ package AcousticNetwork;
 
 import java.io.FileInputStream;
 
-class FileI{
+public class FileI{
 	public static final int bin = 0;
 	public static final int text01 = 1;
 	int file_format_;
@@ -30,6 +30,7 @@ class FileI{
 	}
 
 	private byte[] text01ToBits(byte[] text){
+		// Bugy
 		byte[] in = new byte[text.length >> 3];
 		for (int i=0; i<text.length; i++){
 			for (int j=0; j<1; j++){
