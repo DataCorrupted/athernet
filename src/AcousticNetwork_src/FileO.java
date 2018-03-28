@@ -3,11 +3,11 @@ package AcousticNetwork;
 import java.io.FileOutputStream;
 
 public class FileO{
-	public static final int bin = 0;
-	public static final int text01 = 1;
+	public static final int BIN = 0;
+	public static final int TEXT01 = 1;
 
-	int file_format_;
-	FileOutputStream o_file_; 
+	private int file_format_;
+	private FileOutputStream o_file_; 
 
 	public FileO() throws Exception{
 		this("./O", 1);
@@ -16,11 +16,14 @@ public class FileO{
 		file_format_ = file_format;
 		o_file_ = new FileOutputStream(path);
 	}
-	public void putBytes(byte[] f) throws Exception{
-		if (file_format_ == FileO.text01){
+	public void putBytes(byte[] f, int byte_cnt) throws Exception{
+		if (byte_cnt <= 0) { return; }
+
+		if (file_format_ == FileO.TEXT01){
+			byte_cnt = byte_cnt << 3;
 			f = bitsToText01(f);
 		}
-		o_file_.write(f);
+		o_file_.write(f, 0, byte_cnt);
 	}
 	private byte[] bitsToText01(byte[] bytes){
 		byte[] out = new byte[bytes.length << 3];
