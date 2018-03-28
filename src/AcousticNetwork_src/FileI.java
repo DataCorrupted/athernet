@@ -14,33 +14,29 @@ public class FileI{
 		i_file_ = new FileInputStream(path);
 	}
 
-	public byte[] getBytes(int byte_cnt) throws Exception{
+	public int getBytes(byte[] in) throws Exception{
+		int byte_cnt = in.length;
 		int read_bytes = 
 			(file_format_ == FileI.bin)? byte_cnt: byte_cnt<<3;
 		byte[] i_bytes = new byte[read_bytes];
-		i_file_.read(i_bytes, 0, read_bytes);
+		int r = i_file_.read(i_bytes, 0, read_bytes);
 
-		byte[] in = new byte[byte_cnt];
 		if (file_format_ == FileI.bin){
 			in = i_bytes;
 		} else if (file_format_ == FileI.text01){
-			in = text01ToBits(i_bytes);
+			text01ToBits(in, i_bytes);
+			r  = r >>> 3;
 		}
-		return in;
+		return r;
 	}
 
-	private byte[] text01ToBits(byte[] text){
+	private void text01ToBits(byte[] dst, byte[] src){
 		// Bugy
-		byte[] in = new byte[text.length >> 3];
-		for (int i=0; i<text.length; i++){
-			for (int j=0; j<1; j++){
-				if (text[i<<3+j] == (byte)'1'){
-					in[i] ++;
-				}
-				in[i] = (byte) (in[i] << 1);
+		for (int i=0; i<dst.length; i++){
+			for (int j=0; j<8; j++){
+				dst[i] = (byte) (dst[i] << 1);
+				dst[i] += (src[(i<<3)+j] == (byte)'1')? 1: 0;
 			}
 		}
-		return in;
-
 	}
 }

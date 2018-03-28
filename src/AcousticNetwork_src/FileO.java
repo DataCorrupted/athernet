@@ -22,12 +22,12 @@ public class FileO{
 		}
 		o_file_.write(f);
 	}
-	private byte[] bitsToText01(byte[] bits){
-		byte[] out = new byte[bits.length << 3];
-		for (int i=0; i<bits.length; i++){
+	private byte[] bitsToText01(byte[] bytes){
+		byte[] out = new byte[bytes.length << 3];
+		for (int i=0; i<bytes.length; i++){
 			for (int j=0; j<8; j++){
-				out[i<<3+j] = (byte) (((bits[i] & 1) == 1)? '1':'0');
-				bits[i] = (byte) (bits[i] >>> 1);
+				out[(i<<3)+7-j] = (byte) (((bytes[i] & 1) == 1)? '1':'0');
+				bytes[i] = (byte) (bytes[i] >>> 1);
 			}
 		}
 		return out;
