@@ -30,7 +30,7 @@ class FileIOTest{
 	}
 
 	public static void main(String[] args) throws Exception{
-		FileIOTest file_io_test = new FileIOTest("./I", FileI.TEXT01,"./O", FileO.BIN);
+		FileIOTest file_io_test = new FileIOTest("./I", FileI.BIN,"./O", FileO.TEXT01);
 		int byte_cnt = 1000;
 		byte[] f = new byte[byte_cnt];
 
