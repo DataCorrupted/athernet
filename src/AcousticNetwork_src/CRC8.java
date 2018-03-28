@@ -33,8 +33,9 @@ public class CRC8 implements Checksum{
 
 	@Override
 	public void update(byte[] buffer, int offset, int len){
+		int data;
 		for (int i = 0; i < len; i++){
-			int data = buffer[offset+i] ^ value;
+			data = buffer[offset+i] ^ value;
 			value = (short)(crcTable[data & 0xff] ^ (value << 8));
 		}
 	}
@@ -64,12 +65,17 @@ public class CRC8 implements Checksum{
 	}
 
 	public static void  main(String[] args){
-		final int   CRC_POLYNOM = 0x9C; 		// 1001 1100
-		final byte  CRC_INITIAL = (byte)0xFF;
+		final int CRC_POLYNOM = 0x9C; 		// 1001 1100
+		final byte CRC_INITIAL = (byte)0xFF;
 
-		final byte[]    data = {1, 56, -23, 3, 0, 19, 0, 0, 2, 0, 3, 13, 8, -34, 7, 9, 42, 18, 26, -5, 54, 11, -94, -46, -128, 4, 48, 52, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1, 1, -32, -80, 0, 98, -5, 71, 0, 64, 0, 0, 0, 0, -116, 1, 104, 2};
-		CRC8    crc8 = new CRC8(CRC_POLYNOM, CRC_INITIAL);
-		crc8.update(data,0,data.length);
-		System.out.println("Test successful:\t"+(crc8.getValue() == 29));
+		final byte[] data = {1, 56, -23, 3, 0, 19, 0, 0, 2, 0, 3, 13, 8, -34, 7, 9, 42, 18, 26, -5, 54, 11, -94, -46, -128, 4, 48, 52, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1, 1, -32, -80, 0, 98, -5, 71, 0, 64, 0, 0, 0, 0, -116, 1, 104, 0};
+		CRC8 crc8 = new CRC8(CRC_POLYNOM, CRC_INITIAL);
+		crc8.update(data, 0, data.length-1);
+		System.out.printf("%d\n", crc8.getValue());
+		data[data.length-1] = (byte) crc8.getValue();
+
+		crc8.reset();
+		crc8.update(data, 0, data.length-1);
+		System.out.printf("%d\n", crc8.getValue());
 	}
 }
