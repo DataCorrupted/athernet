@@ -41,7 +41,9 @@ class Modulation{
     private int state_;                                     // indicate whether the current data bit is part of the data
     private int count_down_;
     private double header_score_;
-    private boolean[] packet_;
+    private byte[] packet_;
+
+    private double power_energy;
 
     /* Someone want to overload this */
     public Modulation(int sample_rate){
@@ -55,6 +57,7 @@ class Modulation{
     public Modulation(int bit_length, int header_length, int sample_rate, int max_frame_length, int init_count_down,
                       int carrier_freq){
         state_ = 0;
+        power_energy = 0;
 
         bit_length_ = bit_length;
         header_length_ = header_length;
@@ -124,6 +127,9 @@ class Modulation{
         // given a recved signal. Demodulate it.
         // Whether current signals are data or just nothing important.
 
+        // calculate the power
+        power_energy = power_energy * (1-1.0/64.0) + (sample * sample) / 64;
+
         if (state_ == 0){
             // identify the header
             processing_header_.add(sample);
@@ -180,33 +186,14 @@ class Modulation{
             // process and clear the buffer
             state_ = 0;
             // TODO: convert double queue buffer to data
+            boolean[] packet_boolean = convert_processing_data();
             processing_data_.clear();
-
+            packet_ = convert_booleans_to_bytes(packet_boolean);
+            return true;                // new data packet is ready
         }
         else {
             throw new RuntimeException(new String("Invalid state"));
         }
-
-
-
-		/*
-		if (is_data) {
-			if can be demodulated to 0 or 1 {
-				put 0/1 in packet
-				if (packet is full){
-					is_data = false
-				}
-			} else {
-				wait for more sample until it can be demodulated.
-				( Should have same samples for each bit)
-			}
-		} else {
-			match for head.
-			If head matched, {
-				is_data = true;
-			}
-		}
-		return is_packet_full;*/
 	}
 
 	/*
@@ -219,12 +206,12 @@ class Modulation{
             return new byte[0];
         }
 
-        for (int i = 0; i < frame_length_; i++){
-            for (int j = 0; j < 8; j++)
+        byte[] array_out = packet_.clone();
 
-        }
+        // clear packet_ on return
+        packet_ = new byte[0];
 
-        return packet_;
+        return array_out;
     }
 
     /*  Description:
@@ -240,8 +227,11 @@ class Modulation{
         for (int i = 0; i < header_length_; i++){
             sync_power = sync_power + sync_header_[i] * processing_header_.get(i);
         }
-        // TODO: enforce more tight condition
-        if (sync_power > header_score_){
+        // TODO(jianxiong cai): for some reason, reference program said divided by 200
+        sync_power = sync_power / 200;
+        // TODO: enforce other condition
+        // TODO: normalize header in detection maybe?
+        if ( (sync_power > (power_energy * power_energy)) && (sync_power > header_score_) && (sync_power > 0.05)){
             header_score_ = sync_power;
             return true;
         }
@@ -299,10 +289,12 @@ class Modulation{
     // decode the processing_data (receiver side)
     // convert sound to boolean[]
     private boolean[] convert_processing_data(){
-
+        // TODO
+        return new boolean[0];
     }
 
     public static void main(String[] args){
+        Modulation modulator = new Modulation(44100);
 
 
     }
