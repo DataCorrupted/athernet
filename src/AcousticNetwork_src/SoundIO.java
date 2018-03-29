@@ -17,7 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class SoundIO{
+import AcousticNetwork.ConcurrentDoubleBuffer;
+
+public class SoundIO implements Runnable {
 	private int sample_rate_;
 	private AudioFormat format_;
 	private DataLine.Info o_info_;
@@ -26,11 +28,25 @@ public class SoundIO{
 	private TargetDataLine i_line_;
 	private final int FRAMESIZE = 2;
 	private final int BYTESIZE = 8;
+	private ConcurrentDoubleBuffer double_buf_;
 
+	public void run(){
+		i_line_.start();
+		int samples_read = sample_rate_ / 10;
+		ByteBuffer in = ByteBuffer.allocate(samples_read);
+		while (true){
+			i_line_.read(in.array(), 0, samples_read);
+			double_buf_.write(byteBufToDouble(in), 0, samples_read);
+		}
+	}
+
+	public SoundIO(int sr, ConcurrentDoubleBuffer double_buf) throws Exception{
+		this(sr);
+		double_buf_ = double_buf;
+	}
 	public SoundIO() throws Exception{
 		this(44100);
 	}
-
 	public SoundIO(int sr) throws Exception{
 		sample_rate_ = sr;
 		this.format_ = 
