@@ -10,14 +10,14 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.AudioFileFormat.Type;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import AcousticNetwork.ConcurrentDoubleBuffer;
 
 public class SoundIO implements Runnable {
 	private int sample_rate_;
@@ -28,21 +28,35 @@ public class SoundIO implements Runnable {
 	private TargetDataLine i_line_;
 	private final int FRAMESIZE = 2;
 	private final int BYTESIZE = 8;
-	private ConcurrentDoubleBuffer double_buf_;
+	private ArrayBlockingQueue<Double> double_buf_;
 	private boolean stop_ = false;
 
+	@Override
 	public void run(){
 		i_line_.start();
-		int samples_read = sample_rate_ / 10;
-		ByteBuffer in = ByteBuffer.allocate(samples_read);
+		int samples_per_bit = 44;
+		ByteBuffer in = ByteBuffer.allocate(samples_per_bit);
+		double[] wave;
+		// Loops until someone interrupts this.
 		while (!stop_){
-			i_line_.read(in.array(), 0, samples_read);
-			double_buf_.write(byteBufToDouble(in), 0, samples_read);
+			in.clear();
+			i_line_.read(in.array(), 0, samples_per_bit);
+			wave = byteBufToDouble(in);
+			for (int i=0; i<samples_per_bit; i++){
+				try {
+					double_buf_.put(wave[i]);
+				} catch (Exception e){ ;}
+			}
 		}
 	}
-	public void stopConcurrentReader(){ stop_ = true; }
 
-	public SoundIO(int sr, ConcurrentDoubleBuffer double_buf) throws Exception{
+	// Have to use a flag to sign and stop the thread. 
+	// There is a method called Thread.stop(), but it's 
+	// depreciated, check for reasons here:
+	// https://docs.oracle.com/javase/1.5.0/docs/guide/misc/threadPrimitiveDeprecation.html
+	public void stopConcurrentReadThread(){ stop_ = true; }
+
+	public SoundIO(int sr, ArrayBlockingQueue<Double> double_buf) throws Exception{
 		this(sr);
 		double_buf_ = double_buf;
 	}
@@ -99,7 +113,7 @@ public class SoundIO implements Runnable {
 		double[] out = new double[sample_cnt];
 		// Two bytes each time.
 		for (int i=0; i < sample_cnt; i++){
-			out[i] = (double) buf.getShort() / Short.MAX_VALUE;
+			out[i] = (double) buf.getShort()/ Short.MAX_VALUE;
 		}	
 		return out;	
 	}

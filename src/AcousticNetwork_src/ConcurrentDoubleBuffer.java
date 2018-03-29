@@ -4,28 +4,34 @@ class ConcurrentDoubleBuffer{
 	private double[] buf_;
 	private int cap_;
 	private boolean has_data_;
+	int r_prt_;
+	int w_prt_;
 	public ConcurrentDoubleBuffer(){
 		this(5000);
 	}
 	public ConcurrentDoubleBuffer(int cap){
 		cap_  = cap;
 		buf_ = new double[cap];
-		r_prt_ = 0;
-		// Init the buffer with something.
-		w_prt_ = 1; buf_[0] = 0;
+		r_prt_ = -1;
+		w_prt_ = 0;
 	}
 	public void putDouble(double data){
+		// Possible data race:
+		// When w_prt_ is added, there is data, read will be executed.
+		// After read this thread resumes and it realized that the pointers are the same
+		// And raise a warning.
 		if (w_prt_ == r_prt_){
 			System.out.println("Warning: Buffer overflowed, all data in the buffer dumped.");
 		}
+
 		buf_[w_prt_] = data;
 		w_prt_ = (w_prt_ + 1) % cap_;
 	}
 	public double getDouble(){
-		if (w_prt_ != r_prt_){
-			data = buf_[r_prt_];
-			r_prt_ = (r_prt_ + 1) % cap_;
-		}
+		while (!hasData()) {;} // Wait for data.
+		double data = buf_[r_prt_];
+		r_prt_ = (r_prt_ + 1) % cap_;
+		return data;
 	}
 	public void write(double[] data, int offset, int length){
 		for (int i=0; i<length; i++){
@@ -34,11 +40,9 @@ class ConcurrentDoubleBuffer{
 		}
 	}
 	public double read(){
-		// Read is also write operation as the buffer will 
-		// change after each read.
 		return getDouble();
 	}
-	public boolean hasData(){ return r_prt_ != w_prt_; }
+	public boolean hasData(){ return r_prt_ != w_prt_ && r_prt_ != -1; }
 }
 
 /*
