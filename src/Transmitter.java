@@ -36,6 +36,7 @@ class Transmitter{
 			crc8_.update(o_stream, 1, pack_size_-1);
 			o_stream[0] = (byte) crc8_.getValue();
 			// Modulation
+			
 			// Sound
 			f_out_.write(o_stream, 0, pack_size_);
 			// Read next bunch of data.

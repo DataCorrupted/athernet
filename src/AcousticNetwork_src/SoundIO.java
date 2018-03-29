@@ -43,9 +43,11 @@ public class SoundIO implements Runnable {
 			i_line_.read(in.array(), 0, samples_per_bit);
 			wave = byteBufToDouble(in);
 			for (int i=0; i<samples_per_bit; i++){
-				try {
-					double_buf_.put(wave[i]);
-				} catch (Exception e){ ;}
+				while (!double_buf_.offer(wave[i])){
+					// Retrive the oldest one from the queue,
+					// Regardless the queue is empty or not.
+					double_buf_.poll();
+				}
 			}
 		}
 	}
