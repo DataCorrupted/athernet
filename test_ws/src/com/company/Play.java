@@ -15,10 +15,14 @@ public class Play {
         }
         */
 
+        /*
         int a = 10;
         int b = 3;
         System.out.println(a/b);
+        */
 
+        byte[] a = new byte[0];
+        System.out.println(a.length);
 
     }
 }

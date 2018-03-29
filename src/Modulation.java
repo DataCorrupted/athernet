@@ -1,17 +1,10 @@
+/* Description: A PSK modulation method */
 package com.company;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.math.*;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-
-/* Description: A PSK modulation method
-   TODO;    Add sync head to the output
- */
 
 /*
 Implementation note:
@@ -82,11 +75,7 @@ class Modulation{
         }
 
         // generate the sync_header
-        // TODO: change the header generation function
-        sync_header_ = new double[header_length];
-        for (int i = 0; i < header_length; i++){
-            sync_header_[i] = Math.sin(2*Math.PI*i);
-        }
+        generate_header();
     }
 
     // given a frame array (bits), return its modulated signal
@@ -286,16 +275,123 @@ class Modulation{
         return array_out;
     }
 
-    // decode the processing_data (receiver side)
-    // convert sound to boolean[]
+    /*  Description:
+            decode the processing_data (receiver side)
+            convert sound to boolean[]
+    */
     private boolean[] convert_processing_data(){
-        // TODO
-        return new boolean[0];
+        // array for storing the result
+        boolean[] array_out = new boolean[processing_data_.size()/bit_length_];
+
+        int counter = 0;
+        for (int i = 0; i < processing_data_.size(); i++){
+            double tmp_sum = 0;
+            for (int j = 0; j < bit_length_; j++){
+                // only keep the middle 25%-75%, for sync robustness
+                if ((j > bit_length_/4) && (j < bit_length_*3/4)){
+                    tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(counter);
+                }
+                counter ++;
+            }
+
+            // determine if it is 0 or 1
+            if (tmp_sum > 0){
+                array_out[i/bit_length_] = true;
+            }
+            else{
+                array_out[i/bit_length_] = false;
+            }
+        }
+
+        return array_out;
     }
 
+    // Test: test passed
+    private void generate_header(){
+        // TODO: change the header generation function for optimization?
+        // generate the base function
+        int start_freq = 2000;
+        int end_freq = 10000;
+
+        double[] fp = new double[header_length_];
+        fp[0] = start_freq;
+        for (int i = 1; i < header_length_/2; i++){
+            fp[i] = fp[i-1] + ((end_freq-start_freq)+0.0)/(header_length_/2);
+        }
+        fp[header_length_/2] = end_freq;
+        for (int i = header_length_/2+1; i < header_length_; i++){
+            fp[i] = fp[i-1] - ((end_freq-start_freq)+0.0)/(header_length_/2);
+        }
+
+        // use numerical cumulative integral to generate omega
+        double[] omega = new double[header_length_];
+        omega[0] = 0;
+        for (int i = 1; i < header_length_; i++){
+            // TODO: from reference program, using t (sample rate) instead of header_length?
+            omega[i] = omega[i-1] + (fp[i]+fp[i-1])/2.0*(1.0/sample_rate_);
+        }
+
+        sync_header_ = new double[header_length_];
+        for (int i = 0; i < header_length_; i++){
+            sync_header_[i] = Math.sin(2*Math.PI*omega[i]);
+        }
+    }
+
+    // A unit testcase for modulation
     public static void main(String[] args){
         Modulation modulator = new Modulation(44100);
+        /*
+        System.out.println("----------------------------------");
+        for (int i = 0; i < 10; i++){
+            System.out.println(modulator.sync_header_[i]);
+        }
+        */
 
+        // converting byte[] <-> boolean[]
+        /*
+        byte[] test_array = new byte[3];
+        test_array[0] = 0x08;
+        test_array[1] = (byte)0xff;
+        test_array[2] = 0x16;
+        boolean[] test_out = modulator.convert_bytes_to_booleans(test_array);
+        for (int i = 0; i < test_out.length; i++){
+            System.out.println(test_out[i]);
+        }
+        */
+
+        /*
+        boolean[] test_array = new boolean[16];
+        test_array[0] = false;
+        test_array[1] = false;
+        test_array[2] = false;
+        test_array[3] = true;
+        test_array[4] = false;
+        test_array[5] = true;
+        test_array[6] = true;
+        test_array[7] = false;
+        test_array[8] = false;
+        test_array[9] = false;
+        test_array[10] = false;
+        test_array[11] = false;
+        test_array[12] = false;
+        test_array[13] = true;
+        test_array[14] = false;
+        test_array[15] = true;
+        byte[] test_out = modulator.convert_booleans_to_bytes(test_array);
+        System.out.println((int)test_out[0]);
+        System.out.println((int)test_out[1]);
+        */
+
+        // test demodulation (header detection)
+        byte[] test_input = new byte[2];
+        test_input[0] = (byte)0x99;
+        test_input[1] = (byte)0x1f;
+        double[] test_output = modulator.modulate(test_input);
+        System.out.println("Modulation completed");
+        for (int i = 0; i < test_output.length; i++) {
+            boolean flag = modulator.demodulation(test_output[i],2);
+            System.out.println(flag);
+        }
 
     }
 

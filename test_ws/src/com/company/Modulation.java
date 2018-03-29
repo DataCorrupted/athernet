@@ -1,17 +1,10 @@
+/* Description: A PSK modulation method */
 package com.company;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.math.*;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-
-/* Description: A PSK modulation method
-   TODO;    Add sync head to the output
- */
 
 /*
 Implementation note:
@@ -41,7 +34,9 @@ class Modulation{
     private int state_;                                     // indicate whether the current data bit is part of the data
     private int count_down_;
     private double header_score_;
-    private boolean[] packet_;
+    private byte[] packet_;
+
+    private double power_energy;
 
     /* Someone want to overload this */
     public Modulation(int sample_rate){
@@ -55,6 +50,7 @@ class Modulation{
     public Modulation(int bit_length, int header_length, int sample_rate, int max_frame_length, int init_count_down,
                       int carrier_freq){
         state_ = 0;
+        power_energy = 0;
 
         bit_length_ = bit_length;
         header_length_ = header_length;
@@ -79,11 +75,7 @@ class Modulation{
         }
 
         // generate the sync_header
-        // TODO: change the header generation function
-        sync_header_ = new double[header_length];
-        for (int i = 0; i < header_length; i++){
-            sync_header_[i] = Math.sin(2*Math.PI*i);
-        }
+        generate_header();
     }
 
     // given a frame array (bits), return its modulated signal
@@ -123,6 +115,9 @@ class Modulation{
     public boolean demodulation(double sample, int expected_length){
         // given a recved signal. Demodulate it.
         // Whether current signals are data or just nothing important.
+
+        // calculate the power
+        power_energy = power_energy * (1-1.0/64.0) + (sample * sample) / 64;
 
         if (state_ == 0){
             // identify the header
@@ -180,33 +175,14 @@ class Modulation{
             // process and clear the buffer
             state_ = 0;
             // TODO: convert double queue buffer to data
+            boolean[] packet_boolean = convert_processing_data();
             processing_data_.clear();
-
+            packet_ = convert_booleans_to_bytes(packet_boolean);
+            return true;                // new data packet is ready
         }
         else {
             throw new RuntimeException(new String("Invalid state"));
         }
-
-
-
-		/*
-		if (is_data) {
-			if can be demodulated to 0 or 1 {
-				put 0/1 in packet
-				if (packet is full){
-					is_data = false
-				}
-			} else {
-				wait for more sample until it can be demodulated.
-				( Should have same samples for each bit)
-			}
-		} else {
-			match for head.
-			If head matched, {
-				is_data = true;
-			}
-		}
-		return is_packet_full;*/
 	}
 
 	/*
@@ -219,12 +195,12 @@ class Modulation{
             return new byte[0];
         }
 
-        for (int i = 0; i < frame_length_; i++){
-            for (int j = 0; j < 8; j++)
+        byte[] array_out = packet_.clone();
 
-        }
+        // clear packet_ on return
+        packet_ = new byte[0];
 
-        return packet_;
+        return array_out;
     }
 
     /*  Description:
@@ -240,8 +216,11 @@ class Modulation{
         for (int i = 0; i < header_length_; i++){
             sync_power = sync_power + sync_header_[i] * processing_header_.get(i);
         }
-        // TODO: enforce more tight condition
-        if (sync_power > header_score_){
+        // TODO(jianxiong cai): for some reason, reference program said divided by 200
+        sync_power = sync_power / 200;
+        // TODO: enforce other condition
+        // TODO: normalize header in detection maybe?
+        if ( (sync_power > (power_energy * power_energy)) && (sync_power > header_score_) && (sync_power > 0.05)){
             header_score_ = sync_power;
             return true;
         }
@@ -296,14 +275,123 @@ class Modulation{
         return array_out;
     }
 
-    // decode the processing_data (receiver side)
-    // convert sound to boolean[]
+    /*  Description:
+            decode the processing_data (receiver side)
+            convert sound to boolean[]
+    */
     private boolean[] convert_processing_data(){
+        // array for storing the result
+        boolean[] array_out = new boolean[processing_data_.size()/bit_length_];
 
+        int counter = 0;
+        for (int i = 0; i < processing_data_.size(); i++){
+            double tmp_sum = 0;
+            for (int j = 0; j < bit_length_; j++){
+                // only keep the middle 25%-75%, for sync robustness
+                if ((j > bit_length_/4) && (j < bit_length_*3/4)){
+                    tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(counter);
+                }
+                counter ++;
+            }
+
+            // determine if it is 0 or 1
+            if (tmp_sum > 0){
+                array_out[i/bit_length_] = true;
+            }
+            else{
+                array_out[i/bit_length_] = false;
+            }
+        }
+
+        return array_out;
     }
 
-    public static void main(String[] args){
+    // Test: test passed
+    private void generate_header(){
+        // TODO: change the header generation function for optimization?
+        // generate the base function
+        int start_freq = 2000;
+        int end_freq = 10000;
 
+        double[] fp = new double[header_length_];
+        fp[0] = start_freq;
+        for (int i = 1; i < header_length_/2; i++){
+            fp[i] = fp[i-1] + ((end_freq-start_freq)+0.0)/(header_length_/2);
+        }
+        fp[header_length_/2] = end_freq;
+        for (int i = header_length_/2+1; i < header_length_; i++){
+            fp[i] = fp[i-1] - ((end_freq-start_freq)+0.0)/(header_length_/2);
+        }
+
+        // use numerical cumulative integral to generate omega
+        double[] omega = new double[header_length_];
+        omega[0] = 0;
+        for (int i = 1; i < header_length_; i++){
+            // TODO: from reference program, using t (sample rate) instead of header_length?
+            omega[i] = omega[i-1] + (fp[i]+fp[i-1])/2.0*(1.0/sample_rate_);
+        }
+
+        sync_header_ = new double[header_length_];
+        for (int i = 0; i < header_length_; i++){
+            sync_header_[i] = Math.sin(2*Math.PI*omega[i]);
+        }
+    }
+
+    // A unit testcase for modulation
+    public static void main(String[] args){
+        Modulation modulator = new Modulation(44100);
+        /*
+        System.out.println("----------------------------------");
+        for (int i = 0; i < 10; i++){
+            System.out.println(modulator.sync_header_[i]);
+        }
+        */
+
+        // converting byte[] <-> boolean[]
+        /*
+        byte[] test_array = new byte[3];
+        test_array[0] = 0x08;
+        test_array[1] = (byte)0xff;
+        test_array[2] = 0x16;
+        boolean[] test_out = modulator.convert_bytes_to_booleans(test_array);
+        for (int i = 0; i < test_out.length; i++){
+            System.out.println(test_out[i]);
+        }
+        */
+
+        /*
+        boolean[] test_array = new boolean[16];
+        test_array[0] = false;
+        test_array[1] = false;
+        test_array[2] = false;
+        test_array[3] = true;
+        test_array[4] = false;
+        test_array[5] = true;
+        test_array[6] = true;
+        test_array[7] = false;
+        test_array[8] = false;
+        test_array[9] = false;
+        test_array[10] = false;
+        test_array[11] = false;
+        test_array[12] = false;
+        test_array[13] = true;
+        test_array[14] = false;
+        test_array[15] = true;
+        byte[] test_out = modulator.convert_booleans_to_bytes(test_array);
+        System.out.println((int)test_out[0]);
+        System.out.println((int)test_out[1]);
+        */
+
+        // test demodulation (header detection)
+        byte[] test_input = new byte[2];
+        test_input[0] = (byte)0x99;
+        test_input[1] = (byte)0x1f;
+        double[] test_output = modulator.modulate(test_input);
+        System.out.println("Modulation completed");
+        for (int i = 0; i < test_output.length; i++) {
+            boolean flag = modulator.demodulation(test_output[i],2);
+            System.out.println(flag);
+        }
 
     }
 
