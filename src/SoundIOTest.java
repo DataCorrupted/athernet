@@ -1,12 +1,16 @@
 import AcousticNetwork.SoundIO;
+import java.util.concurrent.ArrayBlockingQueue;
 
 class SoundIOTest implements Runnable{
 
 	private double[] wave;
 	private SoundIO io;
+	private ArrayBlockingQueue<Double> double_buf_;
 
-	public SoundIOTest() throws Exception { 
-		io = new SoundIO(); 
+	public SoundIOTest() throws Exception {
+		double_buf_ = new ArrayBlockingQueue<Double>(300000); 
+		io = new SoundIO(44100, double_buf_); 
+		wave = new double[220000];
 	}
 	
 	public void run(){
@@ -47,6 +51,23 @@ class SoundIOTest implements Runnable{
 		io.save_file(wave, "./test.wav");
 	}
 
+	private void testConcurrent() throws Exception{
+		Thread r = new Thread(io);
+		r.start();
+		// Main thread sleep for 5 second.
+		Thread.sleep(2000);
+//		Learn this. It is interesting.
+//		Thread w = new Thread( new Runnable(){
+//			public void run(){ 	io.sound(wave); }
+//		})
+		for (int i=0; i<wave.length; i++){
+			// Wait for data.
+			wave[i] = double_buf_.take();
+		}
+		io.sound(wave);
+		io.stopConcurrentReadThread();
+		r.join();
+	}
 	// Try modify this to test.
 	public static void main(String[] args) throws Exception{
 		SoundIOTest test = new SoundIOTest();
@@ -65,6 +86,8 @@ class SoundIOTest implements Runnable{
 			test.testRecordAndPlayback(10);
 		} else if (args[0].equals("--save")){
 			test.testSaveFile();
+		} else if (args[0].equals("--concurrent")) {
+			test.testConcurrent();
 		} else if (args[0].equals("--both")){
 			Thread t = new Thread(test);
 
