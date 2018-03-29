@@ -29,16 +29,18 @@ public class SoundIO implements Runnable {
 	private final int FRAMESIZE = 2;
 	private final int BYTESIZE = 8;
 	private ConcurrentDoubleBuffer double_buf_;
+	private boolean stop_ = false;
 
 	public void run(){
 		i_line_.start();
 		int samples_read = sample_rate_ / 10;
 		ByteBuffer in = ByteBuffer.allocate(samples_read);
-		while (true){
+		while (!stop_){
 			i_line_.read(in.array(), 0, samples_read);
 			double_buf_.write(byteBufToDouble(in), 0, samples_read);
 		}
 	}
+	public void stopConcurrentReader(){ stop_ = true; }
 
 	public SoundIO(int sr, ConcurrentDoubleBuffer double_buf) throws Exception{
 		this(sr);

@@ -1,15 +1,8 @@
 package AcousticNetwork;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.Lock;
-
 class ConcurrentDoubleBuffer{
-	private final ReentrantReadWriteLock rwl_ = new ReentrantReadWriteLock();
-	private final Lock w_ = rwl_.writeLock();
 	private double[] buf_;
 	private int cap_;
-	private int r_prt_;
-	private int w_prt_;
 	private boolean has_data_;
 	public ConcurrentDoubleBuffer(){
 		this(5000);
@@ -18,45 +11,34 @@ class ConcurrentDoubleBuffer{
 		cap_  = cap;
 		buf_ = new double[cap];
 		r_prt_ = 0;
-		w_prt_ = 0;
-		has_data_ = false;
+		// Init the buffer with something.
+		w_prt_ = 1; buf_[0] = 0;
 	}
 	public void putDouble(double data){
-		if (w_prt_ == r_prt_ && has_data_){
-			r_prt_ ++;
+		if (w_prt_ == r_prt_){
+			System.out.println("Warning: Buffer overflowed, all data in the buffer dumped.");
 		}
-		has_data_ = true;
 		buf_[w_prt_] = data;
 		w_prt_ = (w_prt_ + 1) % cap_;
 	}
 	public double getDouble(){
-		double data = 0;
-		if (has_data_){
+		if (w_prt_ != r_prt_){
 			data = buf_[r_prt_];
 			r_prt_ = (r_prt_ + 1) % cap_;
 		}
-		if (r_prt_ == w_prt_){
-			has_data_ = false;
-		}
-		return data;
 	}
 	public void write(double[] data, int offset, int length){
-		w_.lock();
 		for (int i=0; i<length; i++){
 			if (i == data.length) { break; }
 			putDouble(data[i + offset]);
 		}
-		w_.unlock();
 	}
 	public double read(){
 		// Read is also write operation as the buffer will 
 		// change after each read.
-		w_.lock();
-		double data = getDouble();
-		w_.unlock();
-		return data;
+		return getDouble();
 	}
-	public boolean hasData(){ return has_data_; }
+	public boolean hasData(){ return r_prt_ != w_prt_; }
 }
 
 /*
