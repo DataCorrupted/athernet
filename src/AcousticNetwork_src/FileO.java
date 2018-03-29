@@ -16,14 +16,15 @@ public class FileO{
 		file_format_ = file_format;
 		o_file_ = new FileOutputStream(path);
 	}
-	public void putBytes(byte[] f, int byte_cnt) throws Exception{
-		if (byte_cnt <= 0) { return; }
+	public void write(byte[] f, int offset, int len) throws Exception{
+		if (len <= 0) { return; }
 
 		if (file_format_ == FileO.TEXT01){
-			byte_cnt = byte_cnt << 3;
+			len = len << 3;
+			offset = offset << 3;
 			f = bitsToText01(f);
 		}
-		o_file_.write(f, 0, byte_cnt);
+		o_file_.write(f, offset, len);
 	}
 	private byte[] bitsToText01(byte[] bytes){
 		byte[] out = new byte[bytes.length << 3];

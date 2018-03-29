@@ -3,7 +3,9 @@ import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundIO;
 class Transmitter{
+	// packet size no more than 255.
 	private int pack_size_ = 16;
+	private int head_size_ = 4;
 	private FileI f_in_;
 	private FileO f_out_;
 	private CRC8 crc8_ ;
@@ -13,35 +15,34 @@ class Transmitter{
 	public Transmitter(String file) throws Exception{
 		f_in_ = new FileI(file, FileI.TEXT01);
 		// No modulation, so no sound now. Using file out.
-		f_out_ = new FileO("./tmp", FileO.TEXT01);
+		f_out_ = new FileO("./mid", FileO.TEXT01);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 	}
 	public void transmit() throws Exception{
-		int byte_read = pack_size_ - 2;
-		byte[] i_stream = new byte[byte_read];
+		int byte_read = pack_size_ - head_size_;
 		byte[] o_stream = new byte[pack_size_];
 
+
+		short pack_cnt = 0;
 		// Initial read.
-		int r = f_in_.getBytes(i_stream);
+		int r = f_in_.read(o_stream, head_size_, byte_read);
 		while (r != -1){
-			
+			o_stream[1] = (byte) (pack_cnt >>> 8);
+			o_stream[2] = (byte) (pack_cnt & 0xff);
 			// Record total bytes in this packet.
-			o_stream[1] = (byte) r;
+			o_stream[3] = (byte) r;
 			// Copy all the data in.
-			System.arraycopy(i_stream, 0, o_stream, 2, r);
 			// Add checksum
 			crc8_.update(o_stream, 1, pack_size_-1);
 			o_stream[0] = (byte) crc8_.getValue();
 			// Modulation
 			// Sound
-
-			f_out_.putBytes(o_stream, pack_size_);
+			f_out_.write(o_stream, 0, pack_size_);
 			// Read next bunch of data.
-			i_stream = new byte[byte_read];
-			r = f_in_.getBytes(i_stream);
+			pack_cnt ++;
+			r = f_in_.read(o_stream, head_size_, byte_read);
 			// Reset CRC8
 			crc8_.reset();
-
 		}
 	}
 	static public void main(String[] args) throws Exception{

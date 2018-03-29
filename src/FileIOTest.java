@@ -16,7 +16,7 @@ class FileIOTest{
 	}
 
 	private int testRead(byte[] f) throws Exception{
-		int r = this.i_file_.getBytes(f);
+		int r = this.i_file_.read(f, 0, f.length);
 		System.out.print(r + " bytes read: \n\"\"\"\n");
 		for (int i=0; i<r; i++){
 			System.out.print((char) f[i]);
@@ -26,7 +26,7 @@ class FileIOTest{
 	}
 
 	private void testSave(byte[] f, int byte_cnt) throws Exception{
-		this.o_file_.putBytes(f, byte_cnt);
+		this.o_file_.write(f, 0, byte_cnt);
 	}
 
 	public static void main(String[] args) throws Exception{
