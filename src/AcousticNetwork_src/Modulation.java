@@ -1,10 +1,8 @@
 /* Description: A PSK modulation method */
 package AcousticNetwork;
 
-import java.io.*;
 import java.util.*;
 import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 
 /*
 Implementation note:
@@ -31,6 +29,9 @@ public class Modulation{
 
     private double[] carrier_;          // the carrier signal
     private double[] sync_header_;      // the sync header (for sync)
+
+    // for debug only
+    public List<Double> sync_power_debug;
 
     // for demodulation only
     private List<Double> processing_header_;               // used in identifying the header
@@ -74,6 +75,7 @@ public class Modulation{
         processing_header_ = new ArrayList<>();
         processing_data_ = new ArrayList<>();
         unconfirmed_data_ = new ArrayList<>();
+        sync_power_debug = new ArrayList<>();
 
         // generate one standard frame unit (the waveform for max_frame_length)
         carrier_ = new double[bit_length * max_frame_length * 8];
@@ -132,9 +134,11 @@ public class Modulation{
         if (state_ == 0){
             // identify the header
             processing_header_.add(sample);
-            if (processing_header_.size() < header_length_){
+            // skip the following check as this would be checked in check_sync_header and good for storing debug info.
+            /*if (processing_header_.size() < header_length_){
                 return NOTHING;               // return when not adequate data
             }
+            */
             if (check_sync_header()){
                 state_ ++;                  // next state
                 return CNFIRMING;
@@ -225,6 +229,10 @@ public class Modulation{
             true: when the current sample is identified as the end of a header (based on current knowledge)
       */
     private boolean check_sync_header(){
+        if (processing_header_.size() < header_length_){
+            sync_power_debug.add(0.0);
+            return false;
+        }
         // calculate the dot product
         double sync_power = 0;
         for (int i = 0; i < header_length_; i++){
@@ -232,6 +240,7 @@ public class Modulation{
         }
         // TODO(jianxiong cai): for some reason, reference program said divided by 200
         sync_power = sync_power / 200;
+        sync_power_debug.add(sync_power);
         // TODO: enforce other condition
         // TODO: normalize header in detection maybe?
         if ( (sync_power > (power_energy * power_energy)) && (sync_power > header_score_) && (sync_power > 0.05)){
