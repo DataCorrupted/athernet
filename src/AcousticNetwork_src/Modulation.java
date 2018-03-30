@@ -175,7 +175,7 @@ public class Modulation{
             // process and clear the buffer
             state_ = 0;
             // TODO: convert double queue buffer to data
-            boolean[] packet_boolean = convert_processing_data();
+            boolean[] packet_boolean = convert_processing_data(expected_length);
             processing_data_.clear();
             packet_ = convert_booleans_to_bytes(packet_boolean);
             return true;                // new data packet is ready
@@ -279,9 +279,9 @@ public class Modulation{
             decode the processing_data (receiver side)
             convert sound to boolean[]
     */
-    private boolean[] convert_processing_data(){
+    private boolean[] convert_processing_data(int len){
         // array for storing the result
-        boolean[] array_out = new boolean[processing_data_.size()/bit_length_];
+        boolean[] array_out = new boolean[len*8];
 
         int counter = 0;
         /*
@@ -289,18 +289,19 @@ public class Modulation{
          since counter = bit_length_ * processing_data.size()
          What are you trying to say?
         */
-        for (int i = 0; i < processing_data_.size(); i++){
+        System.out.println(len);
+        for (int i = 0; i < len*8; i++){
             double tmp_sum = 0;
             for (int j = 0; j < bit_length_; j++){
                 // only keep the middle 25%-75%, for sync robustness
                 if ((j > bit_length_/4) && (j < bit_length_*3/4)){
-                    tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(i);
+                    tmp_sum = tmp_sum + carrier_[i + j] * processing_data_.get(i + j);
                 }
             }
 
             // determine if it is 0 or 1
-            System.out.println(tmp_sum / 22);
-            array_out[i/bit_length_] = (tmp_sum>0) ? true: false;
+            //System.out.printf("%3.5f, %d\n", tmp_sum / 22, i);
+            array_out[i] = (tmp_sum>0) ? true: false;
         }
 
         return array_out;
@@ -395,15 +396,15 @@ public class Modulation{
         }*/
         // test demodulate a packet.
         // There is a "hello world" in this packet.
-        byte[] helloworld = {0x0, 0x0, 0x1, 0xc, 0x48, 0x65, 0x6c, 0x6c, 
-                        0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e, 0x0};
+        byte[] helloworld = {0x0f};
         double[] wave = modulator.modulate(helloworld);
+        int byte_cnt = wave.length;
         int i=0;
-        while (!modulator.demodulation(wave[i], 16)) {
+        while (!modulator.demodulation(wave[i], byte_cnt)) {
             i = (i+1) % wave.length; 
         }
         byte[] recv_helloworld = modulator.getPacket(); 
-        for (i=0; i<16; i++){
+        for (i=0; i<byte_cnt; i++){
             System.out.printf("Byte# %d matched: %d. Decode result: %d\n", 
                     i, (helloworld[i] == (recv_helloworld[i]))? 1: 0, recv_helloworld[i]);
         }
