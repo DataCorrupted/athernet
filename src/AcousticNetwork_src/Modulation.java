@@ -43,29 +43,39 @@ public class Modulation{
     private byte[] packet_;
 
     private double power_energy;
+    private int bit_counter_ = -1;
+
+    // dummy sin wave
+    private double[] dummy_sin_wave_;
+    private int dummy_sin_length_;
 
     public int getBitLength() { return bit_length_; }
     public int getHeaderLength() { return header_length_; }
     public int getDataLength() { return processing_data_.size(); }
     public double getHeaderScore() { return header_score_;}
+
     /* Someone want to overload this */
     public Modulation(int sample_rate){
-        this(44,  440, sample_rate, 1100/8, 200, 10000);
+        this(44,  440, sample_rate, 1100/8, 200, 10000,100);
     }
 
     /*
         Params:
             carrier_freq: the frequency for carrier (usually 10^3Hz)
+            dummy_length: in sample points (usually 100)
      */
     public Modulation(int bit_length, int header_length, int sample_rate, int max_frame_length, int init_count_down,
-                      int carrier_freq){
+                      int carrier_freq, int dummy_sin_length){
         state_ = 0;
         power_energy = 0;
+        header_score_ = 0;
 
+        // save all parameters
         bit_length_ = bit_length;
         header_length_ = header_length;
         sample_rate_ = sample_rate;
         max_frame_length_ = max_frame_length;
+        dummy_sin_length_ = dummy_sin_length;
 
         // count down related
         init_count_down_ = init_count_down;
@@ -76,6 +86,7 @@ public class Modulation{
         processing_data_ = new ArrayList<>();
         unconfirmed_data_ = new ArrayList<>();
         sync_power_debug = new ArrayList<>();
+        packet_ = new byte[0];
 
         // generate one standard frame unit (the waveform for max_frame_length)
         carrier_ = new double[bit_length * max_frame_length * 8];
@@ -87,6 +98,9 @@ public class Modulation{
 
         // generate the sync_header
         generate_header();
+
+        // generate dummy sin wave
+        generate_dummy_sin();
     }
 
     // given a frame array (bits), return its modulated signal
@@ -110,7 +124,11 @@ public class Modulation{
 
         // add the sync header part to the frame and return modulated signal
         double[] output_frame = DoubleStream.concat(Arrays.stream(sync_header_),Arrays.stream(output_data)).toArray();
-        return output_frame;
+
+        // add a dummy sin wave to available
+        double[] output_frame_with_dummy = DoubleStream.concat(Arrays.stream(dummy_sin_wave_),Arrays.stream(output_frame)).toArray();
+        return output_frame_with_dummy;
+        //return output_frame;
     }
 
     /*
@@ -127,12 +145,17 @@ public class Modulation{
     public int demodulation(double sample, int expected_length){
         // given a recved signal. Demodulate it.
         // Whether current signals are data or just nothing important.
+        bit_counter_ ++;
 
         // calculate the power
         power_energy = power_energy * (1-1.0/64.0) + (sample * sample) / 64;
 
         if (state_ == 0){
             // identify the header
+            if (processing_header_.size() == header_length_){
+                // if header is already full, remove the first one
+                processing_header_.remove(0);
+            }
             processing_header_.add(sample);
             // skip the following check as this would be checked in check_sync_header and good for storing debug info.
             /*if (processing_header_.size() < header_length_){
@@ -141,6 +164,7 @@ public class Modulation{
             */
             if (check_sync_header()){
                 state_ ++;                  // next state
+                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
                 return CNFIRMING;
             }
             return NOTHING;
@@ -155,6 +179,7 @@ public class Modulation{
 
             // call for recheck
             if (check_sync_header()){
+                System.out.println("Header reconfirmed at bit: " + bit_counter_);
                 // previous is wrong, this is the new header, passed data are new header (FIFO list)
                 while (unconfirmed_data_.size() > 0){
                     processing_header_.remove(0);
@@ -178,6 +203,7 @@ public class Modulation{
                 processing_header_.clear();
 
                 // change state
+                System.out.println("Header confirmed, goto receiving data");
                 state_ ++;
             }
             return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
@@ -189,6 +215,7 @@ public class Modulation{
                 return RCVINGDAT;               // not enough data to decode
             }
 
+            System.out.println("Get all data, start demodulation");
             // decode the waveform to get the bits
             // process and clear the buffer
             state_ = 0;
@@ -243,6 +270,9 @@ public class Modulation{
         sync_power_debug.add(sync_power);
         // TODO: enforce other condition
         // TODO: normalize header in detection maybe?
+        if (bit_counter_ == 539){
+            boolean debug = true;
+        }
         if ( (sync_power > (power_energy * power_energy)) && (sync_power > header_score_) && (sync_power > 0.05)){
             header_score_ = sync_power;
             return true;
@@ -356,6 +386,14 @@ public class Modulation{
         sync_header_ = new double[header_length_];
         for (int i = 0; i < header_length_; i++){
             sync_header_[i] = Math.sin(2*Math.PI*omega[i]);
+        }
+    }
+
+    private void generate_dummy_sin(){
+        dummy_sin_wave_ = new double[dummy_sin_length_];
+        for (int i=0; i< dummy_sin_length_; i++){
+            double t = (i +0.0)/ sample_rate_;
+            dummy_sin_wave_[i] = 0.5*(Math.sin(2*Math.PI*1000*t));
         }
     }
 
