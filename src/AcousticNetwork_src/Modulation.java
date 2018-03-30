@@ -1,5 +1,5 @@
 /* Description: A PSK modulation method */
-package com.company;
+package AcousticNetwork;
 
 import java.io.*;
 import java.util.*;
@@ -14,7 +14,7 @@ Implementation note:
     count_down_:        How many bits to wait till the confirmation of a sync_header
  */
 
-class Modulation{
+public class Modulation{
     // hyper-parameters
     private int init_count_down_;            // The waiting windows for identifying the header
 
