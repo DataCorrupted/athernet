@@ -17,6 +17,8 @@ class Receiver{
 	private int data_size_;
 	private ArrayBlockingQueue<Double> double_q_;
 	private Thread recorder_;
+	private Modulation demodulator_;
+	private int sample_rate_;
 
 	public Receiver() throws Exception{
 		this(44100, 16, 0.1, "./O");
@@ -27,32 +29,33 @@ class Receiver{
 	// buf_len: for how long(in seconds) should the buffer contain history sound data.
 	public Receiver(
 	  int sample_rate, int pack_size, double buf_len, String file) throws Exception{
+	  	sample_rate_ = sample_rate;
 		pack_size_ = pack_size;
 		data_size_ = pack_size_ - head_size_;
 		o_file_ = new FileO(file, FileO.TEXT01);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
 		i_sound_ = new SoundIO(sample_rate, double_q_);
-		demodulator = new Modulation(sample_rate);
+		demodulator_ = new Modulation(sample_rate);
 	}
 
 	// This function should run in an independent thread.
 	// Do not call it manually.
-	private void receiveFromFile(String i_file){
-		double[] wave = io.read_file(path);
+	private void receiveFromFile(String i_file) throws Exception{
+		double[] wave = i_sound_.read_file(i_file);
 		for (int i=0; i<wave.length; i++){
 			double_q_.offer(wave[i]);
 			// Make sure that approx. sample_rate amount 
 			// of data is put into the queue.
-			Thread.sleep(0, 1.0e9/sample_rate);
+			Thread.sleep(0, (int) 1.0e9/sample_rate_);
 		}
 	}
-	public void startReceive(){		
+	public void startReceive() throws Exception{		
 		recorder_ = new Thread(i_sound_);
 		recorder_.start();
 
 	}
-	public void stopReceive(){
+	public void stopReceive() throws Exception{
 		i_sound_.stopConcurrentReadThread();
 		recorder_.join();
 	}
@@ -63,22 +66,24 @@ class Receiver{
 
 		int time = 0;
 		double timeout = 
-			demodulator.getHeaderLength() + 
-			demodulator.getBitLength() * pack_size_ * 8;
+			demodulator_.getHeaderLength() + 
+			demodulator_.getBitLength() * pack_size_ * 8;
 		timeout *= 1.2;	// 20% extra waiting time.
 		// Offer double to demodulate until a packet is offered.
 		// I think a better way is to let demodulate tell me what it's seeing
 		// Whether the header is matched then I wait for longer,
 		// or it's receiving nothing, then I timeout.
-		 
+		int r = Modulation.NOTHING;
 		while (r != Modulation.RCVEDDAT && time <= timeout) {
-			r = demodulator.demodulation(double_q_.take(), pack_size_);
-			time += (r == Modulation.NOTHING)? 1:0
+			System.out.println(r+ " "+ demodulator_.getDataLength());
+			r = demodulator_.demodulation(double_q_.take(), pack_size_);
+			time += (r == Modulation.NOTHING)? 1:0;
 		}
 		
-		i_stream = demolator.getPacket();
+		i_stream = demodulator_.getPacket();
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
+			System.out.println("No packet found, possibly time out when waiting for one.");
 			return i_stream;
 		}
 		// Initial read.
@@ -93,26 +98,28 @@ class Receiver{
 		crc8_.reset();
 		return i_stream;
 	}
-	public byte[] receiveBytes(int byte_cnt, int pack_cnt){
-		int k = 0;
+	public byte[] receiveBytes(int byte_cnt, double timeout) throws Exception{
 		byte[] chunk = new byte[byte_cnt];
 		int start_pos;
-		while (k<pack_cnt){
+		double start_time = System.nanoTime() / 1e9;
+		while (System.nanoTime()/1e9 - start_time <= timeout){
+			System.out.println("2");
 			byte[] packet = receiveOnePacket();
-			int useful_byte = i_stream[3];
-			int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];		
+			int useful_byte = packet[3];
+			System.out.println("Bytes read: " + useful_byte);
+			int pack_cnt = ((int)(packet[1]) << 8) + packet[2];		
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<useful_byte; i++){
 				if (start_pos + i < byte_cnt){
 					chunk[start_pos + i] = packet[head_size_ + i];
 				}
 			}
-			k ++;
 		}
+		return chunk;
 	}
 	static public void main(String[] args) throws Exception{
-		String o_file="./O";
-		String i_file="./I";
+		String o_path="./O";
+		String i_path_tmp="./I";
 		boolean from_file = false;
 		int i=0;
 		while (i<args.length){
@@ -121,12 +128,12 @@ class Receiver{
 				if (i == args.length){
 					System.out.println("Error, no file provided.");
 				} else {
-					o_file = args[i];
+					o_path = args[i];
 				}
 			} else if (args[i].equals("--from-file")){
 				i++;
 				if (i != args.length){
-					i_file = args[i]; 
+					i_path_tmp = args[i]; 
 				}
 				from_file = true;
 			} else {
@@ -134,18 +141,24 @@ class Receiver{
 			}
 			i++;
 		}
-		Receiver receiver = new Receiver();
+		Receiver receiver = new Receiver(o_path);
+		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			receiver.receiveBytes(125, 11);
+			f = receiver.receiveBytes(125, 3);
 			receiver.stopReceive();
 		} else {
+			final String i_path = i_path_tmp;
 			Thread simu_receiver = new Thread( new Runnable(){
-				public void run() { receiver.receiveFromFile();}
-			});
+				public void run() { 
+					try{ receiver.receiveFromFile(i_path);}
+					catch (Exception e) {;}
+			}});
 			simu_receiver.start();
-			receive.receiveBytes(125, 11);
+			System.out.println("1");
+			f = receiver.receiveBytes(125, 3);
 			simu_receiver.join();
 		}
+		receiver.o_file_.write(f, 0, f.length);
 	}
 }
