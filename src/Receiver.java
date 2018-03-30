@@ -107,6 +107,9 @@ class Receiver{
 			// No useful byte in a broken pack.
 			i_stream[3] = 0;
 			System.out.printf("Packet #%3d: broken packet. CRC8 checksum wrong.\n", pack_cnt);
+//			for (int i=0; i<pack_cnt, i++){
+				//System.out.print()
+//			}
 		}
 		crc8_.reset();
 		return i_stream;
@@ -125,6 +128,14 @@ class Receiver{
 					chunk[start_pos + i] = packet[head_size_ + i];
 				}
 			}
+			for (int i=0; i<useful_byte; i++){
+				System.out.print((char) packet[head_size_ + i]);
+			}
+			System.out.print("\n");
+			for (int i=0; i<useful_byte; i++){
+				System.out.print(Integer.toHexString(packet[head_size_ + i]));
+			}
+			System.out.print("\n");
 		}
 		return chunk;
 	}
@@ -156,7 +167,7 @@ class Receiver{
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(125, 3);
+			f = receiver.receiveBytes(250, 5);
 			receiver.stopReceive();
 		} else {
 			final String i_path = i_path_tmp;

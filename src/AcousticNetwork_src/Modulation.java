@@ -56,7 +56,7 @@ public class Modulation{
 
     /* Someone want to overload this */
     public Modulation(int sample_rate){
-        this(44,  440, sample_rate, 1100/8, 200, 10000,100);
+        this(44,  440, sample_rate, 1100/8, 200, 10000, 88);
     }
 
     /*
@@ -164,7 +164,7 @@ public class Modulation{
             */
             if (check_sync_header()){
                 state_ ++;                  // next state
-                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
+//                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
                 return CNFIRMING;
             }
             return NOTHING;
@@ -179,7 +179,7 @@ public class Modulation{
 
             // call for recheck
             if (check_sync_header()){
-                System.out.println("Header reconfirmed at bit: " + bit_counter_);
+//                System.out.println("Header reconfirmed at bit: " + bit_counter_);
                 unconfirmed_data_.clear();
                 // TODO: This was wrong...
                 /*
@@ -206,7 +206,7 @@ public class Modulation{
                 processing_header_.clear();
 
                 // change state
-                System.out.println("Header confirmed, goto receiving data");
+//                System.out.println("Header confirmed, goto receiving data");
                 state_ ++;
             }
             return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
@@ -218,7 +218,7 @@ public class Modulation{
                 return RCVINGDAT;               // not enough data to decode
             }
 
-            System.out.println("Get all data, start demodulation");
+//            System.out.println("Get all data, start demodulation");
             // decode the waveform to get the bits
             // process and clear the buffer
             state_ = 0;
@@ -342,11 +342,6 @@ public class Modulation{
         // array for storing the result
         boolean[] array_out = new boolean[expected_length*8];
 
-        /*
-         This is buggy! It will always result in an overflow
-         since counter = bit_length_ * processing_data.size()
-         What are you trying to say?
-        */
         for (int i = 0; i < expected_length*8; i += 1){
             double tmp_sum = 0;
             // get a chunk
