@@ -43,7 +43,7 @@ public class Modulation{
     private byte[] packet_;
 
     private double power_energy;
-    private int bit_counter_ = -1;
+    private int bit_counter_ = 0;
 
     // dummy sin wave
     private double[] dummy_sin_wave_;
@@ -180,12 +180,15 @@ public class Modulation{
             // call for recheck
             if (check_sync_header()){
                 System.out.println("Header reconfirmed at bit: " + bit_counter_);
-                // previous is wrong, this is the new header, passed data are new header (FIFO list)
+                unconfirmed_data_.clear();
+                // TODO: This was wrong...
+                /*
                 while (unconfirmed_data_.size() > 0){
                     processing_header_.remove(0);
                     processing_header_.add(unconfirmed_data_.get(0));
                     unconfirmed_data_.remove(0);
                 }
+                */
                 count_down_ = init_count_down_;
             }
 
@@ -270,9 +273,11 @@ public class Modulation{
         sync_power_debug.add(sync_power);
         // TODO: enforce other condition
         // TODO: normalize header in detection maybe?
-        if (bit_counter_ == 539){
+        /*
+        if (bit_counter_ == 540){
             boolean debug = true;
         }
+        */
         if ( (sync_power > (power_energy * power_energy)) && (sync_power > header_score_) && (sync_power > 0.05)){
             header_score_ = sync_power;
             return true;
