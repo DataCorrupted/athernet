@@ -32,6 +32,9 @@ class Transmitter{
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		modulator_ = new Modulation(sample_rate);
 	}
+	// Currently it transmits a whole file. 
+	// Let's finish this project first and then we can
+	// Talk about changes.
 	public void transmit() throws Exception{
 		int byte_read = pack_size_ - head_size_;
 		byte[] o_stream = new byte[pack_size_];

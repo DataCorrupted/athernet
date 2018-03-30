@@ -89,7 +89,7 @@ public class SoundIO implements Runnable {
 		this.i_line_ = (TargetDataLine)AudioSystem.getLine(i_info_);
 		o_line_.open(this.format_);
 		i_line_.open(this.format_);
-		
+		this.o_line_.start();
 		//i_line_.start();
 		//o_line_.start();
 		// Now this is disturbing. 
@@ -124,11 +124,9 @@ public class SoundIO implements Runnable {
 		play(doubleToByteBuf(arr));
 	}
 	private void play(ByteBuffer out) throws LineUnavailableException {
-		this.o_line_.start();
 		this.o_line_.write(out.array(), 0, out.capacity());
 		// Drain every data in the buffer before it's closed.
-		this.o_line_.drain();
-		this.o_line_.close();
+		// But there is no need to drain it since we are not closing it.
 	}
 	public double[] record(int sample_cnt){
 		int byte_cnt = sample_cnt * this.FRAMESIZE;

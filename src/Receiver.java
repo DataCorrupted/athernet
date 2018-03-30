@@ -2,6 +2,7 @@ import AcousticNetwork.FileO;
 import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundIO;
+import AcousticNetwork.Modulation;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -11,39 +12,79 @@ class Receiver{
 	// private FileI i_file_;
 	private CRC8 crc8_;
 	private SoundIO i_sound_;
-	private int pack_size_ = 16;
-	private int head_size_ = 4;
+	private int pack_size_;
+	private int head_size_;
+	private int data_size_;
 	private ArrayBlockingQueue<Double> double_q_;
+	private Thread recorder_;
 
 	public Receiver() throws Exception{
-		this("./O");
+		this(44100, 16, 0.1, "./O");
 	}
 	public Receiver(String file) throws Exception{
-		// i_file_ = new FileI("./mid", FileI.TEXT01);
-		// No modulation, so no sound now. Using file out.
+		this(44100, 16, 0.1, file);
+	}
+	// buf_len: for how long(in seconds) should the buffer contain history sound data.
+	public Receiver(
+	  int sample_rate, int pack_size, double buf_len, String file) throws Exception{
+		pack_size_ = pack_size;
+		data_size_ = pack_size_ - head_size_;
 		o_file_ = new FileO(file, FileO.TEXT01);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		double_q_ = new ArrayBlockingQueue<Double>(4410);
-		o_sound_ = new SoundIO(44100, double_q_);
-		// demodulator = new Demodulation(44100);
+		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
+		i_sound_ = new SoundIO(sample_rate, double_q_);
+		demodulator = new Modulation(sample_rate);
 	}
 
-	public void receiveOnePacket() throws Exception{
-		int byte_read = pack_size_ - head_size_;
+	public void startReceive(){		
+		recorder_ = new Thread(i_sound_);
+		recorder_.start();
+
+	}
+	public void stopReceive(){
+		i_sound_.stopConcurrentReadThread();
+		recorder_.join();
+	}
+
+	public byte[] receiveOnePacket() throws Exception{
+		int byte_read = data_size_;
 		byte[] i_stream = new byte[pack_size_];
 
-		// while (!demodulator.packetFull()) { demodulator.demodulate(double_q_.take());}
+		// Offer double to demodulate until a packet is offered.
+		while (!demodulator.demolation(double_q_.take(), pack_size_)) {; }
+		i_stream = demolator.getPacket();
+		if (i_stream.length == 0){
+			// I suppose to get a full length packet, but something unexpected happened.
+			return i_stream;
+		}
 		// Initial read.
 		crc8_.update(i_stream, 1, pack_size_-1);
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			int useful_byte = i_stream[3];
 			int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
-			o_file_.write(i_stream, head_size_, byte_read);
 			System.out.printf("Packet #%3d received with %3d bytes in it.\n", pack_cnt, useful_byte);
 		} else {
 			System.out.println("A broken packet read. CRC8 checksum wrong.");
 		}
 		crc8_.reset();
+		return i_stream;
+	}
+	public byte[] receiveBytes(int len){
+		int k = 0;
+		byte[] chunk = new byte[len];
+		int start_pos;
+		while (k<len){
+			byte[] packet = receiveOnePacket();
+			int useful_byte = i_stream[3];
+			int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
+			k += data_size_;			
+			start_pos = pack_cnt * (data_size_);
+			for (int i=0; i<useful_byte; i++){
+				if (start_pos + i < len){
+					chunk[start_pos + i] = packet[head_size_ + i];
+				}
+			}
+		}
 	}
 	static public void main(String[] args) throws Exception{
 		String file="./O";
@@ -61,6 +102,6 @@ class Receiver{
 			}
 		}
 		Receiver receiver = new Receiver();
-		receiver.receive();
+		receiver.receiveBytes(4000);
 	}
 }
