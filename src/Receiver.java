@@ -80,7 +80,7 @@ class Receiver{
 		double timeout = 
 			demodulator_.getHeaderLength() + 
 			demodulator_.getBitLength() * pack_size_ * 8;
-		timeout *= 1.2;	// 20% extra waiting time.
+		timeout *= 0.9;	// 20% extra waiting time.
 		// Offer double to demodulate until a packet is offered.
 		// I think a better way is to let demodulate tell me what it's seeing
 		// Whether the header is matched then I wait for longer,
@@ -91,7 +91,6 @@ class Receiver{
 			r = demodulator_.demodulation(double_q_.take(), pack_size_);
 			time += (r == Modulation.NOTHING)? 1:0;
 		}
-		
 		i_stream = demodulator_.getPacket();
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
@@ -100,12 +99,14 @@ class Receiver{
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, pack_size_-1);
+		int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			int useful_byte = i_stream[3];
-			int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
 			System.out.printf("Packet #%3d received with %3d bytes in it.\n", pack_cnt, useful_byte);
 		} else {
-			System.out.println("A broken packet read. CRC8 checksum wrong.");
+			// No useful byte in a broken pack.
+			i_stream[3] = 0;
+			System.out.printf("Packet #%3d: broken packet. CRC8 checksum wrong.\n", pack_cnt);
 		}
 		crc8_.reset();
 		return i_stream;
@@ -165,8 +166,7 @@ class Receiver{
 					catch (Exception e) {;}
 			}});
 			simu_receiver.start();
-			System.out.println("1");
-			f = receiver.receiveBytes(125, 5);
+			f = receiver.receiveBytes(125, 1);
 			receiver.stopFileStream();
 			simu_receiver.join();
 		}
