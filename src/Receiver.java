@@ -156,7 +156,7 @@ class Receiver{
 			}
 			i++;
 		}
-		Receiver receiver = new Receiver(16, o_path);
+		Receiver receiver = new Receiver(17, o_path);
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
