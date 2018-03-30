@@ -1,6 +1,7 @@
 /* Description: A PSK modulation method */
 package AcousticNetwork;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.DoubleStream;
 
@@ -339,6 +340,9 @@ public class Modulation{
     */
 
     private boolean[] convert_processing_data(int expected_length){
+        // normalize processing_data such that they are in the range of [-1,1]
+        normalize_data();
+
         // array for storing the result
         boolean[] array_out = new boolean[expected_length*8];
 
@@ -400,6 +404,28 @@ public class Modulation{
             double t = (i +0.0)/ sample_rate_;
             dummy_sin_wave_[i] = 0.5*(Math.sin(2*Math.PI*1000*t));
         }
+    }
+
+    // This function should only be called before converting the processing_data to boolean[]
+    private void normalize_data(){
+        // find the max abs value
+        double max_tmp = 0;
+        for (int i = 0; i < processing_data_.size(); i++){
+            // replace max_tmp with the largest abs so far
+             if ((processing_data_.get(i) > max_tmp) || (processing_data_.get(i) < (-1*max_tmp))){
+                 max_tmp = processing_data_.get(i);
+                 if (max_tmp < 0)           max_tmp = -1 * max_tmp;
+             }
+        }
+
+        // store everything to normalized_data
+        List<Double> normalized_data = new ArrayList<>();
+        for (int i = 0; i < processing_data_.size(); i++){
+            normalized_data.add(processing_data_.get(i) / max_tmp);
+        }
+
+        // replace the processing_data with normalized_data
+        processing_data_ = normalized_data;
     }
 
     // A unit testcase for modulation
