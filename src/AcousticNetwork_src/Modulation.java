@@ -296,10 +296,10 @@ public class Modulation{
                 if ((j > bit_length_/4) && (j < bit_length_*3/4)){
                     tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(i);
                 }
-                counter ++;
             }
 
             // determine if it is 0 or 1
+            System.out.println(tmp_sum / 22);
             array_out[i/bit_length_] = (tmp_sum>0) ? true: false;
         }
 
