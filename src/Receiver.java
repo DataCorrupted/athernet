@@ -13,7 +13,7 @@ class Receiver{
 	private CRC8 crc8_;
 	private SoundIO i_sound_;
 	private int pack_size_;
-	private int head_size_;
+	private int head_size_ = 4;
 	private int data_size_;
 	private ArrayBlockingQueue<Double> double_q_;
 	private Thread recorder_;
@@ -24,8 +24,8 @@ class Receiver{
 	public Receiver() throws Exception{
 		this(44100, 16, 0.1, "./O");
 	}
-	public Receiver(String file) throws Exception{
-		this(44100, 16, 0.1, file);
+	public Receiver(int pack_size, String file) throws Exception{
+		this(44100, pack_size, 0.1, file);
 	}
 	// buf_len: for how long(in seconds) should the buffer contain history sound data.
 	public Receiver(
@@ -86,8 +86,9 @@ class Receiver{
 		// Whether the header is matched then I wait for longer,
 		// or it's receiving nothing, then I timeout.
 		int r = Modulation.NOTHING;
+
 		while (r != Modulation.RCVEDDAT && time <= timeout) {
-			//System.out.println(r+ " "+ demodulator_.getDataLength());
+		//while (r != Modulation.RCVEDDAT) {
 			r = demodulator_.demodulation(double_q_.take(), pack_size_);
 			time += (r == Modulation.NOTHING)? 1:0;
 		}
@@ -101,12 +102,12 @@ class Receiver{
 		crc8_.update(i_stream, 1, pack_size_-1);
 		int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			int useful_byte = i_stream[3];
+			int useful_byte = (int) i_stream[3];
 			System.out.printf("Packet #%3d received with %3d bytes in it.\n", pack_cnt, useful_byte);
 		} else {
 			// No useful byte in a broken pack.
 			i_stream[3] = 0;
-			System.out.printf("Packet #%3d: broken packet. CRC8 checksum wrong.\n", pack_cnt);
+			System.out.printf("Packet #%3d receive failed. CRC8 checksum wrong.\n", pack_cnt);
 //			for (int i=0; i<pack_cnt, i++){
 				//System.out.print()
 //			}
@@ -120,7 +121,7 @@ class Receiver{
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
-			int useful_byte = packet[3];
+			int useful_byte = (int) packet[3];
 			int pack_cnt = ((int)(packet[1]) << 8) + packet[2];		
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<useful_byte; i++){
@@ -128,14 +129,6 @@ class Receiver{
 					chunk[start_pos + i] = packet[head_size_ + i];
 				}
 			}
-			for (int i=0; i<useful_byte; i++){
-				System.out.print((char) packet[head_size_ + i]);
-			}
-			System.out.print("\n");
-			for (int i=0; i<useful_byte; i++){
-				System.out.print(Integer.toHexString(packet[head_size_ + i]));
-			}
-			System.out.print("\n");
 		}
 		return chunk;
 	}
@@ -163,11 +156,11 @@ class Receiver{
 			}
 			i++;
 		}
-		Receiver receiver = new Receiver(o_path);
+		Receiver receiver = new Receiver(16, o_path);
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(250, 5);
+			f = receiver.receiveBytes(250, 4);
 			receiver.stopReceive();
 		} else {
 			final String i_path = i_path_tmp;
