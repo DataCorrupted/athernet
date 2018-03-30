@@ -18,6 +18,7 @@ public class Modulation{
     public static final int NOTHING = -1;
     public static final int RCVEDDAT = 1;
     public static final int RCVINGDAT = 0;
+    public static final int CNFIRMING = 2;
 
     // hyper-parameters
     private int init_count_down_;            // The waiting windows for identifying the header
@@ -136,7 +137,7 @@ public class Modulation{
             if (check_sync_header()){
                 state_ ++;                  // next state
             }
-            return RCVINGDAT;                   // anyway, the data can not be returned
+            return CNFIRMING;                   // anyway, the data can not be returned
         }
         else if (state_ == 1){
             // waiting for the counter down to be 0, make sure the sync_header is the local maximum
@@ -169,8 +170,7 @@ public class Modulation{
                 // change state
                 state_ ++;
             }
-
-            return RCVINGDAT;
+            return (state_ == 1)? CNFIRMING: RCVINGDAT;
         }
         else if (state_ == 2){
             // add the data to the buffer
