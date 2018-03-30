@@ -1,4 +1,6 @@
 /* Description: A PSK modulation method */
+//package AcousticNetwork;
+
 package com.company;
 
 import java.io.*;
@@ -14,7 +16,7 @@ Implementation note:
     count_down_:        How many bits to wait till the confirmation of a sync_header
  */
 
-class Modulation{
+public class Modulation{
     // hyper-parameters
     private int init_count_down_;            // The waiting windows for identifying the header
 
@@ -148,7 +150,7 @@ class Modulation{
             // if count_down completed, turn the unconfirmed data into actual data
             if (count_down_ == 0){
                 // convert data
-                for (int i = 0; i < unconfirmed_data_.size(); i++){
+                while(unconfirmed_data_.size()>0){
                     processing_data_.add(unconfirmed_data_.get(0));
                     unconfirmed_data_.remove(0);
                 }
@@ -284,23 +286,23 @@ class Modulation{
         boolean[] array_out = new boolean[processing_data_.size()/bit_length_];
 
         int counter = 0;
+        /*
+         This is buggy! It will always result in an overflow
+         since counter = bit_length_ * processing_data.size()
+         What are you trying to say?
+        */
         for (int i = 0; i < processing_data_.size(); i++){
             double tmp_sum = 0;
             for (int j = 0; j < bit_length_; j++){
                 // only keep the middle 25%-75%, for sync robustness
                 if ((j > bit_length_/4) && (j < bit_length_*3/4)){
-                    tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(counter);
+                    tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(i);
                 }
                 counter ++;
             }
 
             // determine if it is 0 or 1
-            if (tmp_sum > 0){
-                array_out[i/bit_length_] = true;
-            }
-            else{
-                array_out[i/bit_length_] = false;
-            }
+            array_out[i/bit_length_] = (tmp_sum>0) ? true: false;
         }
 
         return array_out;
@@ -383,6 +385,7 @@ class Modulation{
         */
 
         // test demodulation (header detection)
+        /*
         byte[] test_input = new byte[2];
         test_input[0] = (byte)0x99;
         test_input[1] = (byte)0x1f;
@@ -391,6 +394,20 @@ class Modulation{
         for (int i = 0; i < test_output.length; i++) {
             boolean flag = modulator.demodulation(test_output[i],2);
             System.out.println(flag);
+        }*/
+        // test demodulate a packet.
+        // There is a "hello world" in this packet.
+        byte[] helloworld = {0x0, 0x0, 0x1, 0xc, 0x48, 0x65, 0x6c, 0x6c, 
+                        0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
+        double[] wave = modulator.modulate(helloworld);
+        int i=0;
+        while (!modulator.demodulation(wave[i], 16)) {
+            i = (i+1) % wave.length; 
+        }
+        byte[] recv_helloworld = modulator.getPacket(); 
+        for (i=0; i<16; i++){
+            System.out.printf("Byte# %d matched: %d. Decode result: %d\n", 
+                    i, (helloworld[i] == (recv_helloworld[i]))? 1: 0, recv_helloworld[i]);
         }
 
     }

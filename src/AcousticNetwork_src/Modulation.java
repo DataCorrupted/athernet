@@ -148,7 +148,7 @@ public class Modulation{
             // if count_down completed, turn the unconfirmed data into actual data
             if (count_down_ == 0){
                 // convert data
-                for (int i = 0; i < unconfirmed_data_.size(); i++){
+                while(unconfirmed_data_.size()>0){
                     processing_data_.add(unconfirmed_data_.get(0));
                     unconfirmed_data_.remove(0);
                 }
