@@ -200,6 +200,6 @@ public class SoundIO implements Runnable {
 		File f = new File(path);
 		AudioSystem.write(stream, Type.WAVE, f);		
 	}
-
+	public void drain(){ o_line_.drain();}
 }
 

@@ -61,6 +61,7 @@ class Transmitter{
 			r = i_file_.read(o_stream, head_size_, byte_read);
 			// Reset CRC8
 			crc8_.reset();
+			Thread.sleep(10);
 		}
 	}
 	static public void main(String[] args) throws Exception{
@@ -81,6 +82,7 @@ class Transmitter{
 		}
 		Transmitter transmitter = new Transmitter(file);
 		transmitter.transmit();
+		transmitter.o_sound_.drain();
 		transmitter.o_sound_.saveDataToFile("./std_output.wav");
 	}
 }
