@@ -88,12 +88,13 @@ public class Modulation{
 
         int counter = 0;
 
+
         for (int i = 0 ; i < frame_booleans.length; i++){
             // convert each bits to a waveform
             int phrase = 1;
             if (!frame_booleans[i])          phrase = -1;
             for (int j = 0; j < bit_length_; j++){
-                output_data[counter] = carrier_[j] * phrase;
+                output_data[counter] = carrier_[bit_length_ * i + j] * phrase;
                 counter ++;
             }
         }
@@ -177,7 +178,7 @@ public class Modulation{
             // process and clear the buffer
             state_ = 0;
             // TODO: convert double queue buffer to data
-            boolean[] packet_boolean = convert_processing_data();
+            boolean[] packet_boolean = convert_processing_data(expected_length);
             processing_data_.clear();
             packet_ = convert_booleans_to_bytes(packet_boolean);
             return true;                // new data packet is ready
@@ -281,9 +282,9 @@ public class Modulation{
             decode the processing_data (receiver side)
             convert sound to boolean[]
     */
-    private boolean[] convert_processing_data(){
+    private boolean[] convert_processing_data(int expected_length){
         // array for storing the result
-        boolean[] array_out = new boolean[processing_data_.size()/bit_length_];
+        boolean[] array_out = new boolean[expected_length*8];
 
         int counter = 0;
         /*
@@ -291,18 +292,18 @@ public class Modulation{
          since counter = bit_length_ * processing_data.size()
          What are you trying to say?
         */
-        for (int i = 0; i < processing_data_.size(); i++){
-            double tmp_sum = 0;
-            for (int j = 0; j < bit_length_; j++){
-                // only keep the middle 25%-75%, for sync robustness
-                if ((j > bit_length_/4) && (j < bit_length_*3/4)){
-                    tmp_sum = tmp_sum + carrier_[i] * processing_data_.get(i);
-                }
-                counter ++;
-            }
 
+        for (int i = 0; i < expected_length*8; i += 1){
+            double tmp_sum = 0;
+            // get a chunk
+            for (int j = 0; j < bit_length_; j++){
+                // for robustness, only use the 25%-75% data.
+                if (((j%bit_length_) > bit_length_/4) && ((j%bit_length_) < bit_length_*3/4)){
+                    tmp_sum += carrier_[bit_length_*i+j] * processing_data_.get(bit_length_ * i + j);
+                }
+            }
             // determine if it is 0 or 1
-            array_out[i/bit_length_] = (tmp_sum>0) ? true: false;
+            array_out[i] = (tmp_sum>0) ? true: false;
         }
 
         return array_out;
@@ -397,7 +398,7 @@ public class Modulation{
         }*/
         // test demodulate a packet.
         // There is a "hello world" in this packet.
-        byte[] helloworld = {0x0, 0x0, 0x1, 0xc, 0x48, 0x65, 0x6c, 0x6c, 
+        byte[] helloworld = {0x7f, 0x0, 0x1, 0xc, 0x48, 0x65, 0x6c, 0x6c,
                         0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
         double[] wave = modulator.modulate(helloworld);
         int i=0;

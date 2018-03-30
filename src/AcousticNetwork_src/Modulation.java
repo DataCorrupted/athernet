@@ -15,6 +15,10 @@ Implementation note:
  */
 
 public class Modulation{
+    public static final int NOTHING = -1;
+    public static final int RCVEDDAT = 1;
+    public static final int RCVINGDAT = 0;
+
     // hyper-parameters
     private int init_count_down_;            // The waiting windows for identifying the header
 
@@ -37,6 +41,8 @@ public class Modulation{
     private byte[] packet_;
 
     private double power_energy;
+
+    public int getHeaderLength() { return header_length_; }
 
     /* Someone want to overload this */
     public Modulation(int sample_rate){
@@ -86,12 +92,13 @@ public class Modulation{
 
         int counter = 0;
 
+
         for (int i = 0 ; i < frame_booleans.length; i++){
             // convert each bits to a waveform
             int phrase = 1;
             if (!frame_booleans[i])          phrase = -1;
             for (int j = 0; j < bit_length_; j++){
-                output_data[counter] = carrier_[j] * phrase;
+                output_data[counter] = carrier_[bit_length_ * i + j] * phrase;
                 counter ++;
             }
         }
@@ -112,7 +119,7 @@ public class Modulation{
         True: when a complete datapacket is ready.
         False: Otherwise
     */
-    public boolean demodulation(double sample, int expected_length){
+    public int demodulation(double sample, int expected_length){
         // given a recved signal. Demodulate it.
         // Whether current signals are data or just nothing important.
 
@@ -123,12 +130,12 @@ public class Modulation{
             // identify the header
             processing_header_.add(sample);
             if (processing_header_.size() < header_length_){
-                return false;               // return when not adequate data
+                return NOTHING;               // return when not adequate data
             }
             if (check_sync_header()){
                 state_ ++;                  // next state
             }
-            return false;                   // anyway, the data can not be returned
+            return RCVINGDAT;                   // anyway, the data can not be returned
         }
         else if (state_ == 1){
             // waiting for the counter down to be 0, make sure the sync_header is the local maximum
@@ -162,13 +169,13 @@ public class Modulation{
                 state_ ++;
             }
 
-            return false;
+            return RCVINGDAT;
         }
         else if (state_ == 2){
             // add the data to the buffer
             processing_data_.add(sample);
             if (processing_data_.size() < expected_length * 8 * bit_length_) {
-                return false;               // not enough data to decode
+                return RCVINGDAT;               // not enough data to decode
             }
 
             // decode the waveform to get the bits
@@ -178,7 +185,7 @@ public class Modulation{
             boolean[] packet_boolean = convert_processing_data(expected_length);
             processing_data_.clear();
             packet_ = convert_booleans_to_bytes(packet_boolean);
-            return true;                // new data packet is ready
+            return RCVEDDAT;                // new data packet is ready
         }
         else {
             throw new RuntimeException(new String("Invalid state"));
@@ -279,9 +286,9 @@ public class Modulation{
             decode the processing_data (receiver side)
             convert sound to boolean[]
     */
-    private boolean[] convert_processing_data(int len){
+    private boolean[] convert_processing_data(int expected_length){
         // array for storing the result
-        boolean[] array_out = new boolean[len*8];
+        boolean[] array_out = new boolean[expected_length*8];
 
         int counter = 0;
         /*
@@ -289,18 +296,17 @@ public class Modulation{
          since counter = bit_length_ * processing_data.size()
          What are you trying to say?
         */
-        System.out.println(len);
-        for (int i = 0; i < len*8; i++){
+
+        for (int i = 0; i < expected_length*8; i += 1){
             double tmp_sum = 0;
+            // get a chunk
             for (int j = 0; j < bit_length_; j++){
-                // only keep the middle 25%-75%, for sync robustness
-                if ((j > bit_length_/4) && (j < bit_length_*3/4)){
-                    tmp_sum = tmp_sum + carrier_[i + j] * processing_data_.get(i + j);
+                // for robustness, only use the 25%-75% data.
+                if (((j%bit_length_) > bit_length_/4) && ((j%bit_length_) < bit_length_*3/4)){
+                    tmp_sum += carrier_[bit_length_*i+j] * processing_data_.get(bit_length_ * i + j);
                 }
             }
-
             // determine if it is 0 or 1
-            //System.out.printf("%3.5f, %d\n", tmp_sum / 22, i);
             array_out[i] = (tmp_sum>0) ? true: false;
         }
 
@@ -396,11 +402,12 @@ public class Modulation{
         }*/
         // test demodulate a packet.
         // There is a "hello world" in this packet.
-        byte[] helloworld = {0x0f};
+        byte[] helloworld = {0x7f, 0x0, 0x1, 0xc, 0x48, 0x65, 0x6c, 0x6c,
+                        0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
         double[] wave = modulator.modulate(helloworld);
         int byte_cnt = wave.length;
         int i=0;
-        while (!modulator.demodulation(wave[i], byte_cnt)) {
+        while (modulator.demodulation(wave[i], byte_cnt) != this.RCVEDDAT) {
             i = (i+1) % wave.length; 
         }
         byte[] recv_helloworld = modulator.getPacket(); 
