@@ -137,8 +137,9 @@ public class Modulation{
             }
             if (check_sync_header()){
                 state_ ++;                  // next state
+                return CNFIRMING;
             }
-            return CNFIRMING;                   // anyway, the data can not be returned
+            return NOTHING;
         }
         else if (state_ == 1){
             // waiting for the counter down to be 0, make sure the sync_header is the local maximum
