@@ -223,8 +223,13 @@ public class Modulation{
             // decode the waveform to get the bits
             // process and clear the buffer
             state_ = 0;
-            // TODO: convert double queue buffer to data
             boolean[] packet_boolean = convert_processing_data(expected_length);
+
+            // reserve last several bits for searching window for next packet
+            for (int i = 0; i < 20; i++){
+                processing_header_.add(processing_data_.get(i));
+            }
+
             processing_data_.clear();
             packet_ = convert_booleans_to_bytes(packet_boolean);
             return RCVEDDAT;                // new data packet is ready
