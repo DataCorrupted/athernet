@@ -54,6 +54,7 @@ class Transmitter{
 			// Modulation
 			wave = modulator_.modulate(o_stream);
 			// Sound
+			o_sound_.saveData(wave);
 			o_sound_.sound(wave);
 			// Read next bunch of data.
 			pack_cnt ++;
@@ -80,5 +81,6 @@ class Transmitter{
 		}
 		Transmitter transmitter = new Transmitter(file);
 		transmitter.transmit();
+		transmitter.o_sound_.saveDataToFile("./std_output.wav");
 	}
 }

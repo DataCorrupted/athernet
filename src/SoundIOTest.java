@@ -28,8 +28,9 @@ class SoundIOTest implements Runnable{
 		double[] wave = new double[sample_cnt];
 		for (int i=0; i<sample_cnt; i++){
 			double t = (double) i / sample_rate;
+			// Weighted mean for better frequency responce.
 			wave[i] = 
-				0.5*(Math.sin(2*Math.PI*1000*t) + Math.sin(2*Math.PI*10000*t));
+				0.3*Math.sin(2*Math.PI*1000*t) + 0.7*Math.sin(2*Math.PI*10000*t);
 		}		
 		io.sound(wave);
 	}

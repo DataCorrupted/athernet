@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import java.util.Vector;
+
 public class SoundIO implements Runnable {
 	private int sample_rate_;
 	private AudioFormat format_;
@@ -30,6 +32,28 @@ public class SoundIO implements Runnable {
 	private final int BYTESIZE = 8;
 	private ArrayBlockingQueue<Double> double_buf_;
 	private boolean stop_ = false;
+
+	// This is solely used for debug, so that I can put the audio to a file.
+	private Vector<Double> dvt_;
+
+	// The conversion from double[] to Vector and from Vector to double[]
+	// is not only ugly but also inefficient.
+	// But since this is a debug utility, don'e care any more.
+	public void saveData(double[] data){
+		for (int i=0; i<data.length; i++){
+			dvt_.add(data[i]);
+		}
+	}
+	public void saveDataToFile(String path) throws Exception{
+		double[] wave = new double[dvt_.size()];
+		for (int i=0; i<dvt_.size(); i++){
+			wave[i] = dvt_.get(i);
+		}
+		save_file(wave, path);
+	}
+	public void clearDoubleVector(){
+		dvt_ = new Vector<Double>();
+	}
 
 	@Override
 	public void run(){
@@ -66,6 +90,7 @@ public class SoundIO implements Runnable {
 		this(44100);
 	}
 	public SoundIO(int sr) throws Exception{
+		dvt_ = new Vector<Double>();
 		sample_rate_ = sr;
 		this.format_ = 
 			new AudioFormat(sample_rate_, FRAMESIZE*BYTESIZE, 1, true, true);
