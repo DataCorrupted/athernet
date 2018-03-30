@@ -1,5 +1,5 @@
 /* Description: A PSK modulation method */
-//package AcousticNetwork;
+package AcousticNetwork;
 
 import java.io.*;
 import java.util.*;
@@ -42,8 +42,9 @@ public class Modulation{
 
     private double power_energy;
 
+    public int getBitLength() { return bit_length_; }
     public int getHeaderLength() { return header_length_; }
-
+    public int getDataLength() { return processing_data_.size(); }
     /* Someone want to overload this */
     public Modulation(int sample_rate){
         this(44,  440, sample_rate, 1100/8, 200, 10000);
