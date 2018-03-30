@@ -149,8 +149,12 @@ public class Modulation{
 
             // call for recheck
             if (check_sync_header()){
-                // previous is wrong, this is the new header, passed data are noise
-                unconfirmed_data_.clear();
+                // previous is wrong, this is the new header, passed data are new header (FIFO list)
+                while (unconfirmed_data_.size() > 0){
+                    processing_header_.remove(0);
+                    processing_header_.add(unconfirmed_data_.get(0));
+                    unconfirmed_data_.remove(0);
+                }
                 count_down_ = init_count_down_;
             }
 
