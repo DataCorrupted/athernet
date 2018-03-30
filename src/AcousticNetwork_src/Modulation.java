@@ -286,17 +286,16 @@ public class Modulation{
             decode the processing_data (receiver side)
             convert sound to boolean[]
     */
+
     private boolean[] convert_processing_data(int expected_length){
         // array for storing the result
         boolean[] array_out = new boolean[expected_length*8];
 
-        int counter = 0;
         /*
          This is buggy! It will always result in an overflow
          since counter = bit_length_ * processing_data.size()
          What are you trying to say?
         */
-
         for (int i = 0; i < expected_length*8; i += 1){
             double tmp_sum = 0;
             // get a chunk
@@ -405,9 +404,9 @@ public class Modulation{
         byte[] helloworld = {0x7f, 0x0, 0x1, 0xc, 0x48, 0x65, 0x6c, 0x6c,
                         0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
         double[] wave = modulator.modulate(helloworld);
-        int byte_cnt = wave.length;
+        int byte_cnt = helloworld.length;
         int i=0;
-        while (modulator.demodulation(wave[i], byte_cnt) != this.RCVEDDAT) {
+        while (modulator.demodulation(wave[i], byte_cnt) != Modulation.RCVEDDAT) {
             i = (i+1) % wave.length; 
         }
         byte[] recv_helloworld = modulator.getPacket(); 
