@@ -15,10 +15,10 @@ Implementation note:
  */
 
 public class Modulation{
-    public static final int NOTHING = -1;
-    public static final int RCVEDDAT = 1;
-    public static final int RCVINGDAT = 0;
-    public static final int CNFIRMING = 2;
+    public static final int NOTHING = 0;
+    public static final int RCVEDDAT = -1;
+    public static final int RCVINGDAT = 2;
+    public static final int CNFIRMING = 1;
 
     // hyper-parameters
     private int init_count_down_;            // The waiting windows for identifying the header
@@ -170,7 +170,7 @@ public class Modulation{
                 // change state
                 state_ ++;
             }
-            return (state_ == 1)? CNFIRMING: RCVINGDAT;
+            return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
         }
         else if (state_ == 2){
             // add the data to the buffer
