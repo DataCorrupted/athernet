@@ -11,6 +11,9 @@ class Modulation{
         unit_duration: time duration for each bit (normally 1s)
         sample_rate: the sample rate in HZ
      */
+    double[] Modulation(double sample_rate){
+        this(1, sample_rate);
+    }
     double[] Modulation(double unit_duration, double sample_rate){
         carrier_ = new double[unit_duration * sample_rate];
         // generate one standard frame unit

@@ -22,7 +22,6 @@ class Transmitter{
 		int byte_read = pack_size_ - head_size_;
 		byte[] o_stream = new byte[pack_size_];
 
-
 		short pack_cnt = 0;
 		// Initial read.
 		int r = f_in_.read(o_stream, head_size_, byte_read);
