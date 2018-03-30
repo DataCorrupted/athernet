@@ -75,7 +75,7 @@ class Receiver{
 		// or it's receiving nothing, then I timeout.
 		int r = Modulation.NOTHING;
 		while (r != Modulation.RCVEDDAT && time <= timeout) {
-			System.out.println(r+ " "+ demodulator_.getDataLength());
+			System.out.println(r+ " "+ demodulator_.getHeaderScore());
 			r = demodulator_.demodulation(double_q_.take(), pack_size_);
 			time += (r == Modulation.NOTHING)? 1:0;
 		}

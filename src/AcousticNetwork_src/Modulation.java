@@ -46,6 +46,7 @@ public class Modulation{
     public int getBitLength() { return bit_length_; }
     public int getHeaderLength() { return header_length_; }
     public int getDataLength() { return processing_data_.size(); }
+    public double getHeaderScore() { return header_score_;}
     /* Someone want to overload this */
     public Modulation(int sample_rate){
         this(44,  440, sample_rate, 1100/8, 200, 10000);
