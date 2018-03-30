@@ -19,6 +19,7 @@ class Receiver{
 	private Thread recorder_;
 	private Modulation demodulator_;
 	private int sample_rate_;
+	private boolean file_stop_ = false;
 
 	public Receiver() throws Exception{
 		this(44100, 16, 0.1, "./O");
@@ -42,14 +43,25 @@ class Receiver{
 	// This function should run in an independent thread.
 	// Do not call it manually.
 	private void receiveFromFile(String i_file) throws Exception{
+		file_stop_ = false;
 		double[] wave = i_sound_.read_file(i_file);
+		int wait_time = 0; //(int) 1.0e4/sample_rate_;
 		for (int i=0; i<wave.length; i++){
-			double_q_.offer(wave[i]);
+			double_q_.put(wave[i]);
+			//System.out.println("\t" + double_q_.size() + " " + i );
 			// Make sure that approx. sample_rate amount 
 			// of data is put into the queue.
-			Thread.sleep(0, (int) 1.0e9/sample_rate_);
+			// Turns out, there is no need to sleep at all.
+			// Thread.sleep(0, wait_time);
+		}
+		// The file is over, in order to keep the queue moving
+		// we stuck 0 to it.
+		while (!file_stop_){
+			double_q_.put(0.0);
 		}
 	}
+	private void stopFileStream() { file_stop_ = true; }
+
 	public void startReceive() throws Exception{		
 		recorder_ = new Thread(i_sound_);
 		recorder_.start();
@@ -75,7 +87,7 @@ class Receiver{
 		// or it's receiving nothing, then I timeout.
 		int r = Modulation.NOTHING;
 		while (r != Modulation.RCVEDDAT && time <= timeout) {
-			System.out.println(r+ " "+ demodulator_.getHeaderScore());
+			//System.out.println(r+ " "+ demodulator_.getDataLength());
 			r = demodulator_.demodulation(double_q_.take(), pack_size_);
 			time += (r == Modulation.NOTHING)? 1:0;
 		}
@@ -84,7 +96,7 @@ class Receiver{
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
 			System.out.println("No packet found, possibly time out when waiting for one.");
-			return i_stream;
+			return new byte[pack_size_];
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, pack_size_-1);
@@ -103,10 +115,8 @@ class Receiver{
 		int start_pos;
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
-			System.out.println("2");
 			byte[] packet = receiveOnePacket();
 			int useful_byte = packet[3];
-			System.out.println("Bytes read: " + useful_byte);
 			int pack_cnt = ((int)(packet[1]) << 8) + packet[2];		
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<useful_byte; i++){
@@ -156,7 +166,8 @@ class Receiver{
 			}});
 			simu_receiver.start();
 			System.out.println("1");
-			f = receiver.receiveBytes(125, 3);
+			f = receiver.receiveBytes(125, 5);
+			receiver.stopFileStream();
 			simu_receiver.join();
 		}
 		receiver.o_file_.write(f, 0, f.length);

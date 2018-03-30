@@ -1,0 +1,1 @@
+This is a test file with 125 bytes, which is 1000 bits. It should dur for about 1~2 seconds. We are having some problems. Recorded file have two missing peaks, which is the header of the packet. Now we add more data to see if the two peak is in head.
