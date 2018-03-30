@@ -76,6 +76,7 @@ class Transmitter{
 			} else {
 				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
 			}
+			i++;
 		}
 		Transmitter transmitter = new Transmitter(file);
 		transmitter.transmit();

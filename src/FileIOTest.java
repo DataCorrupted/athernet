@@ -30,10 +30,13 @@ class FileIOTest{
 	}
 
 	public static void main(String[] args) throws Exception{
-		FileIOTest file_io_test = new FileIOTest("./I", FileI.BIN,"./O", FileO.TEXT01);
 		int byte_cnt = 1000;
 		byte[] f = new byte[byte_cnt];
-
+		String file_i = "./I";
+		String file_o = "./O";
+		if (args.length == 2) { file_i = args[1]; }
+		if (args.length == 3) { file_o = args[2]; }
+		FileIOTest file_io_test = new FileIOTest(file_i, FileI.BIN, file_o, FileO.TEXT01);
 		if (args.length == 0){
 			System.out.println("Please specify a function you want to test:\n" +
 							" --save: Save a string \"Hello world\" to O;\n" +
@@ -47,16 +50,11 @@ class FileIOTest{
 			file_io_test.testRead(f);
 			file_io_test.testRead(f);
 		} else if (args[0].equals("--both")){
-			int r;
-
-			r = file_io_test.testRead(f);
-			file_io_test.testSave(f, r);
-			// Don't worry about the extra 0s here.
-			// Higher class will guarantee that no extra 0
-			// will be provided.
-			r = file_io_test.testRead(f);
-			file_io_test.testSave(f, r);
-
+			int r=0;
+			while (r!= -1){
+				r = file_io_test.testRead(f);
+				file_io_test.testSave(f, r);
+			}
 		} else {
 			System.out.println("No such test.");
 		}

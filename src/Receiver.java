@@ -36,6 +36,17 @@ class Receiver{
 		demodulator = new Modulation(sample_rate);
 	}
 
+	// This function should run in an independent thread.
+	// Do not call it manually.
+	private void receiveFromFile(String i_file){
+		double[] wave = io.read_file(path);
+		for (int i=0; i<wave.length; i++){
+			double_q_.offer(wave[i]);
+			// Make sure that approx. sample_rate amount 
+			// of data is put into the queue.
+			Thread.sleep(0, 1.0e9/sample_rate);
+		}
+	}
 	public void startReceive(){		
 		recorder_ = new Thread(i_sound_);
 		recorder_.start();
@@ -50,8 +61,21 @@ class Receiver{
 		int byte_read = data_size_;
 		byte[] i_stream = new byte[pack_size_];
 
+		int time = 0;
+		double timeout = 
+			demodulator.getHeaderLength() + 
+			demodulator.getBitLength() * pack_size_ * 8;
+		timeout *= 1.2;	// 20% extra waiting time.
 		// Offer double to demodulate until a packet is offered.
-		while (!demodulator.demolation(double_q_.take(), pack_size_)) {; }
+		// I think a better way is to let demodulate tell me what it's seeing
+		// Whether the header is matched then I wait for longer,
+		// or it's receiving nothing, then I timeout.
+		 
+		while (r != Modulation.RCVEDDAT && time <= timeout) {
+			r = demodulator.demodulation(double_q_.take(), pack_size_);
+			time += (r == Modulation.NOTHING)? 1:0
+		}
+		
 		i_stream = demolator.getPacket();
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
@@ -69,39 +93,59 @@ class Receiver{
 		crc8_.reset();
 		return i_stream;
 	}
-	public byte[] receiveBytes(int len){
+	public byte[] receiveBytes(int byte_cnt, int pack_cnt){
 		int k = 0;
-		byte[] chunk = new byte[len];
+		byte[] chunk = new byte[byte_cnt];
 		int start_pos;
-		while (k<len){
+		while (k<pack_cnt){
 			byte[] packet = receiveOnePacket();
 			int useful_byte = i_stream[3];
-			int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
-			k += data_size_;			
-			start_pos = pack_cnt * (data_size_);
+			int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];		
+			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<useful_byte; i++){
-				if (start_pos + i < len){
+				if (start_pos + i < byte_cnt){
 					chunk[start_pos + i] = packet[head_size_ + i];
 				}
 			}
+			k ++;
 		}
 	}
 	static public void main(String[] args) throws Exception{
-		String file="./O";
+		String o_file="./O";
+		String i_file="./I";
+		boolean from_file = false;
 		int i=0;
 		while (i<args.length){
-			if (args[i].equals("-f")){
+			if (args[i].equals("-o")){
 				i++;
 				if (i == args.length){
 					System.out.println("Error, no file provided.");
 				} else {
-					file = args[i];
+					o_file = args[i];
 				}
+			} else if (args[i].equals("--from-file")){
+				i++;
+				if (i != args.length){
+					i_file = args[i]; 
+				}
+				from_file = true;
 			} else {
 				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
 			}
+			i++;
 		}
 		Receiver receiver = new Receiver();
-		receiver.receiveBytes(4000);
+		if (!from_file){
+			receiver.startReceive();
+			receiver.receiveBytes(125, 11);
+			receiver.stopReceive();
+		} else {
+			Thread simu_receiver = new Thread( new Runnable(){
+				public void run() { receiver.receiveFromFile();}
+			});
+			simu_receiver.start();
+			receive.receiveBytes(125, 11);
+			simu_receiver.join();
+		}
 	}
 }

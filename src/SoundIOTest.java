@@ -43,6 +43,7 @@ class SoundIOTest implements Runnable{
 
 	private void testRecordAndPlayback(double dur) throws Exception{
 		double[] wave = io.record(dur);
+		io.save_file(wave, "./test.wav");
 		io.sound(wave);
 	}
 
@@ -83,7 +84,13 @@ class SoundIOTest implements Runnable{
 		} else if (args[0].equals("--read")){
 			test.testReadFile();
 		} else if (args[0].equals("--record")){
-			test.testRecordAndPlayback(10);
+			double dur;
+			if (args.length == 2){
+				dur = Double.valueOf(args[1]).doubleValue();
+			} else {
+				dur = 10.0;
+			}
+			test.testRecordAndPlayback(dur);
 		} else if (args[0].equals("--save")){
 			test.testSaveFile();
 		} else if (args[0].equals("--concurrent")) {
