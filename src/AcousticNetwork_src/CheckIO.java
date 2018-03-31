@@ -52,7 +52,7 @@ class CheckIO{
 	public String genGram(){ return genGram(MAXLEN); }
 	public String genGram(int length){
 		if (length > MAXLEN) { length = MAXLEN;}
-		String gram = "    A123456789abcdefB123456789abcdefC123456789abcdefD123456789abcdef";
+		String gram = "    A123456789abcdefB123456789abcdefC123456789abcdefD123456789abcdefE123456789abcdefF123456789abcdef";
 		int k = 0;
 		int j = 0;
 		for (int i = 0; i<largeSize(); i++){
