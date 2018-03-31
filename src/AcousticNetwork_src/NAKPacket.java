@@ -34,6 +34,10 @@ public class NAKPacket {
         return false;
     }
 
+    public void clear(){
+        loss_packets_ = new ArrayList<>();
+    }
+
     /*
     Note:
         zero(packet_id=255) padding if (number of loss_packet) < expected_length
@@ -66,7 +70,7 @@ public class NAKPacket {
     }
 
     public static void main (String[] args){
-        NAKPacket nak_pack = new NAKPacket(16);
+        NAKPacket nak_pack = new NAKPacket(14);
         nak_pack.add_loss_packet(0);
         nak_pack.add_loss_packet(15);
 
