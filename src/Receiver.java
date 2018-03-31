@@ -146,6 +146,7 @@ class Receiver{
 		String o_path="./O";
 		String i_path_tmp="./I";
 		boolean from_file = false;
+		double time_limit = 15;
 		int i=0;
 		while (i<args.length){
 			if (args[i].equals("-o")){
@@ -161,6 +162,9 @@ class Receiver{
 					i_path_tmp = args[i]; 
 				}
 				from_file = true;
+			} else if (args[i].equals("--error-correction")) {
+				time_limit = 30;
+				System.out.println("Using error correction mode, listen for 30s");
 			} else {
 				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
 			}
@@ -170,7 +174,7 @@ class Receiver{
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(1250, 15);
+			f = receiver.receiveBytes(1250, time_limit);
 			receiver.stopReceive();
 		} else {
 			final String i_path = i_path_tmp;

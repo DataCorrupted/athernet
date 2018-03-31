@@ -69,6 +69,7 @@ class Transmitter{
 	static public void main(String[] args) throws Exception{
 		String file="./I";
 		int i=0;
+		int re_play = 1;
 		while (i<args.length){
 			if (args[i].equals("-f")){
 				i++;
@@ -77,18 +78,21 @@ class Transmitter{
 				} else {
 					file = args[i];
 				}
+			} else if (args[i].equals("--error-correction")) {
+				re_play = 3;
+				System.out.println("Using error correction mode.");
 			} else {
 				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
 			}
 			i++;
 		}
 		Transmitter transmitter = new Transmitter(16, file);
-		double dur = 0.5;
-		int sample_rate = 44100;
-		int sample_cnt = (int) (dur * sample_rate);
-		double[] wave = new double[sample_cnt];
 		transmitter.transmit();
+		for (i = 0; i<re_play-1; i++){
+			transmitter.o_sound_.sound(transmitter.o_sound_.toArray());
+		}
 		transmitter.o_sound_.drain();
-		transmitter.o_sound_.saveDataToFile("./std_output.wav");
+
+//		transmitter.o_sound_.saveDataToFile("./std_output.wav");
 	}
 }

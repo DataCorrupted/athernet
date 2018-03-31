@@ -44,12 +44,15 @@ public class SoundIO implements Runnable {
 			dvt_.add(data[i]);
 		}
 	}
-	public void saveDataToFile(String path) throws Exception{
+	public double[] toArray(){
 		double[] wave = new double[dvt_.size()];
 		for (int i=0; i<dvt_.size(); i++){
 			wave[i] = dvt_.get(i);
 		}
-		save_file(wave, path);
+		return wave;
+	}
+	public void saveDataToFile(String path) throws Exception{
+		save_file(toArray(), path);
 	}
 	public void clearDoubleVector(){
 		dvt_ = new Vector<Double>();
