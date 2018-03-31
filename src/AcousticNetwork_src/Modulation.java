@@ -228,8 +228,9 @@ public class Modulation{
             boolean[] packet_boolean = convert_processing_data(expected_length);
 
             // reserve last several bits for searching window for next packet
-            for (int i = 0; i < 20; i++){
-                processing_header_.add(processing_data_.get(i));
+            int recheck_length = 100;
+            for (int i = 0; i < recheck_length; i++){
+                processing_header_.add(processing_data_.get(processing_data_.size() - (recheck_length -i)));
             }
 
             processing_data_.clear();
@@ -271,6 +272,9 @@ public class Modulation{
             sync_power_debug.add(0.0);
             return false;
         }
+        // normalize the header
+        // List<Double> normalized_header = normalize_data(processing_header_);
+
         // calculate the dot product
         double sync_power = 0;
         for (int i = 0; i < header_length_; i++){
@@ -280,12 +284,6 @@ public class Modulation{
         sync_power = sync_power / 200;
         sync_power_debug.add(sync_power);
         // TODO: enforce other condition
-        // TODO: normalize header in detection maybe?
-        /*
-        if (bit_counter_ == 540){
-            boolean debug = true;
-        }
-        */
         if ( (sync_power > (power_energy * power_energy)) && (sync_power > header_score_) && (sync_power > 0.05)){
             header_score_ = sync_power;
             return true;
