@@ -6,15 +6,15 @@ public class Client {
     private Receiver receiver_;
     private Transmitter transmitter_;
 
-    public Client(){
+    public Client() throws Exception{
         this(16);
     }
-    public Client(int pack_size){
+    public Client(int pack_size) throws Exception{
         receiver_ = new Receiver(pack_size);
         transmitter_ = new Transmitter(pack_size);
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception{
 
         // parse parameters (if needed)
 
@@ -30,14 +30,14 @@ public class Client {
         while(client.receiver_.hasSignal()){
 
             // Tries to receive a packet.
-            int recv_status = client.receiver_.receiveOnePacket();
+            int recv_status = client.receiver_.receiveOnePacket(packet);
             
             // Determine recv status
             if (recv_status == client.receiver_.RECEVED){
                 // Add to ACK_generator.
-            } else (recv_status == client.receiver_.CRCINVL){
+            } else if (recv_status == client.receiver_.CRCINVL){
                 // Flag it loss in ACK_generator.
-            } else (recv_status == client.receiver_.TIMEOUT){
+            } else if (recv_status == client.receiver_.TIMEOUT){
                 // Does nothing and move on to next.
                 ;
             }
