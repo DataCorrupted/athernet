@@ -358,7 +358,7 @@ public class Modulation{
             // get a chunk
             for (int j = 0; j < bit_length_; j++){
                 // for robustness, only use the 25%-75% data.
-                if (((j%bit_length_) > bit_length_/4) && ((j%bit_length_) < bit_length_*3/4)){
+                if (((j%bit_length_) > bit_length_/3) && ((j%bit_length_) < bit_length_*2/3)){
                     tmp_sum += carrier_[bit_length_*i+j] * data_normalized.get(bit_length_ * i + j);
                 }
             }
