@@ -25,10 +25,11 @@ public class Receiver{
 
 	private boolean file_stop_ = false;
 
-	public getPower(){ return i_sound_.getPower(); }
-	public hasSignal(){ return i_sound_.hasSignal(); }
-	public getPackSize(){ return pack_size_; }
-	public getDataSize(){ return data_size_; }
+	public int getPackSize(){ return pack_size_; }
+	public int getDataSize(){ return data_size_; }
+	
+	public double getPower(){ return i_sound_.getPower(); }
+	public boolean hasSignal(){ return i_sound_.hasSignal(); }
 	
 	public Receiver() throws Exception{
 		this(44100, 16, 0.1);

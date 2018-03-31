@@ -17,8 +17,8 @@ public class Transmitter{
 	private CRC8 crc8_ ;
 	private Modulation modulator_;
 
-	public getPackSize(){ return pack_size_; }
-	public getDataSize(){ return data_size_; }
+	public int getPackSize(){ return pack_size_; }
+	public int getDataSize(){ return data_size_; }
 	
 	public Transmitter() throws Exception{
 		this(44100, 16);
