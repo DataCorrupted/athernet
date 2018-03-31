@@ -45,6 +45,7 @@ public class Modulation{
 
     private double power_energy;
     private int bit_counter_ = 0;
+    private int last_bit_counter_ = 0;
 
     // dummy sin wave
     private double[] dummy_sin_wave_;
@@ -180,7 +181,8 @@ public class Modulation{
 
             // call for recheck
             if (check_sync_header()){
-//                System.out.println("Header reconfirmed at bit: " + bit_counter_);
+                System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
+                last_bit_counter_ = bit_counter_;
                 unconfirmed_data_.clear();
                 // TODO: This was wrong...
                 /*

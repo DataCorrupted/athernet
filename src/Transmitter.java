@@ -19,8 +19,8 @@ class Transmitter{
 	public Transmitter() throws Exception{
 		this(44100, 16, "./I");
 	}
-	public Transmitter(String file) throws Exception{
-		this(44100, 16, file);
+	public Transmitter(int pack_size, String file) throws Exception{
+		this(44100, pack_size, file);
 	}
 	public Transmitter(
 	  int sample_rate, int packet_size, String file) throws Exception{
@@ -42,6 +42,7 @@ class Transmitter{
 		short pack_cnt = 0;
 		// Initial read.
 		int r = i_file_.read(o_stream, head_size_, byte_read);
+
 		while (r != -1){
 			o_stream[1] = (byte) (pack_cnt >>> 8);
 			o_stream[2] = (byte) (pack_cnt & 0xff);
@@ -80,7 +81,7 @@ class Transmitter{
 			}
 			i++;
 		}
-		Transmitter transmitter = new Transmitter(file);
+		Transmitter transmitter = new Transmitter(16, file);
 		transmitter.transmit();
 		transmitter.o_sound_.drain();
 		transmitter.o_sound_.saveDataToFile("./std_output.wav");
