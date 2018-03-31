@@ -4,13 +4,13 @@ import AcousticNetwork.FileO;
 
 import java.util.ArrayList;
 
-class CheckIO{
+public class CheckIO{
 	private FileI i_file_;
 	private FileI o_file_;
 	private ArrayList<Byte> ground_truth_;
 	private ArrayList<Byte> reality_;
 	private ArrayList<Integer> diff_list_;
-	private final int MAXLEN = 96;
+	private final int MAXLEN = 56;
 
 	public CheckIO() throws Exception{
 		this("./I", "./O");
@@ -52,7 +52,7 @@ class CheckIO{
 	public String genGram(){ return genGram(MAXLEN); }
 	public String genGram(int length){
 		if (length > MAXLEN) { length = MAXLEN;}
-		String gram = "    A123456789abcdefB123456789abcdefC123456789abcdefD123456789abcdefE123456789abcdefF123456789abcdef";
+		String gram = "    A1234567B1234567C1234567D1234567E1234567F1234567G1234567";
 		int k = 0;
 		int j = 0;
 		for (int i = 0; i<largeSize(); i++){
@@ -78,6 +78,9 @@ class CheckIO{
 		s = s + "The accuracy is of " + accuracy() + "\n";
 		s = s + "Below is a detailed gram of where they are differnet: \n";
 		s = s + genGram();
+		if (countDiff() == 0){
+			s = s + "Congratulations! Your packet is safe and SOUND.";
+		}
 		return s;
 	}
 	public static void main(String args[]) throws Exception{

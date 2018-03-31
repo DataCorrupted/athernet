@@ -40,6 +40,11 @@ class Transmitter{
 		byte[] o_stream = new byte[pack_size_];
 		double[] wave;
 		short pack_cnt = 0;
+		
+		// Creat an empty package.
+		wave = modulator_.modulate(o_stream);
+		o_sound_.sound(wave);
+
 		// Initial read.
 		int r = i_file_.read(o_stream, head_size_, byte_read);
 
@@ -78,6 +83,10 @@ class Transmitter{
 			i++;
 		}
 		Transmitter transmitter = new Transmitter(16, file);
+		double dur = 0.5;
+		int sample_rate = 44100;
+		int sample_cnt = (int) (dur * sample_rate);
+		double[] wave = new double[sample_cnt];
 		transmitter.transmit();
 		transmitter.o_sound_.drain();
 		transmitter.o_sound_.saveDataToFile("./std_output.wav");

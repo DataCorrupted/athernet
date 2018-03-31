@@ -3,6 +3,7 @@ import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundIO;
 import AcousticNetwork.Modulation;
+import AcousticNetwork.CheckIO;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -20,7 +21,9 @@ class Receiver{
 	private Modulation demodulator_;
 	private int sample_rate_;
 	private boolean file_stop_ = false;
-
+	private boolean useful_packet = false;
+	// After debug, delete it.
+	private int last_pack = -1;
 	public Receiver() throws Exception{
 		this(44100, 16, 0.1, "./O");
 	}
@@ -96,6 +99,7 @@ class Receiver{
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
 			System.out.println("No packet found, possibly time out when waiting for one.");
+			useful_packet = false;
 			return new byte[pack_size_];
 		}
 		// Initial read.
@@ -103,9 +107,13 @@ class Receiver{
 		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			System.out.printf("Packet #%3d received.\n", pack_cnt);
+			last_pack = pack_cnt;
+			i_stream[0] = 1;
 		} else {
 			// No useful byte in a broken pack.
-			i_stream[1] = 0;
+			i_stream[0] = 0;
+			last_pack ++;
+			i_stream[1] = (byte) (last_pack & 0xff);
 			System.out.printf("Packet #%3d receive failed. CRC8 checksum wrong.\n", pack_cnt);
 //			for (int i=0; i<pack_cnt, i++){
 				//System.out.print()
@@ -120,11 +128,15 @@ class Receiver{
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
-			int pack_cnt = packet[1];		
+			if (packet[0] == 0) { continue; }
+			int pack_cnt = packet[1];	
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
 					chunk[start_pos + i] = packet[head_size_ + i];
+//					if (pack_cnt == 0){
+//						System.out.println((start_pos + i) + " " + chunk[start_pos + i] + " " + packet[head_size_ + i]);
+//					}
 				}
 			}
 		}
@@ -158,7 +170,7 @@ class Receiver{
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(250, 10);
+			f = receiver.receiveBytes(1250, 15);
 			receiver.stopReceive();
 		} else {
 			final String i_path = i_path_tmp;
@@ -173,5 +185,7 @@ class Receiver{
 			simu_receiver.join();
 		}
 		receiver.o_file_.write(f, 0, f.length);
+		CheckIO checker = new CheckIO();
+		System.out.println(checker.summary());
 	}
 }
