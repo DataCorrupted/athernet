@@ -81,7 +81,7 @@ class Transmitter{
 			}
 			i++;
 		}
-		Transmitter transmitter = new Transmitter(17, file);
+		Transmitter transmitter = new Transmitter(16, file);
 		transmitter.transmit();
 		transmitter.o_sound_.drain();
 		transmitter.o_sound_.saveDataToFile("./std_output.wav");
