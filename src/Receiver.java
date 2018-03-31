@@ -13,7 +13,7 @@ class Receiver{
 	private CRC8 crc8_;
 	private SoundIO i_sound_;
 	private int pack_size_;
-	private int head_size_ = 4;
+	private int head_size_ = 2;
 	private int data_size_;
 	private ArrayBlockingQueue<Double> double_q_;
 	private Thread recorder_;
@@ -100,13 +100,12 @@ class Receiver{
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, pack_size_-1);
-		int pack_cnt = ((int)(i_stream[1]) << 8) + i_stream[2];
+		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			int useful_byte = (int) i_stream[3];
-			System.out.printf("Packet #%3d received with %3d bytes in it.\n", pack_cnt, useful_byte);
+			System.out.printf("Packet #%3d received.\n", pack_cnt);
 		} else {
 			// No useful byte in a broken pack.
-			i_stream[3] = 0;
+			i_stream[1] = 0;
 			System.out.printf("Packet #%3d receive failed. CRC8 checksum wrong.\n", pack_cnt);
 //			for (int i=0; i<pack_cnt, i++){
 				//System.out.print()
@@ -121,10 +120,9 @@ class Receiver{
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
-			int useful_byte = (int) packet[3];
-			int pack_cnt = ((int)(packet[1]) << 8) + packet[2];		
+			int pack_cnt = packet[1];		
 			start_pos = pack_cnt * data_size_;
-			for (int i=0; i<useful_byte; i++){
+			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
 					chunk[start_pos + i] = packet[head_size_ + i];
 				}

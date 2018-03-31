@@ -10,7 +10,7 @@ class Transmitter{
 	// pack[0] = crc8
 	// pack[1~2] = packet label(Short)
 	// pack[3] = byte count in this packet.
-	private int head_size_ = 4;
+	private int head_size_ = 2;
 	private FileI i_file_;
 	//private FileO o_file_;
 	private SoundIO o_sound_;
@@ -44,11 +44,7 @@ class Transmitter{
 		int r = i_file_.read(o_stream, head_size_, byte_read);
 
 		while (r != -1){
-			o_stream[1] = (byte) (pack_cnt >>> 8);
-			o_stream[2] = (byte) (pack_cnt & 0xff);
-			// Record total bytes in this packet.
-			o_stream[3] = (byte) r;
-			// Copy all the data in.
+			o_stream[1] = (byte) (pack_cnt & 0xff);
 			// Add checksum
 			crc8_.update(o_stream, 1, pack_size_-1);
 			o_stream[0] = (byte) crc8_.getValue();

@@ -181,7 +181,7 @@ public class Modulation{
 
             // call for recheck
             if (check_sync_header()){
-                System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
+                //System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
                 last_bit_counter_ = bit_counter_;
                 unconfirmed_data_.clear();
                 // TODO: This was wrong...
