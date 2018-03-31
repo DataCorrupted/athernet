@@ -10,17 +10,32 @@ import java.util.List;
 
 public class Server {
 
-    private FileI = i_file_;
+    private FileI i_file_;
+    private SoundO o_sound_;
     private Receiver receiver_;
     private Transmitter transmitter_;
     private List<Integer> loss_lists_;          // store all packages need resend
 
-    public Server(String file, int file_format){
+    private byte[] data_;
+
+    public Server(String file, int file_format) throws Exception {
         receiver_ = new Receiver();
         transmitter_ = new Transmitter();
-        i_file_ = FileI(file, file_format);
+        i_file_ = new FileI(file, file_format);
+        o_sound_ = new SoundO();
 
         loss_lists_ = new ArrayList<>();
+    }
+
+    public int readFile(String path){
+        // data_ = i_file_.blabla;
+        // return bytes_read;
+        return -1;
+    }
+
+    public int getPack(int pack_id){
+        // return bytes read. -1 for no data.
+        return -1;
     }
 
     public static void main(String[] args) throws Exception{
@@ -82,8 +97,10 @@ public class Server {
             while(server_.loss_lists_.size() > 0){
                 int packet_id = server_.loss_lists_.get(0);
                 server_.loss_lists_.remove(0);
-                byte[] data_to_resend = server_.get_data(packet_id);
-                server_.transmitter_.transmitOnePack(data_to_resend);
+                byte[] data_to_resend = new byte[16];
+                if (server_.getPack(packet_id, data_to_resend) > 0){
+                    server_.transmitter_.transmitOnePack(data_to_resend);
+                }
             }
 
             // TODO: if Client didn't speak for certain seconds, manually timeout, return 0
