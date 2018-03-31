@@ -8,9 +8,10 @@ public class Client {
     public static void main(String[] args){
         // parse parameters (if needed)
 
-        // start receiving the data
+        // receiver_.startReceive();
 
         // while(has signal)
+        // 		int resp = receiveOnePacket()
         // if data is CRC invalid, flag it as loss in ACK_generator
         // if data is correct, add it to ACK_generateor
 
@@ -18,6 +19,8 @@ public class Client {
         // if ACK_generator has no loss packet: write data to output and exist
         // else
         // while(has signal), repeat the receiving steps above
+
+        // receiver_.stopReceive();
 
 
     }
