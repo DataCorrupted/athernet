@@ -29,11 +29,6 @@ public class FileI{
 				text01ToBits(i_bytes, in, offset, r);
 			}
 		}
-//		System.out.print(r + " bytes read: \n\"\"\"\n");
-//		for (int i=offset; i<r+offset; i++){
-//			System.out.print((char) in[i]);
-//		}
-//		System.out.print("\n\"\"\"\n");
 		return r;
 	}
 
