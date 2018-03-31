@@ -225,8 +225,13 @@ public class Modulation{
             // decode the waveform to get the bits
             // process and clear the buffer
             state_ = 0;
-            // TODO: convert double queue buffer to data
             boolean[] packet_boolean = convert_processing_data(expected_length);
+
+            // reserve last several bits for searching window for next packet
+            for (int i = 0; i < 20; i++){
+                processing_header_.add(processing_data_.get(i));
+            }
+
             processing_data_.clear();
             packet_ = convert_booleans_to_bytes(packet_boolean);
             return RCVEDDAT;                // new data packet is ready
@@ -343,7 +348,7 @@ public class Modulation{
 
     private boolean[] convert_processing_data(int expected_length){
         // normalize processing_data such that they are in the range of [-1,1]
-        normalize_data();
+        List<Double> data_normalized = normalize_data(processing_data_);
 
         // array for storing the result
         boolean[] array_out = new boolean[expected_length*8];
@@ -353,8 +358,8 @@ public class Modulation{
             // get a chunk
             for (int j = 0; j < bit_length_; j++){
                 // for robustness, only use the 25%-75% data.
-                if (((j%bit_length_) > bit_length_/4) && ((j%bit_length_) < bit_length_*3/4)){
-                    tmp_sum += carrier_[bit_length_*i+j] * processing_data_.get(bit_length_ * i + j);
+                if (((j%bit_length_) > bit_length_/3) && ((j%bit_length_) < bit_length_*2/3)){
+                    tmp_sum += carrier_[bit_length_*i+j] * data_normalized.get(bit_length_ * i + j);
                 }
             }
             // determine if it is 0 or 1
@@ -404,25 +409,25 @@ public class Modulation{
     }
 
     // This function should only be called before converting the processing_data to boolean[]
-    private void normalize_data(){
+    private List<Double> normalize_data(List<Double> data_input){
         // find the max abs value
         double max_tmp = 0;
-        for (int i = 0; i < processing_data_.size(); i++){
+        for (int i = 0; i < data_input.size(); i++){
             // replace max_tmp with the largest abs so far
-             if ((processing_data_.get(i) > max_tmp) || (processing_data_.get(i) < (-1*max_tmp))){
-                 max_tmp = processing_data_.get(i);
+             if ((data_input.get(i) > max_tmp) || (data_input.get(i) < (-1*max_tmp))){
+                 max_tmp = data_input.get(i);
                  if (max_tmp < 0)           max_tmp = -1 * max_tmp;
              }
         }
 
         // store everything to normalized_data
         List<Double> normalized_data = new ArrayList<>();
-        for (int i = 0; i < processing_data_.size(); i++){
-            normalized_data.add(processing_data_.get(i) / max_tmp);
+        for (int i = 0; i < data_input.size(); i++){
+            normalized_data.add(data_input.get(i) / max_tmp);
         }
 
-        // replace the processing_data with normalized_data
-        processing_data_ = normalized_data;
+        // return a normalized data packet
+        return normalized_data;
     }
 
     // A unit testcase for modulation

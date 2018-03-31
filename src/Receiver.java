@@ -158,7 +158,7 @@ class Receiver{
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(250, 4);
+			f = receiver.receiveBytes(250, 10);
 			receiver.stopReceive();
 		} else {
 			final String i_path = i_path_tmp;
