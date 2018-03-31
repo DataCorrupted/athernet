@@ -16,6 +16,10 @@ class Transmitter{
 	private SoundO o_sound_;
 	private CRC8 crc8_ ;
 	private Modulation modulator_;
+
+	public getPackSize(){ return pack_size_; }
+	public getDataSize(){ return data_size_; }
+	
 	public Transmitter() throws Exception{
 		this(44100, 16);
 	}
