@@ -10,6 +10,7 @@ class CheckIO{
 	private ArrayList<Byte> ground_truth_;
 	private ArrayList<Byte> reality_;
 	private ArrayList<Integer> diff_list_;
+	private final int MAXLEN = 96;
 
 	public CheckIO() throws Exception{
 		this("./I", "./O");
@@ -48,9 +49,9 @@ class CheckIO{
 		}
 		return diff_list_.size();
 	}
-	public String genGram(){ return genGram(64); }
+	public String genGram(){ return genGram(MAXLEN); }
 	public String genGram(int length){
-		if (length > 64) { length = 64;}
+		if (length > MAXLEN) { length = MAXLEN;}
 		String gram = "    A123456789abcdefB123456789abcdefC123456789abcdefD123456789abcdef";
 		int k = 0;
 		int j = 0;
@@ -99,6 +100,7 @@ class CheckIO{
 			} else {
 				System.out.println("No such command.\n -i <ground-truth>\n -o <your-file>");
 			}
+			i++;
 		}
 		CheckIO c = new CheckIO(i_file, o_file);
 		System.out.println(c.summary());
