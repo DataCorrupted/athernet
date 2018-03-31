@@ -73,7 +73,7 @@ public class Receiver{
 		double timeout = 
 			demodulator_.getHeaderLength() + 
 			demodulator_.getBitLength() * pack_size_ * 8;
-		timeout *= 0.9;	// 20% extra waiting time.
+		timeout *= 2;	// 100% extra waiting time.
 		// Offer double to demodulate until a packet is offered.
 		// I think a better way is to let demodulate tell me what it's seeing
 		// Whether the header is matched then I wait for longer,

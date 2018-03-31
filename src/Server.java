@@ -65,6 +65,7 @@ public class Server {
         // hold on less than a second (in case hearing yourself)
 
         // ---------------------NAK Flow Control------------------------
+
         while(true){
             // hear for NAK Report (perhaps more than one packet)
             // if NAK report is broken, ignore it
