@@ -1,4 +1,4 @@
-package AcoutsticNetwork;
+package AcousticNetwork;
 
 import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
@@ -13,8 +13,6 @@ class Transmitter{
 	// pack[2~16] = Data;
 	private int head_size_ = 2;
 	private int data_size_;
-	private FileI i_file_;
-	//private FileO o_file_;
 	private SoundO o_sound_;
 	private CRC8 crc8_ ;
 	private Modulation modulator_;
@@ -43,7 +41,7 @@ class Transmitter{
 		crc8_.update(out, 1, pack_size_-1);
 		out[0] = (byte) crc8_.getValue();
 		// Modulation
-		wave = modulator_.modulate(out);
+		double[] wave = modulator_.modulate(out);
 		// Sound
 		// You can pre save all the std wav through this. 
 		// But I will develop this when we have the need.
@@ -59,7 +57,7 @@ class Transmitter{
 			0x00, 0x00, 0x2e, 0x2e, 0x48, 0x65, 0x6c, 0x6c,
 			0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e
 		};
-		Transmitter transmitter = new Transmitter(16, file);
+		Transmitter transmitter = new Transmitter(16);
 		transmitter.transmitOnePack(out);
 		transmitter.o_sound_.drain();
 	}

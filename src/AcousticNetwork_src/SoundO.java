@@ -92,8 +92,8 @@ public class SoundO {
 	// Drain every data in the buffer before it's closed.
 	public void drain(){ o_line_.drain();}
 
-	public static void main(String[] args){
-		io = SoundO();
+	public static void main(String[] args) throws Exception{
+		SoundO o = new SoundO();
 		double dur = 5;
 		int sample_rate = 44100;
 		int sample_cnt = (int) (dur * sample_rate);
@@ -104,7 +104,7 @@ public class SoundO {
 			wave[i] = 
 				0.3*Math.sin(2*Math.PI*1000*t) + 0.7*Math.sin(2*Math.PI*10000*t);
 		}		
-		io.sound(wave);
+		o.sound(wave);
 	}
 
 	// You can save data to this vector and output them to a file.
@@ -125,11 +125,11 @@ public class SoundO {
 		}		
 		return wave;
 	}
-	public void playPreserved(){
+	public void playPreserved() throws Exception{
 		sound(toArray());
 	}
 	public void savePreservedToFile(String path) throws Exception{
-		save_file(toArray(), path);
+		saveToFile(toArray(), path);
 	}
 	public void clearPreservedVector(){
 		dvt_.clear();

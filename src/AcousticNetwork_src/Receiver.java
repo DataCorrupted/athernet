@@ -1,4 +1,4 @@
-package AcoutsticNetwork;
+package AcousticNetwork;
 
 import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
@@ -38,7 +38,6 @@ class Receiver{
 	  	sample_rate_ = sample_rate;
 		pack_size_ = pack_size;
 		data_size_ = pack_size_ - head_size_;
-		o_file_ = new FileO(file, FileO.TEXT01);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
 		i_sound_ = new SoundI(sample_rate, double_q_);
@@ -102,26 +101,29 @@ class Receiver{
 
 	static public void main(String[] args) throws Exception{
 		Receiver receiver = new Receiver(16);
-		byte[] f;
+		int f;
+		byte[] recv_data = new byte[16];
+		boolean from_file = true;
+		if (args.length != 0) { from_file = false; }
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveOnePacket(data);
+			f = receiver.receiveOnePacket(recv_data);
 			receiver.stopReceive();
 		} else {
-			final String i_path = "../std_output.wav";
+			final String i_path = "./std_output.wav";
 			Thread simu_receiver = new Thread( new Runnable(){
 				public void run() { 
 					try{ receiver.receiveFromFile(i_path);}
 					catch (Exception e) {;}
 			}});
 			simu_receiver.start();
-			f = receiver.receiveOnePacket(data);
+			f = receiver.receiveOnePacket(recv_data);
 			receiver.stopFileStream();
 			simu_receiver.join();
 		}
 
 		for (int i=0; i<16; i++){
-			System.out.print(data[i] + " ");
+			System.out.print(recv_data[i] + " ");
 		}
 		System.out.println();
 	}
@@ -130,15 +132,17 @@ class Receiver{
 	// Do not call it manually.
 	private void receiveFromFile(String i_file) throws Exception{
 		file_stop_ = false;
-		double[] wave = i_sound_.read_file(i_file);
+		double[] wave = i_sound_.readFile(i_file);
 		int wait_time = 0; //(int) 1.0e4/sample_rate_;
 		for (int i=0; i<wave.length; i++){
-			double_q_.put(wave[i]);
-			//System.out.println("\t" + double_q_.size() + " " + i );
-			// Make sure that approx. sample_rate amount 
-			// of data is put into the queue.
-			// Turns out, there is no need to sleep at all.
-			// Thread.sleep(0, wait_time);
+
+			while (!double_q_.offer(wave[i])){
+				// Overflow.
+				System.out.println("Warning[Receiver.receiveFromFile(String)]: Bufferoverflowed, the latested data just been throwed.");
+				// Retrive the oldest one from the queue,
+				// Regardless the queue is empty or not.
+				double_q_.poll();
+			}
 		}
 		// The file is over, in order to keep the queue moving
 		// we stuck 0 to it.

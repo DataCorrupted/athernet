@@ -24,12 +24,12 @@ public class SoundI implements Runnable {
 	private AudioFormat format_;
 	private DataLine.Info i_info_;
 	private TargetDataLine i_line_;
-	private ArrayBlockingQueue<Double> double_buf_;
+	private ArrayBlockingQueue<Double> double_q_;
 	private double avg_power_ = -1;
 	private boolean stop_ = false;
 
 	// Record from another thread.
-	// Put all the data in the double_buf_
+	// Put all the data in the double_q_
 	@Override
 	public void run(){
 		i_line_.start();
@@ -44,12 +44,12 @@ public class SoundI implements Runnable {
 			for (int i=0; i<wave.length; i++){
 				// Update avg power.
 				avg_power_ = avg_power_ * 63 / 64 + wave[i] * wave[i] / 64;
-				while (!double_buf_.offer(wave[i])){
+				while (!double_q_.offer(wave[i])){
 					// Overflow.
-					System.println.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
+					System.out.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
 					// Retrive the oldest one from the queue,
 					// Regardless the queue is empty or not.
-					double_buf_.poll();
+					double_q_.poll();
 				}
 			}
 		}
@@ -77,7 +77,7 @@ public class SoundI implements Runnable {
 	// Offer a blocking queue for multi threading.
 	public SoundI(int sr, ArrayBlockingQueue<Double> double_buf) throws Exception{
 		this(sr);
-		double_buf_ = double_buf;
+		double_q_ = double_buf;
 	}
 
 	protected void setUpDevice() throws Exception{
@@ -148,10 +148,10 @@ public class SoundI implements Runnable {
 			(double)r / sample_rate_ / FRAMESIZE);
 		return byteBufToDouble(buf);
 	}
-	public static void main(String[] args){
-		SoundI i = SoundI();
-		SoundO o = SoundO();
-		double[] wave = i.record(dur);
+	public static void main(String[] args) throws Exception{
+		SoundI i = new SoundI();
+		SoundO o = new SoundO();
+		double[] wave = i.record(5.0);
 		o.sound(wave);
 	}
 }
