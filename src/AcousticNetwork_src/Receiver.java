@@ -7,7 +7,7 @@ import AcousticNetwork.Modulation;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-class Receiver{
+public class Receiver{
 	public final int RECEVED = 1;
 	public final int TIMEOUT = 0;
 	public final int CRCINVL = -1;

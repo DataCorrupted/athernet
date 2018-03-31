@@ -4,7 +4,7 @@ import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundO;
 import AcousticNetwork.Modulation;
-class Transmitter{
+public class Transmitter{
 	// packet size no more than 128(byte).
 	private int pack_size_;
 	// The first 4 byte of a packet is header.
