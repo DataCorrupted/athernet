@@ -8,6 +8,10 @@ import AcousticNetwork.CheckIO;
 import java.util.concurrent.ArrayBlockingQueue;
 
 class Receiver{
+	public final int RECEVED = 1;
+	public final int TIMEOUT = -1;
+	public final int CRCINVL = 0;
+
 	private FileO o_file_;
 	// We use file input for now;
 	// private FileI i_file_;
