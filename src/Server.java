@@ -27,15 +27,29 @@ public class Server {
         loss_lists_ = new ArrayList<>();
     }
 
-    public int readFile(String path){
-        // data_ = i_file_.blabla;
-        // return bytes_read;
-        return -1;
+    public int readFile() throws Exception{
+        data_ = i_file_.readAllData();
+        return data_.length;
+    }
+    public int readNewFile(String path){
+        this.i_file_.updateFile(path);
+        return this.readFile();
     }
 
-    public int getPack(int pack_id){
-        // return bytes read. -1 for no data.
-        return -1;
+    // Given packet's id and an array to place that packet,
+    // move data to arr and return bytes read.
+    public int getPack(int pack_id, byte[] arr){
+        int start_pos = transmitter_.getDataSize();
+        int cnt = 0;
+        for (int i=0; i<data_size; i++){
+            if (start_pos+i < data_.length){
+                arr[i] = data_[start_pos+i];
+                cnt++;
+            }
+        }
+        // There is no need to specify a -1, as 0 already means nothing read,
+        // which indicates that an invalid pack id is given.
+        return cnt;
     }
 
     public static void main(String[] args) throws Exception{
@@ -59,10 +73,21 @@ public class Server {
         Server server_ = new Server(file, FileI.TEXT01);
 
         // send out a dummy (empty) packet
+        byte[] packet = new byte[transmitter_.getPackSize()];
+        transmitter_.transmitOnePack(packet);
+
+        // Read data from a file.
+        int r = readFile();
+        System.out.printf("%d bytes read from file.", r)
 
         // send out all data_packet
+        int pack_cnt = 0;
+        while (getPack(pack_cnt, packet) != -1){
+            transmitter_.transmitOnePack(packet);
+        }
 
-        // hold on less than a second (in case hearing yourself)
+        // hold on 0.5s (in case hearing yourself)
+        Thread.sleep(500);
 
         // ---------------------NAK Flow Control------------------------
 

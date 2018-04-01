@@ -2,6 +2,7 @@ package AcousticNetwork;
 
 import java.io.FileInputStream;
 
+// FileI need to be re constructured. As the need for it differs somehow.
 public class FileI{
 	public static final int BIN = 0;
 	public static final int TEXT01 = 1;
@@ -11,6 +12,10 @@ public class FileI{
 
 	public FileI(String path, int file_format) throws Exception{
 		file_format_ = file_format;
+		i_file_ = new FileInputStream(path);
+	}
+
+	public void updateFile(String path){
 		i_file_ = new FileInputStream(path);
 	}
 
@@ -30,6 +35,21 @@ public class FileI{
 			}
 		}
 		return r;
+	}
+
+	public byte[] readAllData() throws Exception{
+		ArrayList<Byte> c = new ArrayList<Byte>();
+		byte[] tmp = new byte[1];
+		int r = this.read(tmp, 0, 1);
+		while (r != -1){
+			c.add(tmp[0]);
+			r = this.read(tmp, 0, 1);
+		}
+		byte[] out = new byte[c.size()];
+		for (int i=0; i<c.size(); i++){
+			out[i] = get[i];
+		}
+		return out;
 	}
 
 	private void text01ToBits(byte[] src, byte[] dst, int offset, int len){
