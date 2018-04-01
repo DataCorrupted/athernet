@@ -228,7 +228,7 @@ public class Modulation{
             boolean[] packet_boolean = convert_processing_data(expected_length);
 
             // reserve last several bits for searching window for next packet
-            int recheck_length = 150;
+            int recheck_length = 100;
             for (int i = 0; i < recheck_length; i++){
                 processing_header_.add(processing_data_.get(processing_data_.size() - (recheck_length -i)));
             }
