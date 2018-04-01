@@ -42,6 +42,7 @@ class Transmitter{
 		short pack_cnt = 0;
 		
 		// Creat an empty package.
+		o_stream[1] = (byte) 253;
 		wave = modulator_.modulate(o_stream);
 		o_sound_.sound(wave);
 

@@ -21,7 +21,6 @@ class Receiver{
 	private Modulation demodulator_;
 	private int sample_rate_;
 	private boolean file_stop_ = false;
-	private boolean useful_packet = false;
 	// After debug, delete it.
 	private int last_pack = -1;
 	public Receiver() throws Exception{
@@ -99,7 +98,6 @@ class Receiver{
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
 			System.out.println("No packet found, possibly time out when waiting for one.");
-			useful_packet = false;
 			return new byte[pack_size_];
 		}
 		// Initial read.
@@ -128,7 +126,7 @@ class Receiver{
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
-			//if (packet[0] == 0) { continue; }
+			if (packet[0] == 0) { continue; }
 			int pack_cnt = packet[1];	
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<data_size_; i++){
@@ -140,6 +138,9 @@ class Receiver{
 				}
 			}
 		}
+//		for (int i=0; i<14; i++){
+//			System.out.println(chunk[i]);
+//		}
 		return chunk;
 	}
 	static public void main(String[] args) throws Exception{
