@@ -130,7 +130,6 @@ class Receiver{
 			byte[] packet = receiveOnePacket();
 			//if (packet[0] == 0) { continue; }
 			int pack_cnt = packet[1];	
-			System.out.println(pack_cnt);
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
