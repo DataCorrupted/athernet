@@ -31,17 +31,17 @@ public class Server {
         data_ = i_file_.readAllData();
         return data_.length;
     }
-    public int readNewFile(String path){
-        this.i_file_.updateFile(path);
+    public int readNewFile(String path) throws Exception{
+        i_file_.updateFile(path);
         return this.readFile();
     }
 
     // Given packet's id and an array to place that packet,
     // move data to arr and return bytes read.
     public int getPack(int pack_id, byte[] arr){
-        int start_pos = transmitter_.getDataSize();
+        int start_pos = transmitter_.getDataSize() * pack_id;
         int cnt = 0;
-        for (int i=0; i<data_size; i++){
+        for (int i=0; i<transmitter_.getDataSize(); i++){
             if (start_pos+i < data_.length){
                 arr[i] = data_[start_pos+i];
                 cnt++;
@@ -74,21 +74,21 @@ public class Server {
         Server server_ = new Server(file, FileI.TEXT01);
 
         // send out a dummy (empty) packet
-        byte[] packet = new byte[transmitter_.getPackSize()];
-        transmitter_.transmitOnePack(packet);
-        System.out.println("Empty Packet sent.")
+        byte[] packet = new byte[server_.transmitter_.getPackSize()];
+        server_.transmitter_.transmitOnePack(packet);
+        System.out.println("Empty Packet sent.");
 
         // Read data from a file.
-        int r = readFile();
-        System.out.printf("%d bytes read from file.", r)
+        int r = server_.readFile();
+        System.out.printf("%d bytes read from file.", r);
 
         // send out all data_packet
         int pack_cnt = 0;
-        while (getPack(pack_cnt, packet) != -1){
-            transmitter_.transmitOnePack(packet);
+        while (server_.getPack(pack_cnt, packet) != -1){
+            server_.transmitter_.transmitOnePack(packet);
             pack_cnt ++;
         }
-        System.out.println("All data transmitted.")
+        System.out.println("All data transmitted.");
 
         // hold on 0.5s (in case hearing yourself)
         Thread.sleep(500);

@@ -23,6 +23,8 @@ public class CheckIO{
 		diff_list_ = new ArrayList<Integer>();
 		updateFiles();
 	}
+	// This is stupid now that I knows how to read from a whole file.
+	// I will change it some time later.
 	public void readFile(FileI stream, ArrayList<Byte> c) throws Exception{
 		c.clear();
 		byte[] tmp = new byte[1];
@@ -92,16 +94,19 @@ public class CheckIO{
 				i++;
 				if (i==args.length){
 					System.out.println("No file given. Quit.");
+					return;
 				}
 				i_file = args[i];
 			} else if (args[i].equals("-o")){
 				i++;
 				if (i==args.length){
 					System.out.println("No file given. Quit.");
+					return;
 				}
 				o_file = args[i];
 			} else {
 				System.out.println("No such command.\n -i <ground-truth>\n -o <your-file>");
+				return;
 			}
 			i++;
 		}
