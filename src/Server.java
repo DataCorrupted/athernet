@@ -76,11 +76,11 @@ public class Server {
         // send out a dummy (empty) packet
         byte[] packet = new byte[transmitter_.getPackSize()];
         transmitter_.transmitOnePack(packet);
-        System.out.println("Empty Packet sent.")
+        System.out.println("Empty Packet sent.");
 
         // Read data from a file.
         int r = readFile();
-        System.out.printf("%d bytes read from file.", r)
+        System.out.printf("%d bytes read from file.", r);
 
         // send out all data_packet
         int pack_cnt = 0;
@@ -88,7 +88,7 @@ public class Server {
             transmitter_.transmitOnePack(packet);
             pack_cnt ++;
         }
-        System.out.println("All data transmitted.")
+        System.out.println("All data transmitted.");
 
         // hold on 0.5s (in case hearing yourself)
         Thread.sleep(500);
