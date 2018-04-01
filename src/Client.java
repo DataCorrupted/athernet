@@ -40,41 +40,51 @@ public class Client {
         byte[] data = new byte[1250];
 
         while(true) {
+            int packet_received = 0;            // how many packages has received, including CRC Invalid
             // Recv data as long as there is signal.
-            while (client.receiver_.hasSignal()) {
-
+            while (true) {
                 // Tries to receive a packet.
                 int recv_status = client.receiver_.receiveOnePacket(packet);
 
                 // Determine recv status
                 int recv_pack_id = (int) packet[1] & 0xff;
                 if (recv_status == client.receiver_.RECEVED) {
+                    packet_received ++;
                     // Add to ACK_generator.
                     client.ack_checker_.on_ack(recv_pack_id);
                     System.arraycopy(
-                        packet, receiver_.getPackSize() - receiver_.getDataSize(),
+                        packet, client.receiver_.getPackSize() - client.receiver_.getDataSize(),
                         data, 0,
-                        receiver_.getDataSize()
+                        client.receiver_.getDataSize()
                     );
                 } else if (recv_status == client.receiver_.CRCINVL) {
                     // Skip CRC invalid packet
                     ;
                 } else if (recv_status == client.receiver_.TIMEOUT) {
-                    // Does nothing and move on to next.
-                    ;
+                    // Does nothing and move on to next;
+                    packet_received ++;
+                    break;
                 }
             }
 
-            // TODO: is it receiver_.getPacketSize / receiver.getDataSize?
+            // if server didn't response for certain time
+            if (packet_received == 0){
+                System.out.println("No further pack receive, goto writing data.");
+                break;
+            }
+
+            // NAK control: send back NAK Report
             int packet_size = client.receiver_.getPackSize();
             // if all packets received, return now
             if (!client.ack_checker_.has_loss_packet()){
+                System.out.println("No loss pack, goto writing data.");
                 break;
             }
             else{
                 // send an empty packet
                 byte[] dummy_buffer = new byte[packet_size];
                 dummy_buffer[1] = (byte)253;
+                client.transmitter_.transmitOnePack(dummy_buffer);
             }
             // generate loss packet list and NAK
             List<Integer> loss_packet_list = client.ack_checker_.get_loss_list();
@@ -99,10 +109,8 @@ public class Client {
         }
 
         // Write to file.
-        o_file_.write(data, 0, 1250);
+        client.o_file_.write(data, 0, 1250);
         // Stop receiving data
         client.receiver_.stopReceive();
-
-        // TODO: write data to file
     }
 }

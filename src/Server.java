@@ -75,6 +75,7 @@ public class Server {
 
         // send out a dummy (empty) packet
         byte[] packet = new byte[server_.transmitter_.getPackSize()];
+        packet[1] = (byte)253;
         server_.transmitter_.transmitOnePack(packet);
         System.out.println("Empty Packet sent.");
 
@@ -91,18 +92,21 @@ public class Server {
         System.out.println("All data transmitted.");
 
         // hold on 0.5s (in case hearing yourself)
-        Thread.sleep(500);
+        // Thread.sleep(100);
 
         // ---------------------NAK Flow Control------------------------
-
         while(true){
             // hear for NAK Report (perhaps more than one packet)
             // if NAK report is broken, ignore it
-            while(server_.receiver_.hasSignal()){
+            int packet_received = 0;                // count how many package received (including CRC invalid)
+            while(true){
                 byte[] nak_report = new byte[server_.receiver_.getPackSize()];
                 int flag = server_.receiver_.receiveOnePacket(nak_report);
                 // decode the data packet
                 if (flag == server_.receiver_.RECEVED){
+                    if (((int)nak_report[1] & 0xff) != 253){
+                        continue;
+                    }
                     if (((int)nak_report[1] & 0xff) != 254){
                         System.out.println("[WARNING] NAK Report is invalid, packet_id != 254");
                     }
@@ -111,11 +115,22 @@ public class Server {
                         int loss_id = (int)nak_report[j] & 0xff;
                         server_.loss_lists_.add(loss_id);
                     }
+                    packet_received ++;
                 }
-                // TODO (jianxiong cai on testing period): set the timeout time maybe
                 else if (flag == server_.receiver_.TIMEOUT){
+                    System.out.println("Timeout reached, transmission done");
                     break;
                 }
+                else{
+                    // CRC8 Invalid
+                    packet_received++;
+                }
+            }
+
+            // if Client didn't speak for certain seconds, manually timeout, return 0
+            // the Client should have got all data it needed
+            if (packet_received == 0){
+                break;
             }
 
             // resend lost package (remember to send out a dummy empty packet before)
@@ -132,9 +147,6 @@ public class Server {
                     server_.transmitter_.transmitOnePack(data_to_resend);
                 }
             }
-
-            // TODO: if Client didn't speak for certain seconds, manually timeout, return 0
-            // the Client should have got all data it needed
         }
 
 

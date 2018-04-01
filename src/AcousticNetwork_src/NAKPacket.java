@@ -80,6 +80,13 @@ public class NAKPacket {
         for (int i = 0; i < nak_array.length; i++){
             System.out.println(nak_array[i]);
         }
+
+        nak_pack.clear();
+
+        nak_pack.add_loss_packet(234);
+        for (int i = 0; i < nak_array.length; i++){
+            System.out.println(nak_array[i]);
+        }
     }
 
 }
