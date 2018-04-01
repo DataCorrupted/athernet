@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.io.FileInputStream;
 import java.io.File;
 
-//import org.apache.commons.io.IOUtils;
-
-// FileI need to be re constructured. As the need for it differs somehow.
 public class FileI{
 	public static final int BIN = 0;
 	public static final int TEXT01 = 1;
