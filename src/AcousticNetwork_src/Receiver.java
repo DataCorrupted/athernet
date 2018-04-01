@@ -28,6 +28,7 @@ public class Receiver{
 	public int getPackSize(){ return pack_size_; }
 	public int getDataSize(){ return data_size_; }
 	public int getHeadSize(){ return head_size_; }
+	
 	public double getPower(){ return i_sound_.getPower(); }
 	public boolean hasSignal(){ return i_sound_.hasSignal(); }
 	

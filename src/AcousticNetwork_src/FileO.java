@@ -36,4 +36,11 @@ public class FileO{
 		}
 		return out;
 	}
+	public static void main(String[] args) throws Exception{
+		FileO o_file = new FileO("./O", FileO.BIN);
+		byte[] data = {
+			0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20,  
+			0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
+		o_file.write(data, 0, data.length);
+	}
 }

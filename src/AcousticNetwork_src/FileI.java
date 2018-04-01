@@ -63,4 +63,13 @@ public class FileI{
 		}
 		return dst;
 	}
+
+	public static void main(String[] args) throws Exception{
+		FileI i_file = new FileI("./I", FileI.TEXT01);
+		byte[] data = i_file.readAllData();
+		for (int i=0; i<data.length; i++){
+			System.out.print((char) data[i]);
+		}
+		System.out.println();
+	}
 }
