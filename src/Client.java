@@ -52,11 +52,13 @@ public class Client {
                     packet_received ++;
                     // Add to ACK_generator.
                     client.ack_checker_.on_ack(recv_pack_id);
-                    System.arraycopy(
-                        packet, client.receiver_.getHeadSize(),
-                        data, 0,
-                        client.receiver_.getDataSize()
-                    );
+                    int start_pos = packet[1] * client.receiver_.getDataSize();
+                    for (int i=0; i<client.receiver_.getDataSize(); i++){
+                        if (start_pos + i < data.length){
+                            data[start_pos + i] 
+                                = packet[client.receiver_.getHeadSize() + i];
+                        }
+                    }
                 } else if (recv_status == client.receiver_.CRCINVL) {
                     // Skip CRC invalid packet
                     ;
