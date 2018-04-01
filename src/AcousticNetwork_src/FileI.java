@@ -35,8 +35,8 @@ public class FileI{
 			if (file_format_ == FileI.BIN){
 				System.arraycopy(i_bytes, 0, in, offset, r);
 			} else if (file_format_ == FileI.TEXT01){
-				r  = r >>> 3;	
-				text01ToBits(i_bytes, in, offset, r);
+				byte[] tmp = text01ToBits(i_bytes);
+				System.arraycopy(tmp, 0, in, offset, r);
 			}
 		}
 		return r;
@@ -45,24 +45,22 @@ public class FileI{
 	public byte[] readAllData() throws Exception{
 		byte[] out = new byte[(int)file_.length()];
 		i_file_.read(out);
-			if (file_format_ == FileI.BIN){
-				System.arraycopy(i_bytes, 0, in, offset, r);
-			} else if (file_format_ == FileI.TEXT01){
-				r  = r >>> 3;	
-				text01ToBits(i_bytes, in, offset, r);
-			}
-		if (file_format_ = FileI.TEXT01){
-			text01ToBits(out, )
+		if (file_format_ == FileI.BIN){
+			return out;
+		} else {
+			return text01ToBits(out);
 		}
-		return out;
 	}
 
-	private void text01ToBits(byte[] src, byte[] dst, int offset, int len){
+	private byte[] text01ToBits(byte[] src){
+		int len = src.length >>> 3;
+		byte[] dst = new byte[len];
 		for (int i=0; i<len; i++){
 			for (int j=0; j<8; j++){
-				dst[i + offset] = (byte) (dst[i + offset] << 1);
-				dst[i + offset] += (src[(i<<3)+j] == (byte)'1')? 1: 0;
+				dst[i] = (byte) (dst[i] << 1);
+				dst[i] += (src[(i<<3)+j] == (byte)'1')? 1: 0;
 			}
 		}
+		return dst;
 	}
 }

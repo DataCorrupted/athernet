@@ -52,9 +52,9 @@ public class Client {
                     // Add to ACK_generator.
                     client.ack_checker_.on_ack(recv_pack_id);
                     System.arraycopy(
-                        packet, receiver_.getPackSize() - receiver_.getDataSize(),
+                        packet, client.receiver_.getHeadSize(),
                         data, 0,
-                        receiver_.getDataSize()
+                        client.receiver_.getDataSize()
                     );
                 } else if (recv_status == client.receiver_.CRCINVL) {
                     // Skip CRC invalid packet
@@ -99,7 +99,7 @@ public class Client {
         }
 
         // Write to file.
-        o_file_.write(data, 0, 1250);
+        client.o_file_.write(data, 0, 1250);
         // Stop receiving data
         client.receiver_.stopReceive();
 
