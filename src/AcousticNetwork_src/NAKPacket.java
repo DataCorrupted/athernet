@@ -34,6 +34,10 @@ public class NAKPacket {
         return false;
     }
 
+    public void clear(){
+        loss_packets_ = new ArrayList<>();
+    }
+
     /*
     Note:
         zero(packet_id=255) padding if (number of loss_packet) < expected_length
@@ -48,13 +52,14 @@ public class NAKPacket {
         }
 
         byte[] out_array = new byte[expected_length];
-        for (int i = 0; i < expected_length; i++){
+        out_array[1] = (byte)254;                   // packet_id for NAK
+        for (int i = 0; i < expected_length-2; i++){
             if (i < loss_packets_.size()){
                 int tmp_num = loss_packets_.get(i);
-                out_array[i] = (byte)tmp_num;
+                out_array[i+2] = (byte)tmp_num;
             }
             else{
-                out_array[i] = (byte)0xff;
+                out_array[i+2] = (byte)0xff;
             }
         }
         return out_array;
@@ -66,7 +71,7 @@ public class NAKPacket {
     }
 
     public static void main (String[] args){
-        NAKPacket nak_pack = new NAKPacket(16);
+        NAKPacket nak_pack = new NAKPacket(14);
         nak_pack.add_loss_packet(0);
         nak_pack.add_loss_packet(15);
 

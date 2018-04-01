@@ -12,7 +12,7 @@ public class ACKChecker {
     Params:
         the last packet_id expected
      */
-    ACKChecker(int last_expected_pack_id){
+    public ACKChecker(int last_expected_pack_id){
         last_expected_pack_id_ = last_expected_pack_id;
 
         received_status_ = new boolean[last_expected_pack_id+1];
