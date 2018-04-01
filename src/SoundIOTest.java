@@ -30,13 +30,13 @@ class SoundIOTest implements Runnable{
 			double t = (double) i / sample_rate;
 			// Weighted mean for better frequency responce.
 			wave[i] = 
-				0.3*Math.sin(2*Math.PI*1000*t) + 0.7*Math.sin(2*Math.PI*10000*t);
+				0.4*Math.sin(2*Math.PI*1000*t) + 0.6*Math.sin(2*Math.PI*10000*t);
 		}		
 		io.sound(wave);
 	}
 
 	private double[] testReadFile() throws Exception{
-		String path = "../wav/record1_41.wav";
+		String path = "../wav/std_output.wav";
 		double[] wave = io.read_file(path);
 		io.sound(wave);
 		return wave;
