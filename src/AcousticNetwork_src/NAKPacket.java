@@ -35,7 +35,7 @@ public class NAKPacket {
     }
 
     public void clear(){
-        loss_packets_ = new ArrayList<>();
+        loss_packets_.clear();
     }
 
     /*
@@ -77,13 +77,14 @@ public class NAKPacket {
 
         byte[] nak_array = nak_pack.toArray(16);
 
-        for (int i = 0; i < nak_array.length; i++){
+/*        for (int i = 0; i < nak_array.length; i++){
             System.out.println(nak_array[i]);
-        }
+        }*/
 
         nak_pack.clear();
 
         nak_pack.add_loss_packet(234);
+        nak_array = nak_pack.to_array(16);
         for (int i = 0; i < nak_array.length; i++){
             System.out.println(nak_array[i]);
         }
