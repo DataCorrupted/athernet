@@ -111,7 +111,7 @@ class Receiver{
 			i_stream[0] = 1;
 		} else {
 			// No useful byte in a broken pack.
-			i_stream[0] = 0;
+			i_stream[0] = 1;
 			last_pack ++;
 			i_stream[1] = (byte) (last_pack & 0xff);
 			System.out.printf("Packet #%3d receive failed. CRC8 checksum wrong.\n", pack_cnt);
@@ -128,8 +128,9 @@ class Receiver{
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
-			if (packet[0] == 0) { continue; }
+			//if (packet[0] == 0) { continue; }
 			int pack_cnt = packet[1];	
+			System.out.println(pack_cnt);
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
