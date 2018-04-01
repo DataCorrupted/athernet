@@ -45,6 +45,15 @@ public class FileI{
 	public byte[] readAllData() throws Exception{
 		byte[] out = new byte[(int)file_.length()];
 		i_file_.read(out);
+			if (file_format_ == FileI.BIN){
+				System.arraycopy(i_bytes, 0, in, offset, r);
+			} else if (file_format_ == FileI.TEXT01){
+				r  = r >>> 3;	
+				text01ToBits(i_bytes, in, offset, r);
+			}
+		if (file_format_ = FileI.TEXT01){
+			text01ToBits(out, )
+		}
 		return out;
 	}
 

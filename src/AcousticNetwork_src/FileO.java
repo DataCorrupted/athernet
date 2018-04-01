@@ -10,7 +10,7 @@ public class FileO{
 	private FileOutputStream o_file_; 
 
 	public FileO() throws Exception{
-		this("./O", 1);
+		this("./O", TEXT01);
 	}
 	public FileO(String path, int file_format) throws Exception{
 		file_format_ = file_format;

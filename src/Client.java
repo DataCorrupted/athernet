@@ -2,6 +2,7 @@ import AcousticNetwork.Receiver;
 import AcousticNetwork.Transmitter;
 import AcousticNetwork.ACKChecker;
 import AcousticNetwork.NAKPacket;
+import AcousticNetwork.FileO;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class Client {
     private Receiver receiver_;
     private Transmitter transmitter_;
     private ACKChecker ack_checker_;
+    private FileO o_file_;
 
     public Client() throws Exception{
         this(16);
@@ -21,6 +23,7 @@ public class Client {
         transmitter_ = new Transmitter(pack_size);
         // TODO: Recheck if the last package has packet_id == 89
         ack_checker_ = new ACKChecker(89);
+        o_file_ = new FileO();
     }
 
     public static void main(String[] args) throws Exception{
@@ -34,6 +37,7 @@ public class Client {
         client.receiver_.startReceive();
 
         byte[] packet = new byte[client.receiver_.getPackSize()];
+        byte[] data = new byte[1250];
 
         while(true) {
             // Recv data as long as there is signal.
@@ -47,6 +51,11 @@ public class Client {
                 if (recv_status == client.receiver_.RECEVED) {
                     // Add to ACK_generator.
                     client.ack_checker_.on_ack(recv_pack_id);
+                    System.arraycopy(
+                        packet, receiver_.getPackSize() - receiver_.getDataSize(),
+                        data, 0,
+                        receiver_.getDataSize()
+                    );
                 } else if (recv_status == client.receiver_.CRCINVL) {
                     // Skip CRC invalid packet
                     ;
@@ -89,6 +98,8 @@ public class Client {
             // while(has signal), repeat the receiving steps above
         }
 
+        // Write to file.
+        o_file_.write(data, 0, 1250);
         // Stop receiving data
         client.receiver_.stopReceive();
 
