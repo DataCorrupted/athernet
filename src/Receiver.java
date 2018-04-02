@@ -20,11 +20,11 @@ class Receiver{
 	private Thread recorder_;
 	private Modulation demodulator_;
 	private int sample_rate_;
-	private int ecc_;
-	public void setEcc(int ecc){ ecc_ = ecc; }
 	private boolean file_stop_ = false;
+
 	// After debug, delete it.
 	private int last_pack = -1;
+
 	public Receiver() throws Exception{
 		this(44100, 16, 0.1, "./O");
 	}
@@ -111,13 +111,10 @@ class Receiver{
 			i_stream[0] = 1;
 		} else {
 			// No useful byte in a broken pack.
-			i_stream[0] = (byte) (1 - ecc_);
+			i_stream[0] = 1;
 			last_pack ++;
 			i_stream[1] = (byte) (last_pack & 0xff);
 			System.out.printf("Packet #%3d receive failed. CRC8 checksum wrong.\n", pack_cnt);
-//			for (int i=0; i<pack_cnt, i++){
-				//System.out.print()
-//			}
 		}
 		crc8_.reset();
 		return i_stream;
@@ -134,15 +131,9 @@ class Receiver{
 			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
 					chunk[start_pos + i] = packet[head_size_ + i];
-//					if (pack_cnt == 0){
-//						System.out.println((start_pos + i) + " " + chunk[start_pos + i] + " " + packet[head_size_ + i]);
-//					}
 				}
 			}
 		}
-//		for (int i=0; i<14; i++){
-//			System.out.println(chunk[i]);
-//		}
 		return chunk;
 	}
 	static public void main(String[] args) throws Exception{
@@ -168,7 +159,6 @@ class Receiver{
 				from_file = true;
 			} else if (args[i].equals("--error-correction")) {
 				time_limit = 30;
-				ecc = 1;
 				System.out.println("Using error correction mode, listen for 30s");
 			} else {
 				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
@@ -176,7 +166,6 @@ class Receiver{
 			i++;
 		}
 		Receiver receiver = new Receiver(16, o_path);
-		receiver.setEcc(ecc);
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();

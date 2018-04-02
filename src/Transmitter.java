@@ -8,8 +8,7 @@ class Transmitter{
 	private int pack_size_;
 	// The first 4 byte of a packet is header.
 	// pack[0] = crc8
-	// pack[1~2] = packet label(Short)
-	// pack[3] = byte count in this packet.
+	// pack[1] = pack id.
 	private int head_size_ = 2;
 	private FileI i_file_;
 	//private FileO o_file_;
@@ -87,8 +86,10 @@ class Transmitter{
 			}
 			i++;
 		}
+
 		Transmitter transmitter = new Transmitter(16, file);
 		transmitter.transmit();
+		
 		for (i = 0; i<re_play-1; i++){
 			transmitter.o_sound_.sound(transmitter.o_sound_.toArray());
 		}
