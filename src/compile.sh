@@ -1,2 +1,2 @@
-javac -d . AcousticNetwork_src/*.java
+javac -d . AcousticNetwork/*.java
 javac *.java
