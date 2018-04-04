@@ -1,6 +1,9 @@
 package AcousticNetwork;
 
 class OFDM{
+	public final double MINFREQ = 20;
+	public final double MAXFREQ = 20000;
+
 	// Total number of channels.
 	private int channel_cnt_;
 
@@ -22,14 +25,15 @@ class OFDM{
 	// How much samples for a bit.
 	private int bit_lenght_;
 
-	public final double MINFREQ = 20;
-	public final double MAXFREQ = 20000;
+	// The length (in bits) of a package.
+	private int pack_len_;
 
 	public OFDM(){
-		this(44100, 1000, 3000, 4);
+		this(44100, 1000, 3000, 4, 44);
 	}
-
-	public OFDM(int sample_rate, double f, double b, int c){
+	public OFDM(int sample_rate, double f, double b, int c, int bit_lenght, int pack_length){
+		pack_len_ = pack_length;
+		bit_len_ = bit_lenght;
 		sample_rate_ = sample_rate;
 		freq_ = f;
 		bandwidth_ = b;
@@ -50,16 +54,25 @@ class OFDM{
 				carrier_arr_[i][j] = Math.cos(2*Math.PI*freq_arr_[i]*j/sample_rate_);
 			}
 		}
-	}
 
-	public byte[] demodulate(double[] wave){
+	// @input: 		sample, a sample from the wave
+	// @output: 	whether a pack of data is found.
+	public double demodulate(double sample){
+		return false;
+	}
+	// @input: 		wave, given a received data
+	// @output 		transform that data to bits.
+	private byte[] waveToData(double[] wave){
 		byte[] data = new byte[0];
-		return data;
+		return data;		
 	}
 
 	public double[] modulate(byte[] data){
+		return dataToWave(data);
+	}
+	private double[] dataToWave(byte[] data){
 		double[] wave = new double[0];
-		return wave;
+		return wave;		
 	}
 
 	// @input: 
