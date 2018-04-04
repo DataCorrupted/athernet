@@ -28,7 +28,7 @@ public class Modulation{
     private int sample_rate_;           // usually 44100 Hz
     private int max_frame_length_;      // the length of a frame (in bytes), excluding the header
 
-    private double[] carrier_;          // the carrier signal
+    private double[][] carrier_;          // the carrier signal
     private double[] sync_header_;      // the sync header (for sync)
 
     // for debug only
@@ -58,7 +58,7 @@ public class Modulation{
 
     /* Someone want to overload this */
     public Modulation(int sample_rate){
-        this(44,  440, sample_rate, 1100/8, 200, 10000, 88);
+        this(44,  440, sample_rate, 1100/8, 200, 10000, 88, 4);
     }
 
     /*
@@ -67,7 +67,7 @@ public class Modulation{
             dummy_length: in sample points (usually 100)
      */
     public Modulation(int bit_length, int header_length, int sample_rate, int max_frame_length, int init_count_down,
-                      int carrier_freq, int dummy_sin_length){
+                      int carrier_freq, int dummy_sin_length, int c){
         state_ = 0;
         power_energy = 0;
         header_score_ = 0;
@@ -91,12 +91,14 @@ public class Modulation{
         packet_ = new byte[0];
 
         // generate one standard frame unit (the waveform for max_frame_length)
-        carrier_ = new double[bit_length * max_frame_length * 8];
+        carrier_ = new double[c][bit_length * max_frame_length * 8];
 
-        // the carrier is generated in 10kHZ
-        for (int i = 0; i < carrier_.length; i++){
-            carrier_[i] = Math.sin( 2 * Math.PI * carrier_freq * i/sample_rate);
-        }
+        for (int k = 0; k<c; j++){
+	        // the carrier is generated in 10kHZ
+	        for (int i = 0; i < carrier_[0].length; i++){
+	            carrier_[k][i] = Math.sin( 2 * Math.PI * (k+1) * 1000 * i/sample_rate);
+	        }
+	    }
 
         // generate the sync_header
         generate_header();
@@ -105,6 +107,7 @@ public class Modulation{
         generate_dummy_sin();
     }
 
+/*
     // given a frame array (bits), return its modulated signal
     // 1 is the same as carrier, while 0 is -phrase
     public double[] modulate(byte[] frame_bytes){
@@ -132,6 +135,7 @@ public class Modulation{
         return output_frame_with_dummy;
         //return output_frame;
     }
+    */
 
     /*
     Params:
@@ -344,6 +348,7 @@ public class Modulation{
             convert sound to boolean[]
     */
 
+/*
     private boolean[] convert_processing_data(int expected_length){
         // normalize processing_data such that they are in the range of [-1,1]
         List<Double> data_normalized = normalize_data(processing_data_);
@@ -366,6 +371,8 @@ public class Modulation{
 
         return array_out;
     }
+
+    */
 
     // Test: test passed
     private void generate_header(){
