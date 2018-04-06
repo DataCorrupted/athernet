@@ -151,8 +151,7 @@ class OFDM{
 				return CNFIRMING;
 			}
 			return NOTHING;
-		}
-		else if (state_ == 1){
+		} else if (state_ == 1){
 			// waiting for the counter down to be 0, make sure the sync_header is the local maximum
 			// add the data into unconfirmed buffer, and recheck the header value
 			unconfirmed_data_.add(sample);
@@ -194,8 +193,7 @@ class OFDM{
 				state_ ++;
 			}
 			return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
-		}
-		else if (state_ == 2){
+		} else if (state_ == 2){
 			// add the data to the buffer
 			processing_data_.add(sample);
 			if (processing_data_.size() < pack_len_ * 8 * bit_len_) {
@@ -221,11 +219,9 @@ class OFDM{
 			processing_data_.clear();
 			packet_ = convert_booleans_to_bytes(packet_boolean);
 			return RCVEDDAT;                // new data packet is ready
-		}
-		else {
+		} else {
 			throw new RuntimeException(new String("Invalid state"));
 		}
-		return false;
 	}
 
 	// @input: 		wave, given a received data
