@@ -107,7 +107,7 @@ public class Modulation{
         generate_dummy_sin();
     }
 
-/*
+
     // given a frame array (bits), return its modulated signal
     // 1 is the same as carrier, while 0 is -phrase
     public double[] modulate(byte[] frame_bytes){
@@ -135,7 +135,7 @@ public class Modulation{
         return output_frame_with_dummy;
         //return output_frame;
     }
-    */
+    
 
     /*
     Params:

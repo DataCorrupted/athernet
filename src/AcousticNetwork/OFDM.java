@@ -40,7 +40,7 @@ class OFDM{
 	private double bandwidth_;
 
 	// Starting frequency.
-	private double freq_;
+	private double start_freq_;
 	
 	// An array for each carrier's frequency.
 	private double[] freq_arr_;
@@ -60,13 +60,17 @@ class OFDM{
 	public OFDM(){
 		this(44100, 1000, 3000, 4, 44, 128, 440);
 	}
+	// Construct OFDM based on given channel count and delta frequency.
+	public OFDM(int sample_rate, double f, double delta, int c){
+		this(sample_rate, f, (c-1) * delta, c, 44, 128, 440);
+	}
 	public OFDM(int sample_rate, double f, double b, int c, 
 				int bit_lenght, int pack_length, int header_length){
 		pack_len_ = pack_length;
 		bit_len_ = bit_lenght;
 		header_len_ = header_length;
 		sample_rate_ = sample_rate;
-		freq_ = f;
+		start_freq_ = f;
 		bandwidth_ = b;
 		channel_cnt_ = c;
 		if ((c & 0x1) == 1){
@@ -80,7 +84,7 @@ class OFDM{
 
 		double delta_band_width = bandwidth_ / (channel_cnt_ - 1);
 		for(int i=0; i<channel_cnt_; i++){
-			freq_arr_[i] = freq_ + delta_band_width * i;
+			freq_arr_[i] = start_freq_ + delta_band_width * i;
 			for (int j=0; j<bit_len_; j++){
 				carrier_arr_[i][j] = Math.cos(2*Math.PI*freq_arr_[i]*j/sample_rate_);
 			}
@@ -91,17 +95,17 @@ class OFDM{
 	private double[] generateSyncHeader(){
 		// TODO: change the header generation function for optimization?
 		// generate the base function
-		int start_freq = 2000;
-		int end_freq = 10000;
+		double start_freq = 2000;
+		double end_freq = 10000;
 
 		double[] fp = new double[header_len_];
 		fp[0] = start_freq;
 		for (int i = 1; i < header_len_/2; i++){
-			fp[i] = fp[i-1] + ((end_freq-start_freq)+0.0)/(header_len_/2);
+			fp[i] = fp[i-1] + (end_freq-start_freq)/(header_len_/2);
 		}
 		fp[header_len_/2] = end_freq;
 		for (int i = header_len_/2+1; i < header_len_; i++){
-			fp[i] = fp[i-1] - ((end_freq-start_freq)+0.0)/(header_len_/2);
+			fp[i] = fp[i-1] - (end_freq-start_freq)/(header_len_/2);
 		}
 
 		// use numerical cumulative integral to generate omega
@@ -142,8 +146,7 @@ class OFDM{
 				return CNFIRMING;
 			}
 			return NOTHING;
-		}
-		else if (state_ == 1){
+		} else if (state_ == 1){
 			// waiting for the counter down to be 0, make sure the sync_header is the local maximum
 			// add the data into unconfirmed buffer, and recheck the header value
 			unconfirmed_data_.add(sample);
@@ -177,8 +180,7 @@ class OFDM{
 				state_ ++;
 			}
 			return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
-		}
-		else if (state_ == 2){
+		} else if (state_ == 2){
 			// add the data to the buffer
 			processing_data_.add(sample);
 			if (processing_data_.size() < pack_len_ * 8 * bit_len_) {
@@ -204,42 +206,51 @@ class OFDM{
 			processing_data_.clear();
 			packet_ = convert_booleans_to_bytes(packet_boolean);
 			return RCVEDDAT;                // new data packet is ready
-		}
-		else {
+		} else {
 			throw new RuntimeException(new String("Invalid state"));
 		}
 	}
+
 	// @input: 		wave, given a received data
 	// @output 		transform that data to bits.
-	private byte[] waveToData(double[] wave){
-		byte[] data = new byte[0];
+	private boolean[] waveToData(double[] wave){
+		boolean[] data = new boolean[pack_len_];
+		int chunk_cnt = pack_len_ / channel_cnt_;
+		double[] sub_wave = new double[bit_len_];
+		for (int i = 0; i<chunk_cnt; i++){
+			System.arraycopy(wave, i*bit_len_, sub_wave, 0, bit_len_);
+			for (int j=0; j<channel_cnt_; j++){
+				double sum = dot(sub_wave, carrier_arr_[j]);
+				data[i*chunk_cnt + j] = (sum > 0);
+			}
+		}
 		return data;		
 	}
 
 	public double[] modulate(byte[] byte_data){
 		boolean[] data = byteToBoolean(byte_data);
 
-		int chunk_cnt = data.length / channel_cnt_;
+		int chunk_cnt = pack_len_ / channel_cnt_;
 		double[] wave = new double[chunk_cnt * bit_len_];
-		for (int i=0; i<data.length / channel_cnt_; i++){
+		for (int i=0; i<pack_len_ / channel_cnt_; i++){
 			for (int j =0; j<channel_cnt_; j++){
-				int phase = data[i*channel_cnt_ + j] == 1? 1: -1;
+				int phase = data[i*channel_cnt_ + j]? 1: -1;
 				double[] chunk_wave = 
-					mul(phase, carrier_arr_[j])
-				System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_)
+					mul(phase, carrier_arr_[j]);
+				System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_);
 			}
 		}
 		// Normalize.
 		return mul(1.0/channel_cnt_, wave);
 	}
 
-	private boolean[] byteToBoolean(double[] byte_data){
-		boolean[] data = new boolean[byte_data.lengyh >>> 3];
+	private boolean[] byteToBoolean(byte[] byte_data){
+		boolean[] data = new boolean[byte_data.length >>> 3];
 		for (int i=0; i<byte_data.length; i++){
 			int mask = 0x80;
 			for (int j=0; j<8; j++){
-				data[i*8+j] = (byte_data[i] & mask == mask);
-				mask >>> 1;
+				data[i*8+j] = ((byte_data[i] & mask) == mask);
+				mask = mask >>> 1;
 			}
 		}
 		return data;
