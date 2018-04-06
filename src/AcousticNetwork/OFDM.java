@@ -106,12 +106,26 @@ class OFDM{
 		return data;		
 	}
 
-	public double[] modulate(byte[] data){
+	public double[] modulate(byte[] byte_data){
+		boolean[] data = byteToBoolean(byte_data);
+		for (int i=0; i<data.length / channel_cnt_; i++){
+			for (int j =0; j<channel_cnt_; j++){
+				
+			}
+		}
 		return dataToWave(data);
 	}
-	private double[] dataToWave(byte[] data){
-		double[] wave = new double[0];
-		return wave;		
+
+	private boolean[] byteToBoolean(double[] byte_data){
+		boolean[] data = boolean[byte_data.lengyh >>> 3];
+		for (int i=0; i<byte_data.length; i++){
+			int mask = 0x80;
+			for (int j=0; j<8; j++){
+				data[i*8+j] = (byte_data[i] & mask == mask);
+				mask >>> 1;
+			}
+		}
+		return data;
 	}
 
 	// @input: 
