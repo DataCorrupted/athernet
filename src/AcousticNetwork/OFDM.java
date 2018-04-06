@@ -91,16 +91,16 @@ class OFDM{
 		sync_power_debug = new ArrayList<>();
 		packet_ = new byte[0];
 
-		if ((c & 0x1) == 1){
-			System.out.println("Warn[OFDM.OFDM(double, double, double)]: odd channel count given.");
-		}
+//		if ((c & 0x1) == 1){
+//			System.out.println("Warn[OFDM.OFDM(double, double, double)]: odd channel count given.");
+//		}
 		if (f+b > MAXFREQ || f < MINFREQ){
 			System.out.println("Warn[OFDM.OFDM(double, double, double)]: illegal bandwidth and frequency given.");
 		} 
 		freq_arr_ = new double[channel_cnt_];
 		carrier_arr_ = new double[channel_cnt_][bit_len_];
 
-		double delta_band_width = bandwidth_ / (channel_cnt_ - 1);
+		double delta_band_width = (channel_cnt_ == 1)? 0:bandwidth_ / (channel_cnt_ - 1);
 		for(int i=0; i<channel_cnt_; i++){
 			freq_arr_[i] = start_freq_ + delta_band_width * i;
 			for (int j=0; j<bit_len_; j++){
@@ -158,7 +158,7 @@ class OFDM{
 			processing_header_.add(sample);
 			if (checkSyncHeader()){
 				state_ ++;                  // next state
-                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
+                //System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
 				return CNFIRMING;
 			}
 			return NOTHING;
@@ -237,7 +237,7 @@ class OFDM{
 			System.arraycopy(wave, i*bit_len_, sub_wave, 0, bit_len_);
 			for (int j=0; j<channel_cnt_; j++){
 				double sum = dot(sub_wave, carrier_arr_[j]);
-				data[i*chunk_cnt + j] = (sum > 0);
+				data[i * channel_cnt_ + j] = (sum > 0);
 			}
 		}
 		return data;		
@@ -248,21 +248,21 @@ class OFDM{
 
 		int chunk_cnt = pack_len_ / channel_cnt_;
 		double[] wave = new double[chunk_cnt * bit_len_];
-		double[] chunk_wave = new double[bit_len_];
-		for (int i=0; i<pack_len_ / channel_cnt_; i++){
+		for (int i=0; i<chunk_cnt; i++){
+			double[] chunk_wave = new double[bit_len_];
 			for (int j =0; j<channel_cnt_; j++){
 				int phase = data[i*channel_cnt_ + j]? 1: -1;
 				chunk_wave = add(chunk_wave, mul(phase, carrier_arr_[j]));
 			}
-			System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_);
+			System.arraycopy(chunk_wave, 0, wave, i*bit_len_, bit_len_);
 		}
 		// Normalize.
-
+		wave = mul(1.0/channel_cnt_, wave);
         // add the sync header part to the frame and return modulated signal
         double[] output_frame = 
        	DoubleStream.concat(
         	Arrays.stream(sync_header_),
-        	Arrays.stream(mul(1.0/channel_cnt_, wave))
+        	Arrays.stream(wave)
         ).toArray();
 
 
@@ -398,15 +398,13 @@ class OFDM{
 			0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 
 			0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20
 		};
-		OFDM ofdm = new OFDM();
+		OFDM ofdm = new OFDM(44100, 1000, 3000, 4, 44, 128, 440);;
 		double[] wave = ofdm.modulate(data);
-		System.out.println(wave.length);
 
 		for (int i=0; i<wave.length; i++){
 			ofdm.demodulate(wave[i]);
 		}
 
-		System.out.println(ofdm.count_down_);
 
 		byte[] recv_dat = ofdm.getPacket();
 		for (int i=0; i<data.length; i++){
