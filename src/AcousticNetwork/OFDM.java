@@ -172,7 +172,7 @@ class OFDM{
 
 			// call for recheck
 			if (checkSyncHeader()){
-				//System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
+				System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
 				last_bit_counter_ = bit_counter_;
 				unconfirmed_data_.clear();
 				count_down_ = init_count_down_;
@@ -199,7 +199,7 @@ class OFDM{
 		} else if (state_ == 2){
 			// add the data to the buffer
 			processing_data_.add(sample);
-			if (processing_data_.size() < pack_len_ * bit_len_) {
+			if (processing_data_.size() < pack_len_ * bit_len_ / 4) {
 				return RCVINGDAT;               // not enough data to decode
 			}
 
@@ -405,10 +405,14 @@ class OFDM{
 		for (int i=0; i<wave.length; i++){
 			ofdm.demodulate(wave[i]);
 		}
+
+		System.out.println(ofdm.count_down_);
+
 		byte[] recv_dat = ofdm.getPacket();
 		for (int i=0; i<data.length; i++){
 			System.out.println(recv_dat[i] + " " + data[i] + " " + (recv_dat[i] == data[i]));
 		}
+
 	}
 }
 
