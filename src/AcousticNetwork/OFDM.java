@@ -62,7 +62,7 @@ class OFDM{
 	}
 	// Construct OFDM based on given channel count and delta frequency.
 	public OFDM(int sample_rate, double f, double delta, int c){
-		this(sample_rate_, f, 213, f+(c-1) * delta, 44, 128, 440);
+		this(sample_rate, f, (c-1) * delta, c, 44, 128, 440);
 	}
 	public OFDM(int sample_rate, double f, double b, int c, 
 				int bit_lenght, int pack_length, int header_length){
@@ -84,7 +84,7 @@ class OFDM{
 
 		double delta_band_width = bandwidth_ / (channel_cnt_ - 1);
 		for(int i=0; i<channel_cnt_; i++){
-			freq_arr_[i] = freq_ + delta_band_width * i;
+			freq_arr_[i] = start_freq_ + delta_band_width * i;
 			for (int j=0; j<bit_len_; j++){
 				carrier_arr_[i][j] = Math.cos(2*Math.PI*freq_arr_[i]*j/sample_rate_);
 			}
@@ -231,7 +231,7 @@ class OFDM{
 		int chunk_cnt = pack_len_ / channel_cnt_;
 		double[] sub_wave = new double[bit_len_];
 		for (int i = 0; i<chunk_cnt; i++){
-			System.array(wave, i*bit_len_, sub_wave, 0, bit_len_);
+			System.arraycopy(wave, i*bit_len_, sub_wave, 0, bit_len_);
 			for (int j=0; j<channel_cnt_; j++){
 				double sum = dot(sub_wave, carrier_arr_[j]);
 				data[i*chunk_cnt + j] = (sum > 0);
@@ -247,10 +247,10 @@ class OFDM{
 		double[] wave = new double[chunk_cnt * bit_len_];
 		for (int i=0; i<pack_len_ / channel_cnt_; i++){
 			for (int j =0; j<channel_cnt_; j++){
-				int phase = data[i*channel_cnt_ + j] == 1? 1: -1;
+				int phase = data[i*channel_cnt_ + j]? 1: -1;
 				double[] chunk_wave = 
-					mul(phase, carrier_arr_[j])
-				System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_)
+					mul(phase, carrier_arr_[j]);
+				System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_);
 			}
 		}
 		// Normalize.
@@ -258,12 +258,12 @@ class OFDM{
 	}
 
 	private boolean[] byteToBoolean(byte[] byte_data){
-		boolean[] data = new boolean[byte_data.lengyh >>> 3];
+		boolean[] data = new boolean[byte_data.length >>> 3];
 		for (int i=0; i<byte_data.length; i++){
 			int mask = 0x80;
 			for (int j=0; j<8; j++){
-				data[i*8+j] = (byte_data[i] & mask == mask);
-				mask >>> 1;
+				data[i*8+j] = ((byte_data[i] & mask) == mask);
+				mask = mask >>> 1;
 			}
 		}
 		return data;
