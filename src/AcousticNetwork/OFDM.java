@@ -108,16 +108,23 @@ class OFDM{
 
 	public double[] modulate(byte[] byte_data){
 		boolean[] data = byteToBoolean(byte_data);
+
+		int chunk_cnt = data.length / channel_cnt_;
+		double[] wave = new double[chunk_cnt * bit_len_];
 		for (int i=0; i<data.length / channel_cnt_; i++){
 			for (int j =0; j<channel_cnt_; j++){
-				
+				int phase = data[i*channel_cnt_ + j] == 1? 1: -1;
+				double[] chunk_wave = 
+					mul(phase, carrier_arr_[j])
+				System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_)
 			}
 		}
-		return dataToWave(data);
+		// Normalize.
+		return mul(1.0/channel_cnt_, wave);
 	}
 
 	private boolean[] byteToBoolean(double[] byte_data){
-		boolean[] data = boolean[byte_data.lengyh >>> 3];
+		boolean[] data = new boolean[byte_data.lengyh >>> 3];
 		for (int i=0; i<byte_data.length; i++){
 			int mask = 0x80;
 			for (int j=0; j<8; j++){
