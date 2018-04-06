@@ -243,7 +243,7 @@ class OFDM{
 	}
 
 	private boolean[] byteToBoolean(byte[] byte_data){
-		boolean[] data = new boolean[byte_data.length >>> 3];
+		boolean[] data = new boolean[byte_data.length << 3];
 		for (int i=0; i<byte_data.length; i++){
 			int mask = 0x80;
 			for (int j=0; j<8; j++){
@@ -290,9 +290,9 @@ class OFDM{
 		int n = a.length;
 		int m = a[0].length;
 		double[] sum = new double[m];
-		for (int i=0; i<m; i++){
-			for (int j=0; j<n; j++){
-				sum[i] += a[i][j];
+		for (int j=0; j<m; j++){
+			for (int i=0; i<n; i++){
+				sum[j] += a[i][j];
 			}
 		}
 		return sum;
