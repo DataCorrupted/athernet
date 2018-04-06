@@ -155,7 +155,6 @@ class OFDM{
 				// if header is already full, remove the first one
 				processing_header_.remove(0);
 			}
-			System.out.println("SAGD");
 			processing_header_.add(sample);
 			if (checkSyncHeader()){
 				state_ ++;                  // next state
