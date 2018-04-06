@@ -1,8 +1,37 @@
 package AcousticNetwork;
 
+import java.util.List;
+
 class OFDM{
+	public static final int NOTHING = 0;
+	public static final int RCVEDDAT = -1;
+	public static final int RCVINGDAT = 2;
+	public static final int CNFIRMING = 1;
+
 	public final double MINFREQ = 20;
 	public final double MAXFREQ = 20000;
+
+	// for header
+	// hyper-parameters
+	private int init_count_down_;            // The waiting windows for identifying the header
+	// The length (in samples) of a sync header and the generated header.
+	private int header_len_;
+	private double[] sync_header_;
+	// for debug only
+	public List<Double> sync_power_debug;
+	// for demodulation only
+	private List<Double> processing_header_;               // used in identifying the header
+	private List<Double> processing_data_;                 // used in receiving a single frame
+	private List<Double> unconfirmed_data_;                // the buffer for unconfirmed data (when determining)
+	private int state_;                                     // indicate whether the current data bit is part of the data
+	private int count_down_;
+	private double header_score_;
+	private double power_energy_;
+	private int bit_counter_ = 0;
+	private int last_bit_counter_ = 0;
+
+	// the returning bit array
+	private byte[] packet_;
 
 	// Total number of channels.
 	private int channel_cnt_;
@@ -27,10 +56,6 @@ class OFDM{
 
 	// The length (in bits) of a package.
 	private int pack_len_;
-
-	// The length (in samples) of a sync header and the generated header.
-	private int header_len_;
-	private double[] sync_header_;
 	
 	public OFDM(){
 		this(44100, 1000, 3000, 4, 44, 128, 440);
@@ -100,7 +125,106 @@ class OFDM{
 
 	// @input: 		sample, a sample from the wave
 	// @output: 	whether a pack of data is found.
-	public boolean demodulate(double sample){
+	public int demodulate(double sample){
+		// given a recved signal. Demodulate it.
+		// Whether current signals are data or just nothing important.
+		bit_counter_ ++;
+
+		// calculate the power
+		power_energy_ = power_energy_ * (1-1.0/64.0) + (sample * sample) / 64;
+
+		if (state_ == 0){
+			// identify the header
+			if (processing_header_.size() == header_len_){
+				// if header is already full, remove the first one
+				processing_header_.remove(0);
+			}
+			processing_header_.add(sample);
+			// skip the following check as this would be checked in check_sync_header and good for storing debug info.
+            /*if (processing_header_.size() < header_length_){
+                return NOTHING;               // return when not adequate data
+            }
+            */
+			if (check_sync_header()){
+				state_ ++;                  // next state
+//                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
+				return CNFIRMING;
+			}
+			return NOTHING;
+		}
+		else if (state_ == 1){
+			// waiting for the counter down to be 0, make sure the sync_header is the local maximum
+			// add the data into unconfirmed buffer, and recheck the header value
+			unconfirmed_data_.add(sample);
+			processing_header_.remove(0);
+			processing_header_.add(sample);
+			count_down_  = count_down_ - 1;
+
+			// call for recheck
+			if (check_sync_header()){
+				//System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
+				last_bit_counter_ = bit_counter_;
+				unconfirmed_data_.clear();
+				// TODO: This was wrong...
+                /*
+                while (unconfirmed_data_.size() > 0){
+                    processing_header_.remove(0);
+                    processing_header_.add(unconfirmed_data_.get(0));
+                    unconfirmed_data_.remove(0);
+                }
+                */
+				count_down_ = init_count_down_;
+			}
+
+			// if count_down completed, turn the unconfirmed data into actual data
+			if (count_down_ == 0){
+				// convert data
+				while(unconfirmed_data_.size()>0){
+					processing_data_.add(unconfirmed_data_.get(0));
+					unconfirmed_data_.remove(0);
+				}
+
+				// reset initial value
+				count_down_ = init_count_down_;
+				header_score_ = 0;
+				processing_header_.clear();
+
+				// change state
+//                System.out.println("Header confirmed, goto receiving data");
+				state_ ++;
+			}
+			return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
+		}
+		else if (state_ == 2){
+			// add the data to the buffer
+			processing_data_.add(sample);
+			if (processing_data_.size() < pack_len_ * 8 * bit_len_) {
+				return RCVINGDAT;               // not enough data to decode
+			}
+
+//            System.out.println("Get all data, start demodulation");
+			// decode the waveform to get the bits
+			// process and clear the buffer
+			state_ = 0;
+			double[] data_buffer = new double[processing_data_.size()];
+			for (int i = 0; i < processing_data_.size(); i++){
+				data_buffer[i] = processing_data_.get(i);
+			}
+			boolean[] packet_boolean = waveToData(data_buffer);
+
+			// reserve last several bits for searching window for next packet
+			int recheck_length = 100;
+			for (int i = 0; i < recheck_length; i++){
+				processing_header_.add(processing_data_.get(processing_data_.size() - (recheck_length -i)));
+			}
+
+			processing_data_.clear();
+			packet_ = convert_booleans_to_bytes(packet_boolean);
+			return RCVEDDAT;                // new data packet is ready
+		}
+		else {
+			throw new RuntimeException(new String("Invalid state"));
+		}
 		return false;
 	}
 
@@ -192,4 +316,58 @@ class OFDM{
 		}
 		return sum;
 	}
+
+	private boolean check_sync_header(){
+		if (processing_header_.size() < header_len_){
+			sync_power_debug.add(0.0);
+			return false;
+		}
+		// normalize the header
+		// List<Double> normalized_header = normalize_data(processing_header_);
+
+		// calculate the dot product
+		double sync_power = 0;
+		for (int i = 0; i < header_len_; i++){
+			sync_power = sync_power + sync_header_[i] * processing_header_.get(i);
+		}
+		// TODO(jianxiong cai): for some reason, reference program said divided by 200
+		sync_power = sync_power / 200;
+		sync_power_debug.add(sync_power);
+		// TODO: enforce other condition
+		if ( (sync_power > (power_energy_ * power_energy_)) && (sync_power > header_score_) && (sync_power > 0.05)){
+			header_score_ = sync_power;
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	private byte[] convert_booleans_to_bytes(boolean[] array_in){
+		// check for safety
+		if (array_in.length/8*8 != array_in.length){
+			throw new RuntimeException("Trying to convert misaligned array to bytes[]");
+		}
+		byte[] array_out = new byte[array_in.length/8];
+
+		int counter = 0;
+
+		for (int i = 0; i < array_out.length; i++){
+			int tmp_char = 0;
+			for (int j = 0; j < 8; j++){
+				// append a new boolean into the byte
+				tmp_char = tmp_char << 1;
+				// if the boolean is true, change the last bit to 1
+				if (array_in[counter]){
+					tmp_char = (tmp_char | 0x01);
+				}
+				counter ++;
+			}
+			array_out[i] = (byte)tmp_char;
+		}
+
+		return array_out;
+	}
+
 }
+
