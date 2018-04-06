@@ -181,7 +181,7 @@ class OFDM{
 		} else if (state_ == 2){
 			// add the data to the buffer
 			processing_data_.add(sample);
-			if (processing_data_.size() < pack_len_ * 8 * bit_len_) {
+			if (processing_data_.size() < pack_len_ * bit_len_) {
 				return RCVINGDAT;               // not enough data to decode
 			}
 
