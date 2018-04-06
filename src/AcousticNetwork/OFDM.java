@@ -1,6 +1,8 @@
 package AcousticNetwork;
 
 import java.util.List;
+import java.util.*;
+import java.lang.reflect.Array;
 
 class OFDM{
 	public static final int NOTHING = 0;
@@ -66,6 +68,9 @@ class OFDM{
 	}
 	public OFDM(int sample_rate, double f, double b, int c, 
 				int bit_lenght, int pack_length, int header_length){
+		// hyper-parameters
+		init_count_down_ = 200;
+
 		pack_len_ = pack_length;
 		bit_len_ = bit_lenght;
 		header_len_ = header_length;
@@ -73,6 +78,18 @@ class OFDM{
 		start_freq_ = f;
 		bandwidth_ = b;
 		channel_cnt_ = c;
+
+		state_ = 0;
+		count_down_ = init_count_down_;
+		header_score_ = 0;
+		power_energy_ = 0.0;
+		bit_counter_ = 0;
+		processing_header_ = new ArrayList<>();
+		processing_data_ = new ArrayList<>();
+		unconfirmed_data_ = new ArrayList<>();
+		sync_power_debug = new ArrayList<>();
+		packet_ = new byte[0];
+
 		if ((c & 0x1) == 1){
 			System.out.println("Warn[OFDM.OFDM(double, double, double)]: odd channel count given.");
 		}
