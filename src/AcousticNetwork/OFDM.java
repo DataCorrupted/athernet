@@ -11,7 +11,7 @@ class OFDM{
 	private double bandwidth_;
 
 	// Starting frequency.
-	private double freq_;
+	private double start_freq_;
 	
 	// An array for each carrier's frequency.
 	private double[] freq_arr_;
@@ -35,13 +35,17 @@ class OFDM{
 	public OFDM(){
 		this(44100, 1000, 3000, 4, 44, 128, 440);
 	}
+	// Construct OFDM based on given channel count and delta frequency.
+	public OFDM(int sample_rate, double f, double delta, int c){
+		this(sample_rate_, f, 213, f+(c-1) * delta, 44, 128, 440);
+	}
 	public OFDM(int sample_rate, double f, double b, int c, 
 				int bit_lenght, int pack_length, int header_length){
 		pack_len_ = pack_length;
 		bit_len_ = bit_lenght;
 		header_len_ = header_length;
 		sample_rate_ = sample_rate;
-		freq_ = f;
+		start_freq_ = f;
 		bandwidth_ = b;
 		channel_cnt_ = c;
 		if ((c & 0x1) == 1){
@@ -66,17 +70,17 @@ class OFDM{
 	private double[] generateSyncHeader(){
 		// TODO: change the header generation function for optimization?
 		// generate the base function
-		int start_freq = 2000;
-		int end_freq = 10000;
+		double start_freq = 2000;
+		double end_freq = 10000;
 
 		double[] fp = new double[header_len_];
 		fp[0] = start_freq;
 		for (int i = 1; i < header_len_/2; i++){
-			fp[i] = fp[i-1] + ((end_freq-start_freq)+0.0)/(header_len_/2);
+			fp[i] = fp[i-1] + (end_freq-start_freq)/(header_len_/2);
 		}
 		fp[header_len_/2] = end_freq;
 		for (int i = header_len_/2+1; i < header_len_; i++){
-			fp[i] = fp[i-1] - ((end_freq-start_freq)+0.0)/(header_len_/2);
+			fp[i] = fp[i-1] - (end_freq-start_freq)/(header_len_/2);
 		}
 
 		// use numerical cumulative integral to generate omega
@@ -99,19 +103,29 @@ class OFDM{
 	public boolean demodulate(double sample){
 		return false;
 	}
+
 	// @input: 		wave, given a received data
 	// @output 		transform that data to bits.
-	private byte[] waveToData(double[] wave){
-		byte[] data = new byte[0];
+	private boolean[] waveToData(double[] wave){
+		boolean[] data = new boolean[pack_len_];
+		int chunk_cnt = pack_len_ / channel_cnt_;
+		double[] sub_wave = new double[bit_len_];
+		for (int i = 0; i<chunk_cnt; i++){
+			System.array(wave, i*bit_len_, sub_wave, 0, bit_len_);
+			for (int j=0; j<channel_cnt_; j++){
+				double sum = dot(sub_wave, carrier_arr_[j]);
+				data[i*chunk_cnt + j] = (sum > 0);
+			}
+		}
 		return data;		
 	}
 
 	public double[] modulate(byte[] byte_data){
 		boolean[] data = byteToBoolean(byte_data);
 
-		int chunk_cnt = data.length / channel_cnt_;
+		int chunk_cnt = pack_len_ / channel_cnt_;
 		double[] wave = new double[chunk_cnt * bit_len_];
-		for (int i=0; i<data.length / channel_cnt_; i++){
+		for (int i=0; i<pack_len_ / channel_cnt_; i++){
 			for (int j =0; j<channel_cnt_; j++){
 				int phase = data[i*channel_cnt_ + j] == 1? 1: -1;
 				double[] chunk_wave = 
@@ -123,7 +137,7 @@ class OFDM{
 		return mul(1.0/channel_cnt_, wave);
 	}
 
-	private boolean[] byteToBoolean(double[] byte_data){
+	private boolean[] byteToBoolean(byte[] byte_data){
 		boolean[] data = new boolean[byte_data.lengyh >>> 3];
 		for (int i=0; i<byte_data.length; i++){
 			int mask = 0x80;
