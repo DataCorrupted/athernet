@@ -122,7 +122,7 @@ class OFDM{
 	// @input: 		sample, a sample from the wave
 	// @output: 	whether a pack of data is found.
 	public int demodulate(double sample){
-		// given a recved signal. Demodulate it.
+		// given a received signal. Demodulate it.
 		// Whether current signals are data or just nothing important.
 		bit_counter_ ++;
 
@@ -136,11 +136,6 @@ class OFDM{
 				processing_header_.remove(0);
 			}
 			processing_header_.add(sample);
-			// skip the following check as this would be checked in check_sync_header and good for storing debug info.
-            /*if (processing_header_.size() < header_length_){
-                return NOTHING;               // return when not adequate data
-            }
-            */
 			if (check_sync_header()){
 				state_ ++;                  // next state
 //                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
@@ -161,14 +156,6 @@ class OFDM{
 				//System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
 				last_bit_counter_ = bit_counter_;
 				unconfirmed_data_.clear();
-				// TODO: This was wrong...
-                /*
-                while (unconfirmed_data_.size() > 0){
-                    processing_header_.remove(0);
-                    processing_header_.add(unconfirmed_data_.get(0));
-                    unconfirmed_data_.remove(0);
-                }
-                */
 				count_down_ = init_count_down_;
 			}
 
@@ -221,7 +208,6 @@ class OFDM{
 		else {
 			throw new RuntimeException(new String("Invalid state"));
 		}
-		return false;
 	}
 	// @input: 		wave, given a received data
 	// @output 		transform that data to bits.
