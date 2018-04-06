@@ -93,7 +93,6 @@ class OFDM{
 	}
 
 	private double[] generateSyncHeader(){
-		// TODO: change the header generation function for optimization?
 		// generate the base function
 		double start_freq = 2000;
 		double end_freq = 10000;
@@ -112,7 +111,6 @@ class OFDM{
 		double[] omega = new double[header_len_];
 		omega[0] = 0;
 		for (int i = 1; i < header_len_; i++){
-			// TODO: from reference program, using t (sample rate) instead of header_length?
 			omega[i] = omega[i-1] + (fp[i]+fp[i-1])/2.0*(1.0/sample_rate_);
 		}
 
@@ -126,7 +124,7 @@ class OFDM{
 	// @input: 		sample, a sample from the wave
 	// @output: 	whether a pack of data is found.
 	public int demodulate(double sample){
-		// given a recved signal. Demodulate it.
+		// given a received signal. Demodulate it.
 		// Whether current signals are data or just nothing important.
 		bit_counter_ ++;
 
@@ -140,11 +138,6 @@ class OFDM{
 				processing_header_.remove(0);
 			}
 			processing_header_.add(sample);
-			// skip the following check as this would be checked in check_sync_header and good for storing debug info.
-            /*if (processing_header_.size() < header_length_){
-                return NOTHING;               // return when not adequate data
-            }
-            */
 			if (check_sync_header()){
 				state_ ++;                  // next state
 //                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
@@ -164,14 +157,6 @@ class OFDM{
 				//System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
 				last_bit_counter_ = bit_counter_;
 				unconfirmed_data_.clear();
-				// TODO: This was wrong...
-                /*
-                while (unconfirmed_data_.size() > 0){
-                    processing_header_.remove(0);
-                    processing_header_.add(unconfirmed_data_.get(0));
-                    unconfirmed_data_.remove(0);
-                }
-                */
 				count_down_ = init_count_down_;
 			}
 
