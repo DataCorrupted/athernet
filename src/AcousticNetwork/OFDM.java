@@ -3,6 +3,7 @@ package AcousticNetwork;
 import java.util.List;
 import java.util.*;
 import java.lang.reflect.Array;
+import java.util.stream.DoubleStream;
 
 class OFDM{
 	public static final int NOTHING = 0;
@@ -256,7 +257,16 @@ class OFDM{
 			System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_);
 		}
 		// Normalize.
-		return mul(1.0/channel_cnt_, wave);
+
+        // add the sync header part to the frame and return modulated signal
+        double[] output_frame = 
+       	DoubleStream.concat(
+        	Arrays.stream(sync_header_),
+        	Arrays.stream(mul(1.0/channel_cnt_, wave))
+        ).toArray();
+
+
+		return output_frame;
 	}
 
 	private boolean[] byteToBoolean(byte[] byte_data){
@@ -383,14 +393,22 @@ class OFDM{
 
 
 	public static void main(String[] args){
-		byte[] data = {0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20};
+		// The data is: "exprs sth in 16 "
+		byte[] data = {
+			0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 
+			0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20
+		};
 		OFDM ofdm = new OFDM();
 		double[] wave = ofdm.modulate(data);
+		System.out.println(wave.length);
 
-		int k = 0;
-		while (ofdm.demodulate(wave[k]) != RCVEDDAT){;}
+		for (int i=0; i<wave.length; i++){
+			ofdm.demodulate(wave[i]);
+		}
 		byte[] recv_dat = ofdm.getPacket();
-
+		for (int i=0; i<data.length; i++){
+			System.out.println(recv_dat[i] + " " + data[i] + " " + (recv_dat[i] == data[i]));
+		}
 	}
 }
 
