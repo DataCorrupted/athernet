@@ -93,7 +93,6 @@ class OFDM{
 	}
 
 	private double[] generateSyncHeader(){
-		// TODO: change the header generation function for optimization?
 		// generate the base function
 		double start_freq = 2000;
 		double end_freq = 10000;
@@ -112,7 +111,6 @@ class OFDM{
 		double[] omega = new double[header_len_];
 		omega[0] = 0;
 		for (int i = 1; i < header_len_; i++){
-			// TODO: from reference program, using t (sample rate) instead of header_length?
 			omega[i] = omega[i-1] + (fp[i]+fp[i-1])/2.0*(1.0/sample_rate_);
 		}
 
