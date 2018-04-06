@@ -138,7 +138,7 @@ class OFDM{
 				processing_header_.remove(0);
 			}
 			processing_header_.add(sample);
-			if (check_sync_header()){
+			if (checkSyncHeader()){
 				state_ ++;                  // next state
 //                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
 				return CNFIRMING;
@@ -153,7 +153,7 @@ class OFDM{
 			count_down_  = count_down_ - 1;
 
 			// call for recheck
-			if (check_sync_header()){
+			if (checkSyncHeader()){
 				//System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
 				last_bit_counter_ = bit_counter_;
 				unconfirmed_data_.clear();
@@ -202,7 +202,7 @@ class OFDM{
 			}
 
 			processing_data_.clear();
-			packet_ = convert_booleans_to_bytes(packet_boolean);
+			packet_ = convertBoolsToBytes(packet_boolean);
 			return RCVEDDAT;                // new data packet is ready
 		} else {
 			throw new RuntimeException(new String("Invalid state"));
@@ -230,13 +230,13 @@ class OFDM{
 
 		int chunk_cnt = pack_len_ / channel_cnt_;
 		double[] wave = new double[chunk_cnt * bit_len_];
+		double[] chunk_wave = new double[bit_len_];
 		for (int i=0; i<pack_len_ / channel_cnt_; i++){
 			for (int j =0; j<channel_cnt_; j++){
 				int phase = data[i*channel_cnt_ + j]? 1: -1;
-				double[] chunk_wave = 
-					mul(phase, carrier_arr_[j]);
-				System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_);
+				chunk_wave = add(chunk_wave, mul(phase, carrier_arr_[j]));
 			}
+			System.arraycopy(chunk_wave, 0, wave, i*chunk_cnt, bit_len_);
 		}
 		// Normalize.
 		return mul(1.0/channel_cnt_, wave);
@@ -298,7 +298,7 @@ class OFDM{
 		return sum;
 	}
 
-	private boolean check_sync_header(){
+	private boolean checkSyncHeader(){
 		if (processing_header_.size() < header_len_){
 			sync_power_debug.add(0.0);
 			return false;
@@ -324,7 +324,7 @@ class OFDM{
 		}
 	}
 
-	private byte[] convert_booleans_to_bytes(boolean[] array_in){
+	private byte[] convertBoolsToBytes(boolean[] array_in){
 		// check for safety
 		if (array_in.length/8*8 != array_in.length){
 			throw new RuntimeException("Trying to convert misaligned array to bytes[]");
@@ -350,8 +350,30 @@ class OFDM{
 		return array_out;
 	}
 
+	public byte[] getPacket(){
+       // convert packet_ to byte[]
+        if (packet_.length == 0){
+            return new byte[0];
+        }
+
+        byte[] array_out = packet_.clone();
+
+        // clear packet_ on return
+        packet_ = new byte[0];
+
+        return array_out;
+    }
+
+
 	public static void main(String[] args){
 		byte[] data = {0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20};
+		OFDM ofdm = new OFDM();
+		double[] wave = ofdm.modulate(data);
+
+		int k = 0;
+		while (ofdm.demodulate(wave[k]) != RCVEDDAT){;}
+		byte[] recv_dat = ofdm.getPacket();
+
 	}
 }
 
