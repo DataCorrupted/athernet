@@ -64,7 +64,7 @@ public class OFDM{
 	private double[] sin_header_;
 	private int dummy_sin_length_ = 100;
 	public OFDM(){
-		this(44100, 1000, 3000, 4, 44, 128, 440);
+		this(44100, 1000, 1000, 2, 44, 128, 440);
 	}
 	// Construct OFDM based on given channel count and delta frequency.
 	public OFDM(int sample_rate, double start_frequency, 
