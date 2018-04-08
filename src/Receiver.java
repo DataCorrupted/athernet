@@ -2,7 +2,7 @@ import AcousticNetwork.FileO;
 import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundIO;
-import AcousticNetwork.Modulation;
+import AcousticNetwork.OFDM;
 import AcousticNetwork.CheckIO;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,7 +18,7 @@ class Receiver{
 	private int data_size_;
 	private ArrayBlockingQueue<Double> double_q_;
 	private Thread recorder_;
-	private Modulation demodulator_;
+	private OFDM demodulator_;
 	private int sample_rate_;
 	private boolean file_stop_ = false;
 
@@ -41,7 +41,7 @@ class Receiver{
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
 		i_sound_ = new SoundIO(sample_rate, double_q_);
-		demodulator_ = new Modulation(sample_rate);
+		demodulator_ = new OFDM();
 	}
 
 	// This function should run in an independent thread.
@@ -89,12 +89,12 @@ class Receiver{
 		// I think a better way is to let demodulate tell me what it's seeing
 		// Whether the header is matched then I wait for longer,
 		// or it's receiving nothing, then I timeout.
-		int r = Modulation.NOTHING;
+		int r = OFDM.NOTHING;
 
-		while (r != Modulation.RCVEDDAT && time <= timeout) {
+		while (r != OFDM.RCVEDDAT && time <= timeout) {
 		//while (r != Modulation.RCVEDDAT) {
-			r = demodulator_.demodulation(double_q_.take(), pack_size_);
-			time += (r == Modulation.NOTHING)? 1:0;
+			r = demodulator_.demodulate(double_q_.take());
+			time += (r == OFDM.NOTHING)? 1:0;
 		}
 		i_stream = demodulator_.getPacket();
 		if (i_stream.length == 0){
