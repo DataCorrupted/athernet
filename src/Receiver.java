@@ -106,9 +106,14 @@ class Receiver{
 		crc8_.update(i_stream, 1, pack_size_-1);
 		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%3d received.\n", pack_cnt);
-			last_pack = pack_cnt;
-			i_stream[0] = 1;
+			if (pack_cnt == -3) {
+				System.out.printf("Empty packet received for sync.\n");
+				i_stream[0] = 0;
+			} else {
+				System.out.printf("Packet #%3d received.\n", pack_cnt);
+				i_stream[0] = 1;
+				last_pack = i_stream[1];
+			}			
 		} else {
 			// No useful byte in a broken pack.
 			i_stream[0] = 1;
