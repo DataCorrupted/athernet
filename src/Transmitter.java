@@ -29,7 +29,7 @@ class Transmitter{
 		// o_file_ = new FileO("./mid", FileO.TEXT01);
 		o_sound_ = new SoundIO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		modulator_ = new OFDM();
+		modulator_ = new OFDM(44100,6000,1000,4);
 	}
 	// Currently it transmits a whole file. 
 	// Let's finish this project first and then we can
@@ -43,7 +43,9 @@ class Transmitter{
 		// Creat an empty package.
 		o_stream[1] = (byte) 253;
 		wave = modulator_.modulate(o_stream);
-		o_sound_.sound(wave);
+		for (int i = 0; i < 8; i++) {
+			o_sound_.sound(wave);
+		}
 
 		// Initial read.
 		int r = i_file_.read(o_stream, head_size_, byte_read);
