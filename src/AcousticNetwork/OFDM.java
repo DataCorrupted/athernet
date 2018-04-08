@@ -181,7 +181,7 @@ public class OFDM{
 			processing_header_.add(sample);
 			if (checkSyncHeader()){
 				state_ ++;                  // next state
-                //System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
+                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
 				return CNFIRMING;
 			}
 			return NOTHING;
@@ -215,7 +215,7 @@ public class OFDM{
 				processing_header_.clear();
 
 				// change state
-//                System.out.println("Header confirmed, goto receiving data");
+                //System.out.println("Header confirmed, goto receiving data");
 				state_ ++;
 			}
 			return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;

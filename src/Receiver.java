@@ -140,9 +140,8 @@ class Receiver{
 		String o_path="./O";
 		String i_path_tmp="./I";
 		boolean from_file = false;
-		double time_limit = 15;
+		double time_limit = 3;
 		int i=0;
-		int ecc = 0;
 		while (i<args.length){
 			if (args[i].equals("-o")){
 				i++;
@@ -169,7 +168,7 @@ class Receiver{
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(1250, time_limit);
+			f = receiver.receiveBytes(250, time_limit);
 			receiver.stopReceive();
 		} else {
 			final String i_path = i_path_tmp;
@@ -179,12 +178,12 @@ class Receiver{
 					catch (Exception e) {;}
 			}});
 			simu_receiver.start();
-			f = receiver.receiveBytes(125, 1);
+			f = receiver.receiveBytes(250, 1);
 			receiver.stopFileStream();
 			simu_receiver.join();
 		}
 		receiver.o_file_.write(f, 0, f.length);
 		CheckIO checker = new CheckIO();
-		System.out.println(checker.summary());
+		//System.out.println(checker.summary());
 	}
 }
