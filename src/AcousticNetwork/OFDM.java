@@ -60,6 +60,9 @@ public class OFDM{
 	// The length (in bits) of a package.
 	private int pack_len_;
 	
+	// Sin wave header.
+	private double[] sin_header_;
+	private int dummy_sin_length_ = 100;
 	public OFDM(){
 		this(44100, 1000, 3000, 4, 44, 128, 440);
 	}
@@ -111,6 +114,7 @@ public class OFDM{
 			}
 		}
 		sync_header_ = generateSyncHeader();
+		generateDummySin();
 	}
 
 	public int getHeaderLength(){
@@ -120,6 +124,14 @@ public class OFDM{
 	public int getBitLength(){
 		return bit_len_;
 	}
+
+    private void generateDummySin(){
+        sin_header_ = new double[dummy_sin_length_];
+        for (int i=0; i< dummy_sin_length_; i++){
+            double t = (i +0.0)/ sample_rate_;
+            sin_header_[i] = 0.5*(Math.sin(2*Math.PI*1000*t));
+        }
+    }
 
 	private double[] generateSyncHeader(){
 		// generate the base function
@@ -275,7 +287,11 @@ public class OFDM{
         	Arrays.stream(sync_header_),
         	Arrays.stream(wave)
         ).toArray();
-
+        output_frame = 
+       	DoubleStream.concat(
+        	Arrays.stream(sin_header_),
+        	Arrays.stream(output_frame)
+        ).toArray();
 
 		return output_frame;
 	}
