@@ -5,7 +5,7 @@ import java.util.*;
 import java.lang.reflect.Array;
 import java.util.stream.DoubleStream;
 
-class OFDM{
+public class OFDM{
 	public static final int NOTHING = 0;
 	public static final int RCVEDDAT = -1;
 	public static final int RCVINGDAT = 2;
@@ -108,6 +108,14 @@ class OFDM{
 			}
 		}
 		sync_header_ = generateSyncHeader();
+	}
+
+	public int getHeaderLength(){
+		return header_len_;
+	}
+
+	public int getBitLength(){
+		return bit_len_;
 	}
 
 	private double[] generateSyncHeader(){
