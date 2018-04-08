@@ -120,7 +120,7 @@ class Receiver{
 		return i_stream;
 	}
 	public byte[] receiveBytes(int byte_cnt, double timeout) throws Exception{
-		byte[] chunk = new byte[byte_cnt];
+		byte[] frame = new byte[byte_cnt];
 		int start_pos;
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
@@ -130,11 +130,11 @@ class Receiver{
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
-					chunk[start_pos + i] = packet[head_size_ + i];
+					frame[start_pos + i] = packet[head_size_ + i];
 				}
 			}
 		}
-		return chunk;
+		return frame;
 	}
 	static public void main(String[] args) throws Exception{
 		String o_path="./O";
