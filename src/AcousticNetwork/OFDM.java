@@ -64,10 +64,13 @@ public class OFDM{
 		this(44100, 1000, 3000, 4, 44, 128, 440);
 	}
 	// Construct OFDM based on given channel count and delta frequency.
-	public OFDM(int sample_rate, double f, double delta, int c){
-		this(sample_rate, f, (c-1) * delta, c, 44, 128, 440);
+	public OFDM(int sample_rate, double start_frequency, 
+				double delta, int channel_cnt){
+		this(sample_rate, start_frequency, 
+			(channel_cnt-1) * delta, channel_cnt, 44, 128, 440);
 	}
-	public OFDM(int sample_rate, double f, double b, int c, 
+	public OFDM(int sample_rate, double start_frequency, 
+				double bandwidth, int channel_cnt, 
 				int bit_lenght, int pack_length, int header_length){
 		// hyper-parameters
 		init_count_down_ = 200;
@@ -76,9 +79,9 @@ public class OFDM{
 		bit_len_ = bit_lenght;
 		header_len_ = header_length;
 		sample_rate_ = sample_rate;
-		start_freq_ = f;
-		bandwidth_ = b;
-		channel_cnt_ = c;
+		start_freq_ = start_frequency;
+		bandwidth_ = bandwidth;
+		channel_cnt_ = channel_cnt;
 
 		state_ = 0;
 		count_down_ = init_count_down_;
@@ -94,7 +97,7 @@ public class OFDM{
 //		if ((c & 0x1) == 1){
 //			System.out.println("Warn[OFDM.OFDM(double, double, double)]: odd channel count given.");
 //		}
-		if (f+b > MAXFREQ || f < MINFREQ){
+		if (start_frequency+bandwidth > MAXFREQ || start_frequency < MINFREQ){
 			System.out.println("Warn[OFDM.OFDM(double, double, double)]: illegal bandwidth and frequency given.");
 		} 
 		freq_arr_ = new double[channel_cnt_];
