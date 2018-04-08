@@ -181,7 +181,7 @@ public class OFDM{
 			processing_header_.add(sample);
 			if (checkSyncHeader()){
 				state_ ++;                  // next state
-                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
+//                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
 				return CNFIRMING;
 			}
 			return NOTHING;
@@ -195,7 +195,7 @@ public class OFDM{
 
 			// call for recheck
 			if (checkSyncHeader()){
-				System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
+//				System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
 				last_bit_counter_ = bit_counter_;
 				unconfirmed_data_.clear();
 				count_down_ = init_count_down_;

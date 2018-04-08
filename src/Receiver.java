@@ -61,7 +61,7 @@ class Receiver{
 		// The file is over, in order to keep the queue moving
 		// we stuck 0 to it.
 		while (!file_stop_){
-			double_q_.put(0.0);
+			double_q_.offer(0.0);
 		}
 	}
 	private void stopFileStream() { file_stop_ = true; }
@@ -170,6 +170,7 @@ class Receiver{
 			receiver.startReceive();
 			f = receiver.receiveBytes(250, time_limit);
 			receiver.stopReceive();
+			receiver.i_sound_.saveDataToFile("recorded.wav");
 		} else {
 			final String i_path = i_path_tmp;
 			Thread simu_receiver = new Thread( new Runnable(){
@@ -183,8 +184,7 @@ class Receiver{
 			simu_receiver.join();
 		}
 		receiver.o_file_.write(f, 0, f.length);
-		receiver.i_sound_.saveDataToFile("recorded.wav");
-		// CheckIO checker = new CheckIO();
-		// System.out.println(checker.summary());
+		CheckIO checker = new CheckIO();
+		System.out.println(checker.summary());
 	}
 }
