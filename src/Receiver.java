@@ -183,7 +183,8 @@ class Receiver{
 			simu_receiver.join();
 		}
 		receiver.o_file_.write(f, 0, f.length);
-		CheckIO checker = new CheckIO();
-		//System.out.println(checker.summary());
+		receiver.i_sound_.saveDataToFile("recorded.wav");
+		// CheckIO checker = new CheckIO();
+		// System.out.println(checker.summary());
 	}
 }
