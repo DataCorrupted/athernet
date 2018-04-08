@@ -2,7 +2,7 @@ import AcousticNetwork.FileO;
 import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundIO;
-import AcousticNetwork.Modulation;
+import AcousticNetwork.OFDM;
 import AcousticNetwork.CheckIO;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,7 +18,7 @@ class Receiver{
 	private int data_size_;
 	private ArrayBlockingQueue<Double> double_q_;
 	private Thread recorder_;
-	private Modulation demodulator_;
+	private OFDM demodulator_;
 	private int sample_rate_;
 	private boolean file_stop_ = false;
 
@@ -41,7 +41,7 @@ class Receiver{
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
 		i_sound_ = new SoundIO(sample_rate, double_q_);
-		demodulator_ = new Modulation(sample_rate);
+		demodulator_ = new OFDM(44100, 6000, 1000, 4);
 	}
 
 	// This function should run in an independent thread.
@@ -61,7 +61,7 @@ class Receiver{
 		// The file is over, in order to keep the queue moving
 		// we stuck 0 to it.
 		while (!file_stop_){
-			double_q_.put(0.0);
+			double_q_.offer(0.0);
 		}
 	}
 	private void stopFileStream() { file_stop_ = true; }
@@ -89,12 +89,12 @@ class Receiver{
 		// I think a better way is to let demodulate tell me what it's seeing
 		// Whether the header is matched then I wait for longer,
 		// or it's receiving nothing, then I timeout.
-		int r = Modulation.NOTHING;
+		int r = OFDM.NOTHING;
 
-		while (r != Modulation.RCVEDDAT && time <= timeout) {
+		while (r != OFDM.RCVEDDAT && time <= timeout) {
 		//while (r != Modulation.RCVEDDAT) {
-			r = demodulator_.demodulation(double_q_.take(), pack_size_);
-			time += (r == Modulation.NOTHING)? 1:0;
+			r = demodulator_.demodulate(double_q_.take());
+			time += (r == OFDM.NOTHING)? 1:0;
 		}
 		i_stream = demodulator_.getPacket();
 		if (i_stream.length == 0){
@@ -106,9 +106,14 @@ class Receiver{
 		crc8_.update(i_stream, 1, pack_size_-1);
 		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%3d received.\n", pack_cnt);
-			last_pack = pack_cnt;
-			i_stream[0] = 1;
+			if (pack_cnt == -3) {
+				System.out.printf("Empty packet received for sync.\n");
+				i_stream[0] = 0;
+			} else {
+				System.out.printf("Packet #%3d received.\n", pack_cnt);
+				i_stream[0] = 1;
+				last_pack = i_stream[1];
+			}			
 		} else {
 			// No useful byte in a broken pack.
 			i_stream[0] = 1;
@@ -120,7 +125,7 @@ class Receiver{
 		return i_stream;
 	}
 	public byte[] receiveBytes(int byte_cnt, double timeout) throws Exception{
-		byte[] chunk = new byte[byte_cnt];
+		byte[] frame = new byte[byte_cnt];
 		int start_pos;
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
@@ -130,19 +135,18 @@ class Receiver{
 			start_pos = pack_cnt * data_size_;
 			for (int i=0; i<data_size_; i++){
 				if (start_pos + i < byte_cnt){
-					chunk[start_pos + i] = packet[head_size_ + i];
+					frame[start_pos + i] = packet[head_size_ + i];
 				}
 			}
 		}
-		return chunk;
+		return frame;
 	}
 	static public void main(String[] args) throws Exception{
 		String o_path="./O";
 		String i_path_tmp="./I";
 		boolean from_file = false;
-		double time_limit = 15;
+		double time_limit = 7;
 		int i=0;
-		int ecc = 0;
 		while (i<args.length){
 			if (args[i].equals("-o")){
 				i++;
@@ -171,6 +175,7 @@ class Receiver{
 			receiver.startReceive();
 			f = receiver.receiveBytes(1250, time_limit);
 			receiver.stopReceive();
+			receiver.i_sound_.saveDataToFile("recorded.wav");
 		} else {
 			final String i_path = i_path_tmp;
 			Thread simu_receiver = new Thread( new Runnable(){
@@ -179,7 +184,7 @@ class Receiver{
 					catch (Exception e) {;}
 			}});
 			simu_receiver.start();
-			f = receiver.receiveBytes(125, 1);
+			f = receiver.receiveBytes(1250, 1);
 			receiver.stopFileStream();
 			simu_receiver.join();
 		}

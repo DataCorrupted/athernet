@@ -2,7 +2,7 @@ import AcousticNetwork.FileI;
 import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundIO;
-import AcousticNetwork.Modulation;
+import AcousticNetwork.OFDM;
 class Transmitter{
 	// packet size no more than 128(byte).
 	private int pack_size_;
@@ -14,7 +14,7 @@ class Transmitter{
 	//private FileO o_file_;
 	private SoundIO o_sound_;
 	private CRC8 crc8_ ;
-	private Modulation modulator_;
+	private OFDM modulator_;
 	public Transmitter() throws Exception{
 		this(44100, 16, "./I");
 	}
@@ -29,7 +29,7 @@ class Transmitter{
 		// o_file_ = new FileO("./mid", FileO.TEXT01);
 		o_sound_ = new SoundIO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		modulator_ = new Modulation(sample_rate);
+		modulator_ = new OFDM(44100,6000,1000,4);
 	}
 	// Currently it transmits a whole file. 
 	// Let's finish this project first and then we can
@@ -42,8 +42,13 @@ class Transmitter{
 		
 		// Creat an empty package.
 		o_stream[1] = (byte) 253;
+		crc8_.update(o_stream, 1, pack_size_-1);
+		o_stream[0] = (byte) crc8_.getValue();
+		crc8_.reset();
 		wave = modulator_.modulate(o_stream);
-		o_sound_.sound(wave);
+		for (int i = 0; i < 8; i++) {
+			o_sound_.sound(wave);
+		}
 
 		// Initial read.
 		int r = i_file_.read(o_stream, head_size_, byte_read);

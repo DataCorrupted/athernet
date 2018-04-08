@@ -70,6 +70,7 @@ public class SoundIO implements Runnable {
 			in.clear();
 			i_line_.read(in.array(), 0, samples_per_bit);
 			wave = byteBufToDouble(in);
+			saveData(wave);
 			for (int i=0; i<wave.length; i++){
 				while (!double_buf_.offer(wave[i])){
 					// Retrive the oldest one from the queue,
