@@ -232,5 +232,5 @@ public class FFT {
 }
 
 
-// Copyright © 2000–2017, Robert Sedgewick and Kevin Wayne. 
+// Copyright AT 2000-2017, Robert Sedgewick and Kevin Wayne.
 // Last updated: Wed Nov 29 05:15:09 EST 2017.
