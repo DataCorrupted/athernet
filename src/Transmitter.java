@@ -42,6 +42,9 @@ class Transmitter{
 		
 		// Creat an empty package.
 		o_stream[1] = (byte) 253;
+		crc8_.update(o_stream, 1, pack_size_-1);
+		o_stream[0] = (byte) crc8_.getValue();
+		crc8_.reset();
 		wave = modulator_.modulate(o_stream);
 		for (int i = 0; i < 8; i++) {
 			o_sound_.sound(wave);
