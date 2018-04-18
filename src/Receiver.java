@@ -41,7 +41,7 @@ class Receiver{
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
 		i_sound_ = new SoundIO(sample_rate, double_q_);
-		demodulator_ = new OFDM(44100, 6000, 1000, 4);
+		demodulator_ = new OFDM(44100, 1000, 1000, 8, pack_size_*8);
 	}
 
 	// This function should run in an independent thread.
@@ -145,7 +145,7 @@ class Receiver{
 		String o_path="./O";
 		String i_path_tmp="./I";
 		boolean from_file = false;
-		double time_limit = 7;
+		double time_limit = 5;
 		int i=0;
 		while (i<args.length){
 			if (args[i].equals("-o")){
@@ -169,7 +169,7 @@ class Receiver{
 			}
 			i++;
 		}
-		Receiver receiver = new Receiver(16, o_path);
+		Receiver receiver = new Receiver(32, o_path);
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();

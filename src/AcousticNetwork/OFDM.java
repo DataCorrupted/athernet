@@ -68,9 +68,9 @@ public class OFDM{
 	}
 	// Construct OFDM based on given channel count and delta frequency.
 	public OFDM(int sample_rate, double start_frequency, 
-				double delta, int channel_cnt){
+				double delta, int channel_cnt, int pack_length){
 		this(sample_rate, start_frequency, 
-			(channel_cnt-1) * delta, channel_cnt, 44, 128, 440);
+			(channel_cnt-1) * delta, channel_cnt, 44, pack_length, 440);
 	}
 	public OFDM(int sample_rate, double start_frequency, 
 				double bandwidth, int channel_cnt, 

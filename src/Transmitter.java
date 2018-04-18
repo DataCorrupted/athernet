@@ -29,7 +29,7 @@ class Transmitter{
 		// o_file_ = new FileO("./mid", FileO.TEXT01);
 		o_sound_ = new SoundIO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		modulator_ = new OFDM(44100,6000,1000,4);
+		modulator_ = new OFDM(44100, 1000, 1000, 8, pack_size_*8);
 	}
 	// Currently it transmits a whole file. 
 	// Let's finish this project first and then we can
@@ -92,7 +92,7 @@ class Transmitter{
 			i++;
 		}
 
-		Transmitter transmitter = new Transmitter(16, file);
+		Transmitter transmitter = new Transmitter(32, file);
 		transmitter.transmit();
 		
 		for (i = 0; i<re_play-1; i++){
