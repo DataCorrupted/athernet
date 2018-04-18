@@ -92,8 +92,11 @@ class Transmitter{
 			i++;
 		}
 
+		double start_time = System.nanoTime() / 1e9;
 		Transmitter transmitter = new Transmitter(32, file);
 		transmitter.transmit();
+		double end_time = System.nanoTime() / 1e9;
+		System.out.println(end_time - start_time);
 		
 		for (i = 0; i<re_play-1; i++){
 			transmitter.o_sound_.sound(transmitter.o_sound_.toArray());
