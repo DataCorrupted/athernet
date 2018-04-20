@@ -109,7 +109,7 @@ class Receiver{
 		double time_limit = 10;
 		int file_length = 6250;
 
-		Receiver receiver = new Receiver();
+		Receiver receiver = new Receiver(256);
 
 		receiver.startReceive();
 		byte[] f = receiver.testReceive(file_length, time_limit);

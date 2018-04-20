@@ -42,17 +42,18 @@ class Transmitter{
 	static public void main(String[] args) throws Exception{
 		FileI i_file_ = new FileI("./I", FileI.TEXT01);
 		
-		double start_time = System.nanoTime() / 1e9;
-		Transmitter transmitter = new Transmitter();
-
 		int head_size = 2;
-		int pack_size = 64;
+		int pack_size = 256;
 		int byte_read = pack_size - head_size;
+
+		Transmitter transmitter = new Transmitter(44100, pack_size);
+
 		byte[] o_stream = new byte[pack_size];
 
 		int r = 0;
 		short pack_cnt = 0;
 
+		double start_time = System.nanoTime() / 1e9;
 		r = i_file_.read(o_stream, head_size, byte_read);
 		while (r != -1){
 			o_stream[1] = (byte) (pack_cnt & 0xff);
