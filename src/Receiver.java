@@ -145,7 +145,8 @@ class Receiver{
 		String o_path="./O";
 		String i_path_tmp="./I";
 		boolean from_file = false;
-		double time_limit = 5;
+		double time_limit = 10;
+		int file_length = 6250;
 		int i=0;
 		while (i<args.length){
 			if (args[i].equals("-o")){
@@ -173,7 +174,7 @@ class Receiver{
 		byte[] f;
 		if (!from_file){
 			receiver.startReceive();
-			f = receiver.receiveBytes(1250, time_limit);
+			f = receiver.receiveBytes(file_length, time_limit);
 			receiver.stopReceive();
 			receiver.i_sound_.saveDataToFile("recorded.wav");
 		} else {
@@ -184,11 +185,10 @@ class Receiver{
 					catch (Exception e) {;}
 			}});
 			simu_receiver.start();
-			f = receiver.receiveBytes(1250, 1);
+			f = receiver.receiveBytes(file_length, 1);
 			receiver.stopFileStream();
 			simu_receiver.join();
 		}
-		receiver.o_file_.write(f, 0, f.length);
 		CheckIO checker = new CheckIO();
 		System.out.println(checker.summary());
 	}
