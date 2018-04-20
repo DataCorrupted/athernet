@@ -1,7 +1,8 @@
 import AcousticNetwork.FileO;
 import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundIO;
+import AcousticNetwork.SoundO;
+import AcousticNetwork.SoundI;
 import AcousticNetwork.OFDM;
 import AcousticNetwork.CheckIO;
 
@@ -12,7 +13,7 @@ class Receiver{
 	// We use file input for now;
 	// private FileI i_file_;
 	private CRC8 crc8_;
-	private SoundIO i_sound_;
+	private SoundI i_sound_;
 	private int pack_size_;
 	private int head_size_ = 2;
 	private int data_size_;
@@ -40,7 +41,7 @@ class Receiver{
 		o_file_ = new FileO(file, FileO.TEXT01);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
-		i_sound_ = new SoundIO(sample_rate, double_q_);
+		i_sound_ = new SoundI(sample_rate, double_q_);
 		demodulator_ = new OFDM(44100, 1000, 1000, 8, pack_size_*8);
 	}
 
@@ -48,7 +49,7 @@ class Receiver{
 	// Do not call it manually.
 	private void receiveFromFile(String i_file) throws Exception{
 		file_stop_ = false;
-		double[] wave = i_sound_.read_file(i_file);
+		double[] wave = i_sound_.readFile(i_file);
 		int wait_time = 0; //(int) 1.0e4/sample_rate_;
 		for (int i=0; i<wave.length; i++){
 			double_q_.put(wave[i]);

@@ -1,7 +1,8 @@
 import AcousticNetwork.FileI;
 import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundIO;
+import AcousticNetwork.SoundO;
+import AcousticNetwork.SoundI;
 import AcousticNetwork.OFDM;
 class Transmitter{
 	// packet size no more than 128(byte).
@@ -12,7 +13,7 @@ class Transmitter{
 	private int head_size_ = 2;
 	private FileI i_file_;
 	//private FileO o_file_;
-	private SoundIO o_sound_;
+	private SoundO o_sound_;
 	private CRC8 crc8_ ;
 	private OFDM modulator_;
 	public Transmitter() throws Exception{
@@ -27,7 +28,7 @@ class Transmitter{
 		i_file_ = new FileI(file, FileI.TEXT01);
 		// No modulation, so no sound now. Using file out.
 		// o_file_ = new FileO("./mid", FileO.TEXT01);
-		o_sound_ = new SoundIO(sample_rate);
+		o_sound_ = new SoundO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		modulator_ = new OFDM(44100, 1000, 1000, 8, pack_size_*8);
 	}
