@@ -35,12 +35,11 @@ public class SoundI implements Runnable {
 		i_line_.start();
 		int samples_per_read = 44;
 		ByteBuffer in = ByteBuffer.allocate(samples_per_read);
-		double[] wave;
 		// Loops until someone interrupts this.
 		while (!stop_){
 			in.clear();
 			i_line_.read(in.array(), 0, samples_per_read);
-			wave = byteBufToDouble(in);
+			double[] wave = byteBufToDouble(in);
 			for (int i=0; i<wave.length; i++){
 				// Update avg power.
 				avg_power_ = avg_power_ * 63 / 64 + wave[i] * wave[i] / 64;

@@ -6,6 +6,7 @@ import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundI;
 import AcousticNetwork.SoundO;
 import AcousticNetwork.OFDM;
+
 class Transmitter{
 	// packet size no more than 128(byte).
 	private int pack_size_;
@@ -43,16 +44,6 @@ class Transmitter{
 		double[] wave;
 		short pack_cnt = 0;
 		
-		// Creat an empty package.
-		// o_stream[1] = (byte) 253;
-		// crc8_.update(o_stream, 1, pack_size_-1);
-		// o_stream[0] = (byte) crc8_.getValue();
-		// crc8_.reset();
-		// wave = modulator_.modulate(o_stream);
-		// for (int i = 0; i < 0; i++) {
-		// 	o_sound_.sound(wave);
-		// }
-
 		// Initial read.
 		int r = i_file_.read(o_stream, head_size_, byte_read);
 
@@ -75,26 +66,13 @@ class Transmitter{
 	}
 	static public void main(String[] args) throws Exception{
 		String file="./I";
-		int i=0;
-		while (i<args.length){
-			if (args[i].equals("-f")){
-				i++;
-				if (i == args.length){
-					System.out.println("Error, no file provided.");
-				} else {
-					file = args[i];
-				}
-			} else {
-				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
-			}
-			i++;
-		}
 
 		double start_time = System.nanoTime() / 1e9;
 		Transmitter transmitter = new Transmitter(64, file);
 		transmitter.transmit();
 		transmitter.o_sound_.drain();
 		double end_time = System.nanoTime() / 1e9;
-		System.out.println(end_time - start_time);
+
+		System.out.println("Time used for transmition: " + (end_time - start_time));
 	}
 }
