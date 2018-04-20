@@ -61,7 +61,6 @@ class Transmitter{
 			// Modulation
 			wave = modulator_.modulate(o_stream);
 			// Sound
-			o_sound_.saveData(wave);
 			o_sound_.sound(wave);
 			// Read next bunch of data.
 			pack_cnt ++;
@@ -74,7 +73,6 @@ class Transmitter{
 	static public void main(String[] args) throws Exception{
 		String file="./I";
 		int i=0;
-		int re_play = 1;
 		while (i<args.length){
 			if (args[i].equals("-f")){
 				i++;
@@ -83,9 +81,6 @@ class Transmitter{
 				} else {
 					file = args[i];
 				}
-			} else if (args[i].equals("--error-correction")) {
-				re_play = 3;
-				System.out.println("Using error correction mode.");
 			} else {
 				System.out.println("Unrecognized command "+ args[i] + ", it will be ignored.");
 			}
@@ -97,12 +92,5 @@ class Transmitter{
 		transmitter.transmit();
 		double end_time = System.nanoTime() / 1e9;
 		System.out.println(end_time - start_time);
-		
-		for (i = 0; i<re_play-1; i++){
-			transmitter.o_sound_.sound(transmitter.o_sound_.toArray());
-		}
-		transmitter.o_sound_.drain();
-
-//		transmitter.o_sound_.saveDataToFile("./std_output.wav");
 	}
 }

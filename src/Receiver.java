@@ -176,7 +176,6 @@ class Receiver{
 			receiver.startReceive();
 			f = receiver.receiveBytes(file_length, time_limit);
 			receiver.stopReceive();
-			receiver.i_sound_.saveDataToFile("recorded.wav");
 		} else {
 			final String i_path = i_path_tmp;
 			Thread simu_receiver = new Thread( new Runnable(){
