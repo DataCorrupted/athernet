@@ -83,10 +83,11 @@ public class CheckIO{
 	}
 	public String summary(){
 		String s = new String();
+		double acc = accuracy();
 		s = s + "\nSummary: \n";
 		s = s + "The length of two files are " + ((isSameLength())? "the same": "differnet")  + "\n";
-		s = s + "The accuracy is of " + accuracy() + "\n";
 		s = s + genGram();
+		s = s + "\nThe accuracy is " + acc + ".\n";
 		if (countDiff() == 0){
 			s = s + "Congratulations! Your packet is safe and SOUND.";
 		}
