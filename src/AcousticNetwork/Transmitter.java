@@ -1,8 +1,10 @@
+package AcousticNetwork;
+
 import AcousticNetwork.FileI;
 import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundO;
 import AcousticNetwork.SoundI;
+import AcousticNetwork.SoundO;
 import AcousticNetwork.OFDM;
 class Transmitter{
 	// packet size no more than 128(byte).

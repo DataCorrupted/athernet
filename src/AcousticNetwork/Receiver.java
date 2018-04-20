@@ -1,8 +1,9 @@
+package AcousticNetwork;
+
 import AcousticNetwork.FileO;
-import AcousticNetwork.FileI;
 import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundO;
 import AcousticNetwork.SoundI;
+import AcousticNetwork.SoundO;
 import AcousticNetwork.OFDM;
 import AcousticNetwork.CheckIO;
 
@@ -10,8 +11,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 class Receiver{
 	private FileO o_file_;
-	// We use file input for now;
-	// private FileI i_file_;
 	private CRC8 crc8_;
 	private SoundI i_sound_;
 	private int pack_size_;
