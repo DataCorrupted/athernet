@@ -52,34 +52,40 @@ public class CheckIO{
 	public String genGram(){ return genGram(MAXLEN); }
 	public String genGram(int length){
 		if (length > MAXLEN) { length = MAXLEN;}
-		String gram = "     A1234567B1234567C1234567D1234567E1234567F1234567G1234567H1234567";
+		String gram = "";
+		boolean if_print = false;
 		int k = 0;
 		int line_width = 8*8;
 		for (int i = 0; i<largeSize() / line_width; i++){
-			boolean if_print = false;
+			boolean if_print_line = false;
 			String tmp = "\n" + String.format("%04d|", i);
 			for (int j=0; j<line_width; j++){
 				if (k < diff_list_.size() && diff_list_.get(k) == i*line_width + j){
 					tmp = tmp + "x";
-					if_print = true;
+					if_print_line = true;
 					k ++;
 				} else if (i > smallSize()){
 					tmp = tmp + "l";
-					if_print = true;
+					if_print_line = true;
 				} else {
 					tmp = tmp + " ";
 				}
 			}
-			if (if_print) { gram = gram + tmp; }
+			if (if_print_line) { gram = gram + tmp; }
 		}
-		return gram + "\n";
+		if (gram == ""){
+			return gram;
+		} else {
+			return 
+				"Below is a detailed gram of where they are differnet: \n     A1234567B1234567C1234567D1234567E1234567F1234567G1234567H1234567" 
+			     + gram + "\n";
+		}
 	}
 	public String summary(){
 		String s = new String();
-		s = s + "Summary: \n";
+		s = s + "\nSummary: \n";
 		s = s + "The length of two files are " + ((isSameLength())? "the same": "differnet")  + "\n";
 		s = s + "The accuracy is of " + accuracy() + "\n";
-		s = s + "Below is a detailed gram of where they are differnet: \n";
 		s = s + genGram();
 		if (countDiff() == 0){
 			s = s + "Congratulations! Your packet is safe and SOUND.";

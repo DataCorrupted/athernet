@@ -90,6 +90,7 @@ class Transmitter{
 		double start_time = System.nanoTime() / 1e9;
 		Transmitter transmitter = new Transmitter(64, file);
 		transmitter.transmit();
+		transmitter.o_sound_.drain();
 		double end_time = System.nanoTime() / 1e9;
 		System.out.println(end_time - start_time);
 	}
