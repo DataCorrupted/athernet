@@ -3,7 +3,6 @@ package AcousticNetwork;
 import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
 import AcousticNetwork.SoundI;
-import AcousticNetwork.SoundO;
 import AcousticNetwork.OFDM;
 import AcousticNetwork.CheckIO;
 
@@ -34,7 +33,7 @@ class Receiver{
 	private int data_size_;
 
 	public Receiver() throws Exception{
-		this(44100, 16, 0.1);
+		this(44100, 64, 0.1);
 	}
 	public Receiver(int pack_size) throws Exception{
 		this(44100, pack_size, 0.1);
@@ -94,12 +93,12 @@ class Receiver{
 		crc8_.update(i_stream, 1, pack_size_-1);
 		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%3d received.\n", pack_cnt);
+			System.out.printf("Packet #%4d received.\n", pack_cnt);
 			i_stream[0] = 1;
 		} else {
 			// No useful byte in a broken pack.
 			i_stream[0] = 0;
-			System.out.printf("Packet #%3d receive failed. CRC8 checksum wrong.\n", pack_cnt);
+			System.out.printf("Packet #%4d receive failed. CRC8 checksum wrong.\n", pack_cnt);
 		}
 		crc8_.reset();
 		return i_stream;
@@ -110,7 +109,7 @@ class Receiver{
 		double time_limit = 10;
 		int file_length = 6250;
 
-		Receiver receiver = new Receiver(64);
+		Receiver receiver = new Receiver();
 
 		receiver.startReceive();
 		byte[] f = receiver.testReceive(file_length, time_limit);

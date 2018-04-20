@@ -1,75 +1,67 @@
 package AcousticNetwork;
 
 import AcousticNetwork.FileI;
-import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundI;
 import AcousticNetwork.SoundO;
 import AcousticNetwork.OFDM;
 
 class Transmitter{
-	// packet size no more than 128(byte).
-	private int pack_size_;
-	// The first 4 byte of a packet is header.
-	// pack[0] = crc8
-	// pack[1] = pack id.
-	private int head_size_ = 2;
-	private FileI i_file_;
-	//private FileO o_file_;
-	private SoundO o_sound_;
+	// Add given data's crc sum.
 	private CRC8 crc8_ ;
+
+	// Modulate given data.
 	private OFDM modulator_;
+	
+	// Transmit the sound.
+	private SoundO o_sound_;
+	
 	public Transmitter() throws Exception{
-		this(44100, 16, "./I");
+		this(44100, 64);
 	}
-	public Transmitter(int pack_size, String file) throws Exception{
-		this(44100, pack_size, file);
-	}
+
+	// TODO: depreciate packet_size once ernest finishes.
 	public Transmitter(
-	  int sample_rate, int packet_size, String file) throws Exception{
-	  	pack_size_ = packet_size;
-		i_file_ = new FileI(file, FileI.TEXT01);
-		// No modulation, so no sound now. Using file out.
-		// o_file_ = new FileO("./mid", FileO.TEXT01);
+	  int sample_rate, int packet_size) throws Exception{
 		o_sound_ = new SoundO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		modulator_ = new OFDM(44100, 1000, 1000, 8, pack_size_*8);
+		modulator_ = new OFDM(44100, 1000, 1000, 8, packet_size*8);
 	}
-	// Currently it transmits a whole file. 
-	// Let's finish this project first and then we can
-	// Talk about changes.
-	public void transmit() throws Exception{
-		int byte_read = pack_size_ - head_size_;
-		byte[] o_stream = new byte[pack_size_];
-		double[] wave;
-		short pack_cnt = 0;
-		
-		// Initial read.
-		int r = i_file_.read(o_stream, head_size_, byte_read);
 
+	public void transmitOnePack(byte[] out) throws Exception{
+		// Add checksum
+		crc8_.update(out, 1, out.length-1);
+		out[0] = (byte) crc8_.getValue();
+		// Modulation
+		double[] wave = modulator_.modulate(out);
+		// Sound
+		o_sound_.sound(wave);
+		// Reset CRC8
+		crc8_.reset();	
+	}
+
+	static public void main(String[] args) throws Exception{
+		FileI i_file_ = new FileI("./I", FileI.TEXT01);
+		
+		double start_time = System.nanoTime() / 1e9;
+		Transmitter transmitter = new Transmitter();
+
+		int head_size = 2;
+		int pack_size = 64;
+		int byte_read = pack_size - head_size;
+		byte[] o_stream = new byte[pack_size];
+
+		int r = 0;
+		short pack_cnt = 0;
+
+		r = i_file_.read(o_stream, head_size, byte_read);
 		while (r != -1){
 			o_stream[1] = (byte) (pack_cnt & 0xff);
-			// Add checksum
-			crc8_.update(o_stream, 1, pack_size_-1);
-			o_stream[0] = (byte) crc8_.getValue();
-			// Modulation
-			wave = modulator_.modulate(o_stream);
-			// Sound
-			o_sound_.sound(wave);
+			transmitter.transmitOnePack(o_stream);
 			// Read next bunch of data.
 			pack_cnt ++;
-			r = i_file_.read(o_stream, head_size_, byte_read);
-			// Reset CRC8
-			crc8_.reset();
-			Thread.sleep(10);
+			r = i_file_.read(o_stream, head_size, byte_read);
 		}
-	}
-	static public void main(String[] args) throws Exception{
-		String file="./I";
-
-		double start_time = System.nanoTime() / 1e9;
-		Transmitter transmitter = new Transmitter(64, file);
-		transmitter.transmit();
+		
 		transmitter.o_sound_.drain();
 		double end_time = System.nanoTime() / 1e9;
 
