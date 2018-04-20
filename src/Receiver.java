@@ -188,6 +188,7 @@ class Receiver{
 			receiver.stopFileStream();
 			simu_receiver.join();
 		}
+		receiver.o_file_.write(f, 0, f.length);
 		CheckIO checker = new CheckIO();
 		System.out.println(checker.summary());
 	}

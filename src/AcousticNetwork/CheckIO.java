@@ -52,22 +52,25 @@ public class CheckIO{
 	public String genGram(){ return genGram(MAXLEN); }
 	public String genGram(int length){
 		if (length > MAXLEN) { length = MAXLEN;}
-		String gram = "    A1234567B1234567C1234567D1234567E1234567F1234567G1234567";
+		String gram = "     A1234567B1234567C1234567D1234567E1234567F1234567G1234567H1234567";
 		int k = 0;
-		int j = 0;
-		for (int i = 0; i<largeSize(); i++){
-			if (i % length == 0){
-				gram = gram + "\n" + String.format("%03d ", j);
-				j++;
+		int line_width = 8*8;
+		for (int i = 0; i<largeSize() / line_width; i++){
+			boolean if_print = false;
+			String tmp = "\n" + String.format("%04d|", i);
+			for (int j=0; j<line_width; j++){
+				if (k < diff_list_.size() && diff_list_.get(k) == i*line_width + j){
+					tmp = tmp + "x";
+					if_print = true;
+					k ++;
+				} else if (i > smallSize()){
+					tmp = tmp + "l";
+					if_print = true;
+				} else {
+					tmp = tmp + " ";
+				}
 			}
-			if (k < diff_list_.size() && diff_list_.get(k) == i){
-				gram = gram + "x";
-				k ++;
-			} else if (i > smallSize()){
-				gram = gram + "l";
-			} else {
-				gram = gram + " ";
-			}
+			if (if_print) { gram = gram + tmp; }
 		}
 		return gram + "\n";
 	}
