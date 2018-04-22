@@ -33,17 +33,16 @@ class Receiver{
 	private int data_size_;
 
 	public Receiver() throws Exception{
-		this(44100, 64, 0.1);
+		this(44100, 0.1, 4000);
 	}
-	public Receiver(int pack_size) throws Exception{
-		this(44100, pack_size, 0.1);
+	public Receiver(double timeout) throws Exception{
+		this(44100, 0.1, timeout);
 	}
+	
 	// buf_len: for how long(in seconds) should the buffer contain history sound data.
 	public Receiver(
-	  int sample_rate, int pack_size, double buf_len) throws Exception{
+	  int sample_rate, double buf_len, double timeout) throws Exception{
 	  	sample_rate_ = sample_rate;
-		pack_size_ = pack_size;
-		data_size_ = pack_size_ - head_size_;
 
 		double_q_ = new ArrayBlockingQueue<Double>((int) (sample_rate * buf_len));
 
@@ -54,10 +53,7 @@ class Receiver{
 
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		
-		// 90% of a pack's time for timeout.
-		timeout_ = 
-			(demodulator_.getHeaderLength() + 
-			 demodulator_.getBitLength() * pack_size_ * 8) * 0.9;
+		timeout_ = timeout
 	}
 	public void startReceive() throws Exception{	
 		recorder_.start();
@@ -68,9 +64,6 @@ class Receiver{
 	}
 
 	public byte[] receiveOnePacket() throws Exception{
-		int byte_read = data_size_;
-		byte[] i_stream = new byte[pack_size_];
-
 		int time = 0;
 		// Offer double to demodulate until a packet is offered.
 		// I think a better way is to let demodulate tell me what it's seeing
@@ -83,14 +76,14 @@ class Receiver{
 			r = demodulator_.demodulate(double_q_.take());
 			time += (r == OFDM.NOTHING)? 1:0;
 		}
-		i_stream = demodulator_.getPacket();
+		byte[] i_stream = demodulator_.getPacket();
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
 			System.out.println("No packet found, possibly time out when waiting for one.");
-			return new byte[pack_size_];
+			return new byte[0];
 		}
 		// Initial read.
-		crc8_.update(i_stream, 1, pack_size_-1);
+		crc8_.update(i_stream, 1, i_stream.length-1);
 		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			System.out.printf("Packet #%4d received.\n", pack_cnt);
