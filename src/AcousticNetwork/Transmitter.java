@@ -45,7 +45,7 @@ class Transmitter{
 		int pack_size = 256;
 		int byte_read = pack_size - head_size;
 
-		Transmitter transmitter = new Transmitter(44100, pack_size);
+		Transmitter transmitter = new Transmitter();
 
 		byte[] o_stream = new byte[pack_size];
 

@@ -38,7 +38,7 @@ class Receiver{
 	public Receiver(double timeout) throws Exception{
 		this(44100, 0.1, timeout);
 	}
-	
+
 	// buf_len: for how long(in seconds) should the buffer contain history sound data.
 	public Receiver(
 	  int sample_rate, double buf_len, double timeout) throws Exception{
@@ -53,7 +53,7 @@ class Receiver{
 
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		
-		timeout_ = timeout
+		timeout_ = timeout;
 	}
 	public void startReceive() throws Exception{	
 		recorder_.start();
