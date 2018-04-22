@@ -1,9 +1,9 @@
-package AcousticNetwork;
+package athernet.physical;
 
-import AcousticNetwork.FileI;
-import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundO;
-import AcousticNetwork.OFDM;
+import athernet.util.FileI;
+import athernet.physical.CRC8;
+import athernet.physical.SoundO;
+import athernet.physical.OFDM;
 
 class Transmitter{
 	// Add given data's crc sum.
@@ -42,7 +42,7 @@ class Transmitter{
 		FileI i_file_ = new FileI("./I", FileI.TEXT01);
 		
 		int head_size = 2;
-		int pack_size = 64;
+		int pack_size = 128;
 		int byte_read = pack_size - head_size;
 
 		Transmitter transmitter = new Transmitter();

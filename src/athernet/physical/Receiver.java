@@ -1,10 +1,11 @@
-package AcousticNetwork;
+package athernet.physical;
 
-import AcousticNetwork.FileO;
-import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundI;
-import AcousticNetwork.OFDM;
-import AcousticNetwork.CheckIO;
+import athernet.util.FileO;
+import athernet.util.CheckIO;
+import athernet.physical.CRC8;
+import athernet.physical.SoundI;
+import athernet.physical.OFDM;
+
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -81,14 +82,13 @@ class Receiver{
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, i_stream.length-1);
-		int pack_cnt = i_stream[1];
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%4d received.\n", pack_cnt);
+			System.out.printf("Packet #%4d received.\n", i_stream[1]);
 			i_stream[0] = 1;
 		} else {
 			// No useful byte in a broken pack.
 			i_stream = new byte[0];
-			System.out.printf("Packet #%4d receive failed. CRC8 checksum wrong.\n", pack_cnt);
+			System.out.printf("Failed to receive packet. CRC8 checksum wrong.\n");
 		}
 		crc8_.reset();
 		return i_stream;

@@ -1,8 +1,8 @@
-package AcousticNetwork;
+package athernet.util;
 
 import java.io.File;
-import AcousticNetwork.FileI;
-import AcousticNetwork.FileO;
+import athernet.util.FileI;
+import athernet.util.FileO;
 
 public class FileIO{
 	public static final int BIN = 0;

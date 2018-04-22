@@ -1,4 +1,4 @@
-package AcousticNetwork;
+package athernet.physical;
 
 import java.util.List;
 import java.util.*;
@@ -59,21 +59,23 @@ public class OFDM{
 	// The length (in bits) of a package.
 	private int pack_len_;
 
+	// Max pack length(in bytes)
+	private int max_len_;
 	// Sin wave header.
 	private double[] sin_header_;
 	private int dummy_sin_length_ = 100;
 	public OFDM(){
-		this(44100, 1000, 3000, 4, 44, 440);
+		this(44100, 1000, 3000, 4, 44, 440, 1024);
 	}
 	// Construct OFDM based on given channel count and delta frequency.
 	public OFDM(int sample_rate, double start_frequency, 
 				double delta, int channel_cnt){
 		this(sample_rate, start_frequency, 
-			(channel_cnt-1) * delta, channel_cnt, 44, 440);
+			(channel_cnt-1) * delta, channel_cnt, 44, 440, 1024);
 	}
 	public OFDM(int sample_rate, double start_frequency, 
 				double bandwidth, int channel_cnt, 
-				int bit_lenght, int header_length){
+				int bit_lenght, int header_length, int max_len){
 		// hyper-parameters
 		init_count_down_ = 200;
 
@@ -84,6 +86,7 @@ public class OFDM{
 		start_freq_ = start_frequency;
 		bandwidth_ = bandwidth;
 		channel_cnt_ = channel_cnt;
+		max_len_ = max_len;
 
 		state_ = 0;
 		count_down_ = init_count_down_;
@@ -225,6 +228,12 @@ public class OFDM{
 			// calculate the length field
 			if ((pack_len_ == -1) && (processing_data_.size() >= 8 * bit_len_ / channel_cnt_)){
 				pack_len_ = decode_length();
+				// Prevent too long pack.
+				if (pack_len_ >= max_len_){
+					state_ = 0;
+					pack_len_ = -1;
+					return NOTHING;
+				}
 				// clear the processing buffer
 				for (int i = 0; i < (8 * bit_len_ / channel_cnt_); i++ ){
 					processing_data_.remove(0);
@@ -285,7 +294,7 @@ public class OFDM{
 			length_boolean[i] = packet_boolean[i];
 		}
 		byte[] tmp = convertBoolsToBytes(length_boolean);
-		return (int)Math.pow(2,tmp[0]&0xFF);
+		return (int)Math.pow(2,tmp[0]&0x7F);
 	}
 
 	public double[] modulate(byte[] byte_data){
@@ -486,7 +495,7 @@ public class OFDM{
 			0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 
 			0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20
 		};
-		OFDM ofdm = new OFDM(44100, 1000, 10000, 8, 44, 440);;
+		OFDM ofdm = new OFDM(44100, 1000, 10000, 8, 44, 440, 1024);
 		double[] wave = ofdm.modulate(data);
 
 		for (int i=0; i<wave.length; i++){
