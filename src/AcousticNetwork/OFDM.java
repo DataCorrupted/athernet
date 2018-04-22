@@ -285,7 +285,7 @@ public class OFDM{
 			length_boolean[i] = packet_boolean[i];
 		}
 		byte[] tmp = convertBoolsToBytes(length_boolean);
-		return tmp[0];
+		return (int)Math.pow(2,tmp[0]);
 	}
 
 	public double[] modulate(byte[] byte_data){
@@ -295,7 +295,7 @@ public class OFDM{
 		}
 
 		// encode the length
-		byte data_length = (byte)byte_data.length;
+		byte data_length = (byte)(Math.log(byte_data.length)/Math.log(2));
 
 		byte[] new_byte_data = new byte[byte_data.length + 1];
 		new_byte_data[0] = data_length;
