@@ -1,4 +1,4 @@
-package AcousticNetwork;
+package AcousticNetwork.util;
 import AcousticNetwork.FileI;
 import AcousticNetwork.FileO;
 

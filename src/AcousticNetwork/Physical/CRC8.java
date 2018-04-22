@@ -4,7 +4,7 @@
  * I used it in this project. I just changed the code style and claimed it in my package.
  * Such a coincident that initially my class called CRC8 too. :)
  */
-package AcousticNetwork;
+package AcousticNetwork.Physical;
 import java.util.zip.Checksum;
 
 public class CRC8 implements Checksum{

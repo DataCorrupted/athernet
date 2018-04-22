@@ -1,4 +1,4 @@
-package AcousticNetwork;
+package AcousticNetwork.Physical;
 
 import AcousticNetwork.FileO;
 import AcousticNetwork.CRC8;

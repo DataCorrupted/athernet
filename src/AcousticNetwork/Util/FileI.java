@@ -1,4 +1,4 @@
-package AcousticNetwork;
+package AcousticNetwork.util;
 
 import AcousticNetwork.FileIO;
 import java.io.FileInputStream;
