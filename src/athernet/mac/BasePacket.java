@@ -1,4 +1,4 @@
-package athernet.macLayer;
+package athernet.mac;
 
 public class BasePacket {
     public final byte TYPE_ACK = 0;
@@ -19,6 +19,5 @@ public class BasePacket {
 
     public BasePacket(byte[] frame){
         mac_addr_ = (byte)(frame[0] >> 6);
-
     }
 }
