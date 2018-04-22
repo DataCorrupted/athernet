@@ -1,9 +1,9 @@
-package AcousticNetwork.Physical;
+package athernet.physical;
 
-import AcousticNetwork.FileI;
-import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundO;
-import AcousticNetwork.OFDM;
+import athernet.util.FileI;
+import athernet.physical.CRC8;
+import athernet.physical.SoundO;
+import athernet.physical.OFDM;
 
 class Transmitter{
 	// Add given data's crc sum.

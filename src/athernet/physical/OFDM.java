@@ -1,4 +1,4 @@
-package AcousticNetwork.Physical;
+package athernet.physical;
 
 import java.util.List;
 import java.util.*;

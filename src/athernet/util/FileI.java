@@ -1,6 +1,6 @@
-package AcousticNetwork.util;
+package athernet.util;
 
-import AcousticNetwork.FileIO;
+import athernet.util.FileIO;
 import java.io.FileInputStream;
 
 public class FileI extends FileIO {

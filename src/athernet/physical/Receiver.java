@@ -1,10 +1,11 @@
-package AcousticNetwork.Physical;
+package athernet.Physical;
 
-import AcousticNetwork.FileO;
-import AcousticNetwork.CRC8;
-import AcousticNetwork.SoundI;
-import AcousticNetwork.OFDM;
-import AcousticNetwork.CheckIO;
+import athernet.util.FileO;
+import athernet.util.CheckIO;
+import athernet.physical.CRC8;
+import athernet.physical.SoundI;
+import athernet.physical.OFDM;
+
 
 import java.util.concurrent.ArrayBlockingQueue;
 

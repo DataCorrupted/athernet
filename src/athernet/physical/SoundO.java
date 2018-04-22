@@ -1,4 +1,4 @@
-package AcousticNetwork.Physical;
+package athernet.physical;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

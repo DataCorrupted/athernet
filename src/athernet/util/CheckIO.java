@@ -1,6 +1,6 @@
-package AcousticNetwork.util;
-import AcousticNetwork.FileI;
-import AcousticNetwork.FileO;
+package athernet.util;
+import athernet.util.FileI;
+import athernet.util.FileO;
 
 import java.util.ArrayList;
 
