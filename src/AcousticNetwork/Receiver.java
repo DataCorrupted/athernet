@@ -28,12 +28,10 @@ class Receiver{
 	private double timeout_;
 
 	private int sample_rate_;
-	private int pack_size_;
 	private int head_size_ = 2;
-	private int data_size_;
 
 	public Receiver() throws Exception{
-		this(44100, 0.1, 4000);
+		this(44100, 0.1, 3000);
 	}
 	public Receiver(double timeout) throws Exception{
 		this(44100, 0.1, timeout);
@@ -80,7 +78,7 @@ class Receiver{
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
 			System.out.println("No packet found, possibly time out when waiting for one.");
-			return new byte[0];
+			return new byte[8];
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, i_stream.length-1);
@@ -121,8 +119,9 @@ class Receiver{
 			byte[] packet = receiveOnePacket();
 			if (packet[0] == 0) { continue; }
 			int pack_cnt = packet[1];	
-			start_pos = pack_cnt * data_size_;
-			for (int i=0; i<data_size_; i++){
+			int data_size = packet.length - head_size_;
+			start_pos = pack_cnt * data_size;
+			for (int i=0; i<data_size; i++){
 				if (start_pos + i < byte_cnt){
 					frame[start_pos + i] = packet[head_size_ + i];
 				}

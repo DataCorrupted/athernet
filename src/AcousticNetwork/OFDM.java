@@ -493,7 +493,6 @@ public class OFDM{
 			ofdm.demodulate(wave[i]);
 		}
 
-
 		byte[] recv_dat = ofdm.getPacket();
 		for (int i=0; i<data.length; i++){
 			System.out.println(recv_dat[i] + " " + data[i] + " " + (recv_dat[i] == data[i]));
