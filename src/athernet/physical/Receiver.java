@@ -1,4 +1,4 @@
-package athernet.Physical;
+package athernet.physical;
 
 import athernet.util.FileO;
 import athernet.util.CheckIO;
