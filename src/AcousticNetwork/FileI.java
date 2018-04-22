@@ -1,17 +1,15 @@
 package AcousticNetwork;
 
+import AcousticNetwork.FileIO;
 import java.io.FileInputStream;
 
-public class FileI{
-	public static final int BIN = 0;
-	public static final int TEXT01 = 1;
-	
-	private int file_format_;
+public class FileI extends FileIO {
+
 	private FileInputStream i_file_; 
 
 	public FileI(String path, int file_format) throws Exception{
-		file_format_ = file_format;
-		i_file_ = new FileInputStream(path);
+		super(path, file_format);
+		i_file_ = new FileInputStream(file_);
 	}
 
 	public int read(byte[] in, int offset, int len) throws Exception{
@@ -29,20 +27,7 @@ public class FileI{
 				text01ToBits(i_bytes, in, offset, r);
 			}
 		}
-//		System.out.print(r + " bytes read: \n\"\"\"\n");
-//		for (int i=offset; i<r+offset; i++){
-//			System.out.print((char) in[i]);
-//		}
-//		System.out.print("\n\"\"\"\n");
 		return r;
 	}
 
-	private void text01ToBits(byte[] src, byte[] dst, int offset, int len){
-		for (int i=0; i<len; i++){
-			for (int j=0; j<8; j++){
-				dst[i + offset] = (byte) (dst[i + offset] << 1);
-				dst[i + offset] += (src[(i<<3)+j] == (byte)'1')? 1: 0;
-			}
-		}
-	}
 }
