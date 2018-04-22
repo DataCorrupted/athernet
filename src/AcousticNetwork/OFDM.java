@@ -223,11 +223,15 @@ public class OFDM{
 			processing_data_.add(sample);
 
 			// calculate the length field
-			if ((pack_len_ == -1) && (processing_data_.size() >= 8 * 44 / channel_cnt_)){
+			if ((pack_len_ == -1) && (processing_data_.size() >= 8 * bit_len_ / channel_cnt_)){
 				pack_len_ = decode_length();
+				// clear the processing buffer
+				for (int i = 0; i < (8 * bit_len_ / channel_cnt_); i++ ){
+					processing_data_.remove(0);
+				}
 			}
 
-			if (processing_data_.size() < (pack_len_+1) * 8 * bit_len_ / channel_cnt_) {
+			if (processing_data_.size() < pack_len_ * 8 * bit_len_ / channel_cnt_) {
 				return RCVINGDAT;               // not enough data to decode
 			}
 
@@ -239,7 +243,7 @@ public class OFDM{
 			for (int i = 0; i < processing_data_.size(); i++){
 				data_buffer[i] = processing_data_.get(i);
 			}
-			boolean[] packet_boolean = waveToData(data_buffer, (pack_len_+1)*8);
+			boolean[] packet_boolean = waveToData(data_buffer, pack_len_*8);
 
 			// reserve last several bits for searching window for next packet
 			int recheck_length = 100;
@@ -251,11 +255,12 @@ public class OFDM{
 			pack_len_ = -1;
 
 			// remove the first one (length field and return)
-			byte[] packet_tmp_ = convertBoolsToBytes(packet_boolean);
-			packet_ = new byte[packet_tmp_.length - 1];
-			for (int i = 0; i < packet_.length; i++){
-				packet_[i] = packet_tmp_[i+1];
-			}
+			packet_ = convertBoolsToBytes(packet_boolean);
+//			byte[] packet_tmp_ = convertBoolsToBytes(packet_boolean);
+//			packet_ = new byte[packet_tmp_.length - 1];
+//			for (int i = 0; i < packet_.length; i++){
+//				packet_[i] = packet_tmp_[i+1];
+//			}
 
 			return RCVEDDAT;                // new data packet is ready
 		} else {
