@@ -2,7 +2,6 @@ package AcousticNetwork;
 
 import java.util.List;
 import java.util.*;
-import java.lang.reflect.Array;
 import java.util.stream.DoubleStream;
 
 public class OFDM{
@@ -59,7 +58,7 @@ public class OFDM{
 
 	// The length (in bits) of a package.
 	private int pack_len_;
-	
+
 	// Sin wave header.
 	private double[] sin_header_;
 	private int dummy_sin_length_ = 100;
@@ -78,7 +77,7 @@ public class OFDM{
 		// hyper-parameters
 		init_count_down_ = 200;
 
-		pack_len_ = pack_length;
+		pack_len_ = -1;
 		bit_len_ = bit_lenght;
 		header_len_ = header_length;
 		sample_rate_ = sample_rate;
@@ -222,7 +221,13 @@ public class OFDM{
 		} else if (state_ == 2){
 			// add the data to the buffer
 			processing_data_.add(sample);
-			if (processing_data_.size() < pack_len_ * bit_len_ / channel_cnt_) {
+
+			// calculate the length field
+			if ((pack_len_ == -1) && (processing_data_.size() >= 8 * 44 / channel_cnt_)){
+				pack_len_ = decode_length();
+			}
+
+			if (processing_data_.size() < (pack_len_+1) * 8 * bit_len_ / channel_cnt_) {
 				return RCVINGDAT;               // not enough data to decode
 			}
 
@@ -234,7 +239,7 @@ public class OFDM{
 			for (int i = 0; i < processing_data_.size(); i++){
 				data_buffer[i] = processing_data_.get(i);
 			}
-			boolean[] packet_boolean = waveToData(data_buffer);
+			boolean[] packet_boolean = waveToData(data_buffer, (pack_len_+1)*8);
 
 			// reserve last several bits for searching window for next packet
 			int recheck_length = 100;
@@ -243,18 +248,78 @@ public class OFDM{
 			}
 
 			processing_data_.clear();
-			packet_ = convertBoolsToBytes(packet_boolean);
+			pack_len_ = -1;
+
+			// remove the first one (length field and return)
+			byte[] packet_tmp_ = convertBoolsToBytes(packet_boolean);
+			packet_ = new byte[packet_tmp_.length - 1];
+			for (int i = 0; i < packet_.length; i++){
+				packet_[i] = packet_tmp_[i+1];
+			}
+
 			return RCVEDDAT;                // new data packet is ready
 		} else {
-			throw new RuntimeException(new String("Invalid state"));
+			throw new RuntimeException("Invalid state");
 		}
 	}
 
+	// Decode the length field
+	// The length field is always in the font of processing_data
+	private int decode_length(){
+		// only give necessary data to waveToData()
+		double[] length_buffer = new double[8*bit_len_/channel_cnt_];
+		for (int i = 0; i < length_buffer.length; i++){
+			length_buffer[i] = processing_data_.get(i);
+		}
+
+
+		boolean[] packet_boolean = waveToData(length_buffer,8);
+
+		boolean[] length_boolean = new boolean[8];
+		for (int i = 0; i < 8; i++){
+			length_boolean[i] = packet_boolean[i];
+		}
+		byte[] tmp = convertBoolsToBytes(length_boolean);
+		return tmp[0];
+	}
+
+	public double[] modulate(byte[] byte_data){
+		// check the length of the input array
+		if (byte_data.length > 256){
+			throw new RuntimeException("OFDM Modulate: the length of input data array is too huge");
+		}
+
+		// encode the length
+		byte data_length = (byte)byte_data.length;
+
+		byte[] new_byte_data = new byte[byte_data.length + 1];
+		new_byte_data[0] = data_length;
+		System.arraycopy(byte_data,0,new_byte_data,1,byte_data.length);
+
+		double[] wave = modulateWithLength(new_byte_data);
+
+		// add the sync header part to the frame and return modulated signal
+		double[] output_frame =
+				DoubleStream.concat(
+						Arrays.stream(sync_header_),
+						Arrays.stream(wave)
+				).toArray();
+		output_frame =
+				DoubleStream.concat(
+						Arrays.stream(sin_header_),
+						Arrays.stream(output_frame)
+				).toArray();
+
+		return output_frame;
+	}
+
+
 	// @input: 		wave, given a received data
 	// @output 		transform that data to bits.
-	private boolean[] waveToData(double[] wave){
-		boolean[] data = new boolean[pack_len_];
-		int chunk_cnt = pack_len_ / channel_cnt_;
+	// pack_len = wave / bit_len (44)
+	private boolean[] waveToData(double[] wave, int pack_len){
+		boolean[] data = new boolean[pack_len];
+		int chunk_cnt = pack_len / channel_cnt_;
 		double[] sub_wave = new double[bit_len_];
 		for (int i = 0; i<chunk_cnt; i++){
 			System.arraycopy(wave, i*bit_len_, sub_wave, 0, bit_len_);
@@ -266,10 +331,12 @@ public class OFDM{
 		return data;		
 	}
 
-	public double[] modulate(byte[] byte_data){
-		boolean[] data = byteToBoolean(byte_data);
 
-		int chunk_cnt = pack_len_ / channel_cnt_;
+	// Modulate the data (length has been encoded and put to the front of the data)
+	private double[] modulateWithLength(byte[] byte_data){
+		boolean[] data = bytesToBools(byte_data);
+
+		int chunk_cnt = data.length / channel_cnt_;
 		double[] wave = new double[chunk_cnt * bit_len_];
 		for (int i=0; i<chunk_cnt; i++){
 			double[] chunk_wave = new double[bit_len_];
@@ -279,24 +346,14 @@ public class OFDM{
 			}
 			System.arraycopy(chunk_wave, 0, wave, i*bit_len_, bit_len_);
 		}
+
 		// Normalize.
 		wave = mul(1.0/channel_cnt_, wave);
-        // add the sync header part to the frame and return modulated signal
-        double[] output_frame = 
-       	DoubleStream.concat(
-        	Arrays.stream(sync_header_),
-        	Arrays.stream(wave)
-        ).toArray();
-        output_frame = 
-       	DoubleStream.concat(
-        	Arrays.stream(sin_header_),
-        	Arrays.stream(output_frame)
-        ).toArray();
 
-		return output_frame;
+		return wave;
 	}
 
-	private boolean[] byteToBoolean(byte[] byte_data){
+	private boolean[] bytesToBools(byte[] byte_data){
 		boolean[] data = new boolean[byte_data.length << 3];
 		for (int i=0; i<byte_data.length; i++){
 			int mask = 0x80;
@@ -368,7 +425,6 @@ public class OFDM{
 		// TODO(jianxiong cai): for some reason, reference program said divided by 200
 		sync_power = sync_power / 200;
 		sync_power_debug.add(sync_power);
-		// TODO: enforce other condition
 		if ( (sync_power > (power_energy_ * power_energy_)) && (sync_power > header_score_) && (sync_power > 0.05)){
 			header_score_ = sync_power;
 			return true;
@@ -425,7 +481,7 @@ public class OFDM{
 			0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 
 			0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20
 		};
-		OFDM ofdm = new OFDM(44100, 1000, 3000, 4, 44, 128, 440);;
+		OFDM ofdm = new OFDM(44100, 1000, 10000, 8, 44, 128, 440);;
 		double[] wave = ofdm.modulate(data);
 
 		for (int i=0; i<wave.length; i++){
