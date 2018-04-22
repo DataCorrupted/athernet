@@ -285,7 +285,7 @@ public class OFDM{
 			length_boolean[i] = packet_boolean[i];
 		}
 		byte[] tmp = convertBoolsToBytes(length_boolean);
-		return (int)Math.pow(2,tmp[0]);
+		return (int)Math.pow(2,tmp[0]&0xFF);
 	}
 
 	public double[] modulate(byte[] byte_data){
@@ -333,7 +333,7 @@ public class OFDM{
 				data[i * channel_cnt_ + j] = (sum > 0);
 			}
 		}
-		return data;		
+		return data;
 	}
 
 
