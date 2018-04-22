@@ -42,7 +42,7 @@ class Transmitter{
 		FileI i_file_ = new FileI("./I", FileI.TEXT01);
 		
 		int head_size = 2;
-		int pack_size = 256;
+		int pack_size = 64;
 		int byte_read = pack_size - head_size;
 
 		Transmitter transmitter = new Transmitter();
