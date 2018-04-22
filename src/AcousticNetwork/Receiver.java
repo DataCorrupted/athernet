@@ -50,7 +50,7 @@ class Receiver{
 		i_sound_ = new SoundI(sample_rate, double_q_);		
 		recorder_ = new Thread(i_sound_);
 
-		demodulator_ = new OFDM(44100, 1000, 1000, 8, pack_size_*8);
+		demodulator_ = new OFDM(44100, 1000, 1000, 8);
 
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		

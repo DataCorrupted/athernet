@@ -24,7 +24,7 @@ class Transmitter{
 	  int sample_rate, int packet_size) throws Exception{
 		o_sound_ = new SoundO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		modulator_ = new OFDM(44100, 1000, 1000, 8, packet_size*8);
+		modulator_ = new OFDM(44100, 1000, 1000, 8);
 	}
 
 	public void transmitOnePack(byte[] out) throws Exception{

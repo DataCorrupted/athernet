@@ -63,17 +63,17 @@ public class OFDM{
 	private double[] sin_header_;
 	private int dummy_sin_length_ = 100;
 	public OFDM(){
-		this(44100, 1000, 3000, 4, 44, 128, 440);
+		this(44100, 1000, 3000, 4, 44, 440);
 	}
 	// Construct OFDM based on given channel count and delta frequency.
 	public OFDM(int sample_rate, double start_frequency, 
-				double delta, int channel_cnt, int pack_length){
+				double delta, int channel_cnt){
 		this(sample_rate, start_frequency, 
-			(channel_cnt-1) * delta, channel_cnt, 44, pack_length, 440);
+			(channel_cnt-1) * delta, channel_cnt, 44, 440);
 	}
 	public OFDM(int sample_rate, double start_frequency, 
 				double bandwidth, int channel_cnt, 
-				int bit_lenght, int pack_length, int header_length){
+				int bit_lenght, int header_length){
 		// hyper-parameters
 		init_count_down_ = 200;
 
@@ -481,7 +481,7 @@ public class OFDM{
 			0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 
 			0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20
 		};
-		OFDM ofdm = new OFDM(44100, 1000, 10000, 8, 44, 128, 440);;
+		OFDM ofdm = new OFDM(44100, 1000, 10000, 8, 44, 440);;
 		double[] wave = ofdm.modulate(data);
 
 		for (int i=0; i<wave.length; i++){
