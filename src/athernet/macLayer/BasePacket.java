@@ -1,4 +1,4 @@
-package AcousticNetwork.MacLayer;
+package athernet.macLayer;
 
 public class BasePacket {
     public final byte TYPE_ACK = 0;
@@ -8,16 +8,17 @@ public class BasePacket {
     private byte mac_addr_;             // 2 bits
     private byte type_;                 // 6 bits
     private byte pack_id_;              // one byte
-    private byte[] data_;               // 2^n - 3 bytes
+    private byte[] data_field_;               // 2^n - 3 bytes
 
-    public BasePacket(byte mac_addr, byte type, byte pack_id, byte[] data){
+    public BasePacket(byte mac_addr, byte type, byte pack_id, byte[] data_field){
         mac_addr_ = mac_addr;
         type_ = type;
         pack_id_ = pack_id;
-        data_ = data;
+        data_field_ = data_field;
     }
 
     public BasePacket(byte[] frame){
         mac_addr_ = (byte)(frame[0] >> 6);
+
     }
 }
