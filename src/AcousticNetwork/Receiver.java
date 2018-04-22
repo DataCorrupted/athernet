@@ -31,7 +31,7 @@ class Receiver{
 	private int head_size_ = 2;
 
 	public Receiver() throws Exception{
-		this(44100, 0.1, 3000);
+		this(44100, 0.1, 5000);
 	}
 	public Receiver(double timeout) throws Exception{
 		this(44100, 0.1, timeout);
@@ -70,7 +70,6 @@ class Receiver{
 		int r = OFDM.NOTHING;
 
 		while (r != OFDM.RCVEDDAT && time <= timeout_) {
-		//while (r != Modulation.RCVEDDAT) {
 			r = demodulator_.demodulate(double_q_.take());
 			time += (r == OFDM.NOTHING)? 1:0;
 		}
@@ -78,7 +77,7 @@ class Receiver{
 		if (i_stream.length == 0){
 			// I suppose to get a full length packet, but something unexpected happened.
 			System.out.println("No packet found, possibly time out when waiting for one.");
-			return new byte[8];
+			return new byte[0];
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, i_stream.length-1);
@@ -88,7 +87,7 @@ class Receiver{
 			i_stream[0] = 1;
 		} else {
 			// No useful byte in a broken pack.
-			i_stream[0] = 0;
+			i_stream = new byte[0];
 			System.out.printf("Packet #%4d receive failed. CRC8 checksum wrong.\n", pack_cnt);
 		}
 		crc8_.reset();
@@ -100,7 +99,7 @@ class Receiver{
 		double time_limit = 10;
 		int file_length = 6250;
 
-		Receiver receiver = new Receiver(256);
+		Receiver receiver = new Receiver();
 
 		receiver.startReceive();
 		byte[] f = receiver.testReceive(file_length, time_limit);
@@ -117,7 +116,7 @@ class Receiver{
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
-			if (packet[0] == 0) { continue; }
+			if (packet.length == 0) { continue; }
 			int pack_cnt = packet[1];	
 			int data_size = packet.length - head_size_;
 			start_pos = pack_cnt * data_size;
