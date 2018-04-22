@@ -45,7 +45,7 @@ public class SoundI implements Runnable {
 				avg_power_ = avg_power_ * 63 / 64 + wave[i] * wave[i] / 64;
 				while (!double_q_.offer(wave[i])){
 					// Overflow.
-					System.out.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
+					//System.out.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
 					// Retrive the oldest one from the queue,
 					// Regardless the queue is empty or not.
 					double_q_.poll();
