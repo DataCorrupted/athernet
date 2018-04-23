@@ -1,5 +1,9 @@
 package athernet.mac;
 
+import athernet.physical.Receiver;
+import athernet.physical.Transmitter;
+import athernet.mac.MacPacket;
+
 class MacLayer{
 	// The caller of MacLayer should assign a Mac Address.
 	public byte address_;
@@ -9,6 +13,9 @@ class MacLayer{
 
 	// Time we wait until we rule a timeout and resend the same pack.
 	public double timeout_;
+
+	private Receiver recv_;
+	private Transmitter trans_;
 
 	// Status of the MacLayer
 	public int status_;
@@ -25,6 +32,8 @@ class MacLayer{
 		address_ = address;
 		max_resend_ = max_resend;
 		timeout_ = timeout;
+		recv_ = new Receiver();
+		trans_ = new Transmitter();
 	}
 
 	public void requestSend(byte[]){
