@@ -2,7 +2,7 @@ package athernet.physical;
 
 import athernet.util.FileO;
 import athernet.util.CheckIO;
-import athernet.physical.CRC8;
+import athernet.util.CRC8;
 import athernet.physical.SoundI;
 import athernet.physical.OFDM;
 
