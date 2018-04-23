@@ -28,7 +28,7 @@ public class SoundO {
 	private SourceDataLine o_line_;
 
 	public SoundO() throws Exception{
-		this(44100);
+		this(48000);
 	}
 	public SoundO(int sr) throws Exception{
 		dvt_ = new Vector<Double>();
@@ -95,7 +95,7 @@ public class SoundO {
 	public static void main(String[] args) throws Exception{
 		SoundO o = new SoundO();
 		double dur = 5;
-		int sample_rate = 44100;
+		int sample_rate = 48000;
 		int sample_cnt = (int) (dur * sample_rate);
 		double[] wave = new double[sample_cnt];
 		for (int i=0; i<sample_cnt; i++){

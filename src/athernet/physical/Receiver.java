@@ -32,10 +32,10 @@ class Receiver{
 	private int head_size_ = 2;
 
 	public Receiver() throws Exception{
-		this(44100, 0.1, 5000);
+		this(48000, 0.1, 5000);
 	}
 	public Receiver(double timeout) throws Exception{
-		this(44100, 0.1, timeout);
+		this(48000, 0.1, timeout);
 	}
 
 	// buf_len: for how long(in seconds) should the buffer contain history sound data.
@@ -48,7 +48,7 @@ class Receiver{
 		i_sound_ = new SoundI(sample_rate, double_q_);		
 		recorder_ = new Thread(i_sound_);
 
-		demodulator_ = new OFDM(44100, 1000, 1000, 8);
+		demodulator_ = new OFDM(48000, 1000, 1000, 8);
 
 		crc8_ = new CRC8(0x9c, (short) 0xff);
 		

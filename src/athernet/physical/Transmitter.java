@@ -16,14 +16,14 @@ class Transmitter{
 	private SoundO o_sound_;
 	
 	public Transmitter() throws Exception{
-		this(44100);
+		this(48000);
 	}
 
 	// TODO: depreciate packet_size once ernest finishes.
 	public Transmitter(int sample_rate) throws Exception{
 		o_sound_ = new SoundO(sample_rate);
 		crc8_ = new CRC8(0x9c, (short) 0xff);
-		modulator_ = new OFDM(44100, 1000, 1000, 8);
+		modulator_ = new OFDM(48000, 1000, 1000, 8);
 	}
 
 	public void transmitOnePack(byte[] out) throws Exception{

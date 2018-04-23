@@ -65,7 +65,7 @@ public class SoundI implements Runnable {
 	public void stopConcurrentReadThread(){ stop_ = true; }
 
 	public SoundI() throws Exception{
-		this(44100);
+		this(48000);
 	}
 	public SoundI(int sr) throws Exception{
 		sample_rate_ = sr;

@@ -50,7 +50,7 @@ public class OFDM{
 	// For each channel, we generate a carrier with length bit_length_;
 	private double[][] carrier_arr_;
 	
-	// Should be 44100 for performance.
+	// Should be 48000 for performance.
 	private int sample_rate_;
 
 	// How much samples for a bit.
@@ -65,13 +65,13 @@ public class OFDM{
 	private double[] sin_header_;
 	private int dummy_sin_length_ = 100;
 	public OFDM(){
-		this(44100, 1000, 3000, 4, 44, 440, 1024);
+		this(48000, 1000, 3000, 4, 48, 440, 1024);
 	}
 	// Construct OFDM based on given channel count and delta frequency.
 	public OFDM(int sample_rate, double start_frequency, 
 				double delta, int channel_cnt){
 		this(sample_rate, start_frequency, 
-			(channel_cnt-1) * delta, channel_cnt, 44, 440, 1024);
+			(channel_cnt-1) * delta, channel_cnt, 48, 440, 1024);
 	}
 	public OFDM(int sample_rate, double start_frequency, 
 				double bandwidth, int channel_cnt, 
@@ -495,7 +495,7 @@ public class OFDM{
 			0x65, 0x78, 0x70, 0x72, 0x73, 0x20, 0x73, 0x74, 
 			0x68, 0x20, 0x69, 0x6e, 0x20, 0x31, 0x36, 0x20
 		};
-		OFDM ofdm = new OFDM(44100, 1000, 10000, 8, 44, 440, 1024);
+		OFDM ofdm = new OFDM(48000, 1000, 10000, 8, 44, 440, 1024);
 		double[] wave = ofdm.modulate(data);
 
 		for (int i=0; i<wave.length; i++){
