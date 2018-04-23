@@ -43,12 +43,32 @@ public class MacPacket {
     }
 
 
-    // TODO (Constructors)
     // Constructor: build a ACK Packet
+    public MacPacket(byte mac_addr, byte pack_id, byte[] data){
+        mac_addr_ = mac_addr;
+        type_ = TYPE_DATA;
+        pack_id_ = pack_id;
+        data_field_ = data;
+    }
 
     // Constructor: build a Data Packet
+    public MacPacket(byte mac_addr, byte pack_id, byte ack_pack_id){
+        mac_addr_ = mac_addr;
+        type_ = TYPE_ACK;
+        pack_id_ = pack_id;
+        data_field_ = new byte[1];
+        data_field_[0] = ack_pack_id;
+    }
 
     // Constructor: build a init_request packet
+    public MacPacket(byte mac_addr, byte pack_id, int total_length){
+        mac_addr_ = mac_addr;
+        type_ = TYPE_ACK;
+        pack_id_ = pack_id;
+        data_field_ = new byte[2];
+        data_field_[0] = (byte)(total_length >> 8);
+        data_field_[1] = (byte)(total_length & 0xFF);
+    }
 
     // return -1 on error
     public byte get_ack_pack_id(){
@@ -100,7 +120,7 @@ public class MacPacket {
             System.arraycopy(data_field_,1,data_,0,data_.length);
         }
         else if (type_ == TYPE_INIT){
-            total_length_ = data_field_[0];
+            total_length_ = (int)data_field_[0] << 8 + (int)data_field_[1];
         }
         else{
             throw new RuntimeException("Unrecognized MACPacket Type");
