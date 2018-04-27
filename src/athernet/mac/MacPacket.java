@@ -12,8 +12,10 @@ public class MacPacket {
     public static final byte TYPE_ACK = 0;
     public static final byte TYPE_DATA = 1;
     public static final byte TYPE_INIT = 2;
+
     public static final int STATUS_WAITING = 0;
     public static final int STATUS_SENT = 1;
+    public static final int STATUS_ACKED = 2;
 
     private byte dest_addr_;            // 2 bits
     private byte src_addr_;             // 2 bits
@@ -47,8 +49,8 @@ public class MacPacket {
     // Constructor: decode the frames
     public MacPacket(@NotNull byte[] frame){
         // fill in Mac attributes
-        dest_addr_ = (byte)(frame[0] >> 6);
-        src_addr_ = (byte)((frame[0] & 0x30) >> 4);
+        dest_addr_ = (byte)((frame[0] & 0xB0) >>> 6);
+        src_addr_ = (byte)((frame[0] & 0x30) >>> 4);
         type_ = (byte)(frame[0] & 0x0F);
         pack_id_ = frame[1];
         data_field_ = new byte[frame.length - 2];
@@ -82,7 +84,7 @@ public class MacPacket {
         src_addr_ = src_addr;
         type_ = TYPE_INIT;
         data_field_ = new byte[2];
-        data_field_[0] = (byte)(total_length >> 8);
+        data_field_[0] = (byte)((total_length & 0xFF00) >>> 8);
         data_field_[1] = (byte)(total_length & 0xFF);
     }
 
@@ -173,6 +175,7 @@ public class MacPacket {
     // encode all fields to a String
     byte[] toArray(){
         byte[] frame = new byte[data_field_.length + 2];
+        frame[0] = (byte)((dest_addr_ & 0x03) << 6);
         frame[0] = (byte)(((dest_addr_ & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
         frame[1] = pack_id_;
         System.arraycopy(data_field_,0,frame,2,data_field_.length);
@@ -190,7 +193,7 @@ public class MacPacket {
             System.arraycopy(data_field_,1,data_,0,data_.length);
         }
         else if (type_ == TYPE_INIT){
-            total_length_ = (int)data_field_[0] << 8 + (int)data_field_[1];
+            total_length_ = (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
         }
         else{
             throw new RuntimeException("Unrecognized MACPacket Type");
@@ -199,26 +202,36 @@ public class MacPacket {
 
     public static void main(String[] args){
         // create a new package
-        MacPacket pack_1 = new MacPacket((byte)2,(byte)1,(byte)0,5000 );
+        MacPacket pack_1 = new MacPacket((byte)2,(byte)1,5000 );
+        pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
 
         MacPacket pack_recv = new MacPacket(pack_1_str);
 
         for (int i = 0; i < pack_1_str.length; i++) {
-            System.out.println("%x", pack_1_str[i]);
+            System.out.println(String.format("%02X ", pack_1_str[i]));
         }
 
-            if ((pack_recv.getDestAddr() == (byte) 2) ||
-                    (pack_recv.getSrcAddr() == (byte) 1) ||
-                    (pack_recv.getType() == MacPacket.TYPE_INIT) ||
-                    (pack_recv.getPacketID() == 0) ||
-                    (pack_recv.getTotalLength() == (byte) 2) ||
-                    (pack_recv.getACKPacketID() == -1)){
-                System.out.println("Failure");
-            }
-            else{
-                System.out.println("Success");
-            }
-
+        if (pack_recv.getDestAddr() != (byte) 2){
+            System.out.println("DestAddr Mismatch");
+        }
+        else if(pack_recv.getSrcAddr() != (byte) 1){
+            System.out.println("SrcAddr Mismatch");
+        }
+        else if(pack_recv.getType() != MacPacket.TYPE_INIT){
+            System.out.println("Type Mismatch");
+        }
+        else if(pack_recv.getPacketID() != 0){
+            System.out.println("PacketID Mismatch");
+        }
+        else if(pack_recv.getTotalLength() != 5000){
+            System.out.println("TotalLength Mismatch");
+        }
+        else if(pack_recv.getACKPacketID() != -1){
+            System.out.println("ACKPacketID Mismatch");
+        }
+        else {
+            System.out.println("Success");
+        }
     }
 }
