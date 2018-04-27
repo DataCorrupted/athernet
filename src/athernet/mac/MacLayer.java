@@ -57,28 +57,32 @@ class MacLayer{
 
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
-	public MacLayer(byte address){
+	public MacLayer(byte address) throws Exception{
 		this(address, 0.1, 3, 3);
 	}
-	public MacLayer(byte address, double timeout, int max_resend, int window_size){
+	public MacLayer(
+	  byte address, double timeout, int max_resend, int window_size) 
+	  throws Exception{
 		address_ = address;
 		max_resend_ = max_resend;
 		timeout_ = timeout;
 		window_size_ = window_size;
+		
 		recv_ = new Receiver();
 		trans_ = new Transmitter();
+		
 		status_ = MacLayer.LINKIDL;
 		// Init id queue with all available ids.
 		for (int i=0; i<256; i++){ available_q_.offer(i); }
 
 		send_thread_ = new Thread(new Runnable(){
-			public void run(){ send(); }
+			public void run() { try { send(); } catch (Exception e){;} }
 		});
 		recycle_thread_ = new Thread(new Runnable(){
-			public void run(){ recycleID(); }
+			public void run() { try { recycleID(); } catch (Exception e){;} }
 		});
 		recv_thread_ = new Thread(new Runnable(){
-			public void run(){ receive(); }
+			public void run() { try { receive(); } catch (Exception e){;} }
 		});
 	}
 	public int getStatus(){ return status_; }
@@ -87,7 +91,7 @@ class MacLayer{
 		recycle_thread_.start();
 		recv_thread_.start();
 	}
-	public void stopMacLayer() { 
+	public void stopMacLayer() throws Exception{ 
 		stop_ = true; 
 		send_thread_.join();
 		recycle_thread_.join();
@@ -95,16 +99,16 @@ class MacLayer{
 	}
 
 	// Send data pack.
-	public void requestSend(byte dst, byte[] data){
+	public void requestSend(byte dst, byte[] data) throws Exception{
 		requestSend(new MacPacket(dst, address_, data));
 	}
 	// Send init pack.
-	public void requestSend(byte dst, int len){
+	public void requestSend(byte dst, int len) throws Exception{
 		requestSend(new MacPacket(dst, address_, len));
 	}
 
 	// Send pack.
-	private void requestSend(MacPacket pack){
+	private void requestSend(MacPacket pack) throws Exception{
 		// Making this pack id unavailable by moving it to 
 		// sending queue.
 		// Using take, we have to wait if necessary.
@@ -115,7 +119,7 @@ class MacLayer{
 		packet_array_[id] = pack;
 	}
 
-	private void send(){
+	private void send() throws Exception{
 		int id;
 		int status;
 		double curr_time;
@@ -145,7 +149,7 @@ class MacLayer{
 		}
 	}
 
-	private void recycleID(){
+	private void recycleID() throws Exception{
 		int head;
 		while (!stop_){
 			for (int src = 0; src < 4; src ++){
@@ -175,10 +179,10 @@ class MacLayer{
 			Thread.sleep(sleep_time_);
 		}
 	}
-	private void receive(){
+	private void receive() throws Exception{
 		MacPacket mac_pack;
 		while (!stop_){
-			mac_pack = MacPacket(recv_.receiveOnePacket());
+			mac_pack = new MacPacket(recv_.receiveOnePacket());
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 			// An ACK packet.
 				int id = mac_pack.getACKPacketID();
