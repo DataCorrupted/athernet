@@ -1,7 +1,5 @@
 package athernet.mac;
 
-import com.sun.istack.internal.NotNull;
-import org.omg.CORBA.SystemException;
 
 /***
  * The package definition:
@@ -202,12 +200,12 @@ public class MacPacket {
 
     public static void main(String[] args){
         // parameters
-        byte dest_addr = 2;
+        byte dest_addr = 1;
         byte src_addr = 1;
         int total_legnth = 5000;
 
         // create a new package
-        MacPacket pack_1 = new MacPacket(dest_addr,(byte)1,5000 );
+        MacPacket pack_1 = new MacPacket(dest_addr,src_addr,total_legnth );
         pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
 
@@ -217,10 +215,10 @@ public class MacPacket {
             System.out.println(String.format("%02X ", pack_1_str[i]));
         }
 
-        if (pack_recv.getDestAddr() != (byte) 2){
+        if (pack_recv.getDestAddr() != dest_addr){
             System.out.println("DestAddr Mismatch");
         }
-        else if(pack_recv.getSrcAddr() != (byte) 1){
+        else if(pack_recv.getSrcAddr() != src_addr){
             System.out.println("SrcAddr Mismatch");
         }
         else if(pack_recv.getType() != MacPacket.TYPE_INIT){
@@ -229,7 +227,7 @@ public class MacPacket {
         else if(pack_recv.getPacketID() != 0){
             System.out.println("PacketID Mismatch");
         }
-        else if(pack_recv.getTotalLength() != 5000){
+        else if(pack_recv.getTotalLength() != total_legnth){
             System.out.println("TotalLength Mismatch");
         }
         else if(pack_recv.getACKPacketID() != -1){
