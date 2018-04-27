@@ -179,6 +179,7 @@ class MacLayer{
 			Thread.sleep(sleep_time_);
 		}
 	}
+
 	private void receive() throws Exception{
 		MacPacket mac_pack;
 		while (!stop_){
@@ -204,4 +205,13 @@ class MacLayer{
 		}
 	}
 
+	public void getOnePack() throws Exception{
+		return data_q_.take();
+	}
+
+	public static void main(String[] args){
+		mac_layer = new MacLayer(0x1);
+		mac_layer.requestSend(0x1, 16);
+		mac_layer.getOnePack();
+	}
 }
