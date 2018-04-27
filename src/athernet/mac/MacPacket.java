@@ -12,7 +12,7 @@ public class MacPacket {
     public static final int STATUS_WAITING = 0;
     public static final int STATUS_SENT = 1;
 
-    private byte dest_addr;            // 2 bits
+    private byte dest_addr_;            // 2 bits
     private byte src_addr_;             // 2 bits
     private byte type_;                 // 4 bits
     private byte pack_id_;              // one byte
@@ -34,8 +34,8 @@ public class MacPacket {
     private int total_length_;
 
     // Constructor, build a MacFrame
-    public MacPacket(byte dist_addr, byte src_addr, byte type, byte pack_id, byte[] data_field){
-        dest_addr = dist_addr;
+    public MacPacket(byte dest_addr, byte src_addr, byte type, byte pack_id, byte[] data_field){
+        dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = type;
         pack_id_ = pack_id;
@@ -45,7 +45,7 @@ public class MacPacket {
     // Constructor: decode the frames
     public MacPacket(byte[] frame){
         // fill in Mac attributes
-        dest_addr = (byte)(frame[0] >> 6);
+        dest_addr_ = (byte)(frame[0] >> 6);
         src_addr_ = (byte)((frame[0] & 0x30) >> 4);
         type_ = (byte)(frame[0] & 0x0F);
         pack_id_ = frame[1];
@@ -58,8 +58,8 @@ public class MacPacket {
 
 
     // Constructor: build a ACK Packet
-    public MacPacket(byte dist_addr, byte src_addr, byte pack_id, byte[] data){
-        dest_addr = dist_addr;
+    public MacPacket(byte dest_addr, byte src_addr, byte pack_id, byte[] data){
+        dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_DATA;
         pack_id_ = pack_id;
@@ -67,8 +67,8 @@ public class MacPacket {
     }
 
     // Constructor: build a Data Packet
-    public MacPacket(byte dist_addr, byte src_addr, byte pack_id, byte ack_pack_id){
-        dest_addr = dist_addr;
+    public MacPacket(byte dest_addr, byte src_addr, byte pack_id, byte ack_pack_id){
+        dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_ACK;
         pack_id_ = pack_id;
@@ -77,8 +77,8 @@ public class MacPacket {
     }
 
     // Constructor: build a init_request packet
-    public MacPacket(byte dist_addr, byte src_addr, byte pack_id, int total_length){
-        dest_addr = dist_addr;
+    public MacPacket(byte dest_addr, byte src_addr, byte pack_id, int total_length){
+        dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_ACK;
         pack_id_ = pack_id;
@@ -87,8 +87,24 @@ public class MacPacket {
         data_field_[1] = (byte)(total_length & 0xFF);
     }
 
+    public byte getPacketID(){
+        return pack_id_;
+    }
+
+    public byte getSrcAddr(){
+        return src_addr_;
+    }
+
+    public byte getDestAddr(){
+        return dest_addr_;
+    }
+
+    public byte getType(){
+        return type_;
+    }
+
     // return -1 on error
-    public byte get_ack_pack_id(){
+    public byte getACKPacketID(){
         if (type_ == TYPE_ACK){
             return ack_pack_id_;
         }
@@ -98,7 +114,7 @@ public class MacPacket {
     }
 
     // return -1 on error
-    public int get_total_length(){
+    public int getTotalLength(){
         if (type_ == TYPE_INIT){
             return total_length_;
         }
@@ -108,7 +124,7 @@ public class MacPacket {
     }
 
     // return -1 on error
-    public byte get_offset(){
+    public byte getOffset(){
         if (type_ == TYPE_DATA){
             return offset_;
         }
@@ -118,7 +134,7 @@ public class MacPacket {
     }
 
     // return empty array on error
-    public byte[] get_data(){
+    public byte[] getData(){
         if (type_ == TYPE_DATA){
             return data_;
         }
@@ -127,34 +143,34 @@ public class MacPacket {
         }
     }
 
-    public int get_resend_counter(){
+    public int getResendCounter(){
         return resend_counter_;
     }
 
-    public void on_resend_once(){
+    public void onResendOnce(){
         resend_counter_ ++;
     }
 
-    public double get_timestamp(){
+    public double getTimestamp(){
         return timestamp_;
     }
 
-    public void set_timestamp(double new_timestamp){
+    public void setTimestamp(double new_timestamp){
         timestamp_ = new_timestamp;
     }
 
-    public int get_status(){
+    public int getStatus(){
         return status_;
     }
 
-    public void set_status(int status){
+    public void setStatus(int status){
         status_ = status;
     }
 
     // encode all fields to a String
     byte[] toArray(){
         byte[] frame = new byte[data_field_.length + 2];
-        frame[0] = (byte)(((dest_addr & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
+        frame[0] = (byte)(((dest_addr_ & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
         frame[1] = pack_id_;
         System.arraycopy(data_field_,0,frame,2,data_field_.length);
         return frame;
