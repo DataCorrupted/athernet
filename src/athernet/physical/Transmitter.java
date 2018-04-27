@@ -5,7 +5,7 @@ import athernet.util.CRC8;
 import athernet.physical.SoundO;
 import athernet.physical.OFDM;
 
-class Transmitter{
+public class Transmitter{
 	// Add given data's crc sum.
 	private CRC8 crc8_ ;
 
