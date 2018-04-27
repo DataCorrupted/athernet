@@ -1,6 +1,9 @@
 package athernet.mac;
 
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 /***
  * The package definition:
  *      DestAddr (2 bits) + SrcAddr (2 bits) + Type (4 bits) + packet_id (one byte) + MAC Payload (2^n - 3 bytes)
@@ -37,17 +40,17 @@ public class MacPacket {
     private int total_length_;
 
     // Constructor, build a MacFrame
-    public MacPacket(byte dest_addr, byte src_addr, byte type, byte[] data_field){
-        dest_addr_ = dest_addr;
-        src_addr_ = src_addr;
-        type_ = type;
-        data_field_ = data_field;
-    }
+//    public MacPacket(byte dest_addr, byte src_addr, byte type, byte[] data_field){
+//        dest_addr_ = dest_addr;
+//        src_addr_ = src_addr;
+//        type_ = type;
+//        data_field_ = data_field;
+//    }
 
     // Constructor: decode the frames
     public MacPacket(byte[] frame){
         // fill in Mac attributes
-        dest_addr_ = (byte)((frame[0] & 0xB0) >>> 6);
+        dest_addr_ = (byte)((frame[0] & 0xC0) >>> 6);
         src_addr_ = (byte)((frame[0] & 0x30) >>> 4);
         type_ = (byte)(frame[0] & 0x0F);
         pack_id_ = frame[1];
@@ -60,11 +63,15 @@ public class MacPacket {
 
 
     // Constructor: build a Data Packet
-    public MacPacket(byte dest_addr, byte src_addr, byte[] data){
+    public MacPacket(byte dest_addr, byte src_addr, byte offset, byte[] data){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_DATA;
-        data_field_ = data;
+        offset_ = offset;
+
+        data_field_ = new byte[data.length + 1];
+        data_field_[0] = offset;
+        System.arraycopy(data,0,data_field_,1,data.length);
     }
 
     // Constructor: build a ACK Packet
@@ -186,7 +193,7 @@ public class MacPacket {
             ack_pack_id_ = data_field_[0];
         }
         else if (type_ == TYPE_DATA){
-            offset_ = data_field_[1];
+            offset_ = data_field_[0];
             data_ = new byte[data_field_.length - 1];
             System.arraycopy(data_field_,1,data_,0,data_.length);
         }
@@ -200,12 +207,21 @@ public class MacPacket {
 
     public static void main(String[] args){
         // parameters
-        byte dest_addr = 1;
-        byte src_addr = 1;
-        int total_legnth = 5000;
+        byte dest_addr_test = 0;
+        byte src_addr_test = 3;
+
+        // for init_request pack
+        int total_legnth_test = 50000;
+
+        // for data packet
+        byte offset = 0;
+        byte[] data = {1,3,4,5,6};
+
+        // for ACK packet
+        byte ack_packet_id = (byte)240;
 
         // create a new package
-        MacPacket pack_1 = new MacPacket(dest_addr,src_addr,total_legnth );
+        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test,ack_packet_id );
         pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
 
@@ -215,24 +231,32 @@ public class MacPacket {
             System.out.println(String.format("%02X ", pack_1_str[i]));
         }
 
-        if (pack_recv.getDestAddr() != dest_addr){
+        if (pack_recv.getDestAddr() != dest_addr_test){
             System.out.println("DestAddr Mismatch");
         }
-        else if(pack_recv.getSrcAddr() != src_addr){
+        else if(pack_recv.getSrcAddr() != src_addr_test){
             System.out.println("SrcAddr Mismatch");
         }
-        else if(pack_recv.getType() != MacPacket.TYPE_INIT){
+        else if(pack_recv.getType() != MacPacket.TYPE_ACK){
             System.out.println("Type Mismatch");
         }
         else if(pack_recv.getPacketID() != 0){
             System.out.println("PacketID Mismatch");
         }
-        else if(pack_recv.getTotalLength() != total_legnth){
+        else if(pack_recv.getTotalLength() != -1){
             System.out.println("TotalLength Mismatch");
         }
-        else if(pack_recv.getACKPacketID() != -1){
+        else if(pack_recv.getACKPacketID() != ack_packet_id){
             System.out.println("ACKPacketID Mismatch");
         }
+//        else if(!Arrays.equals(pack_recv.getData(),data)){
+//            System.out.println("--------Data Mismatch---------");
+//            byte[] tmp = pack_recv.getData();
+//            for (int i = 0; i < tmp.length; i++){
+//                System.out.println(tmp[i]);
+//            }
+//            System.out.println("Data Mismatch");
+//        }
         else {
             System.out.println("Success");
         }
