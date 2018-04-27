@@ -104,7 +104,7 @@ class MacLayer{
 		// sending queue.
 		// Using take, we have to wait if necessary.
 		int id = available_q_.take();
-		sending_list_[pack.getDstAddr()].add(id);
+		sending_list_[pack.getDestAddr()].add(id);
 
 		pack.setPacketID((byte) id);
 		packet_array_[id] = pack;
@@ -174,12 +174,12 @@ class MacLayer{
 		MacPacket mac_pack;
 		while (!stop_){
 			mac_pack = MacPacket(recv_.receiveOnePacket());
-			if (mac_pack.getType() = MacPacket.TYPE_ACK_){
+			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 			// An ACK packet.
 				int id = mac_pack.getACKPacketID();
 				int src = mac_pack.getSrcAddr();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
-			} else if (mac_pack.getDstAddr() == address_) {
+			} else if (mac_pack.getDestAddr() == address_) {
 			// Not an ACK and the packet is for me.
 				// Throws it away if the queue if full.
 				if (data_q_.offer(mac_pack)){
