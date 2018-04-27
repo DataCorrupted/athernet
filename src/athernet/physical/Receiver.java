@@ -54,6 +54,7 @@ class Receiver{
 		
 		timeout_ = timeout;
 	}
+	public boolean hasSignal() { return i_sound_.hasSignal(); }
 	public void startReceive() throws Exception{	
 		recorder_.start();
 	}
