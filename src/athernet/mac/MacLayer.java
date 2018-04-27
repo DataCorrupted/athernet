@@ -34,7 +34,12 @@ class MacLayer{
 	// All current using packet is stored here for easy reference.
 	private MacPacket[] packet_array_ = new MacPacket[256];
 	// Sending array for all addresses.
-	private ArrayList<Integer>[] sending_list_ = new ArrayList<Integer>[4];
+	// Let's please Java with Object first, but we all know
+	// what type it is, so we cast it down.
+	// This is because Java can't creat generic typed array.
+	@SuppressWarnings("unchecked")
+	private ArrayList<Integer>[] sending_list_ 
+		= (ArrayList<Integer>[]) new Object[4];
 	// All available ID.
 	private ArrayBlockingQueue<Integer> available_q_ 
 		= new ArrayBlockingQueue<Integer>(256);
