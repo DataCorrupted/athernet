@@ -99,8 +99,8 @@ class MacLayer{
 	}
 
 	// Send data pack.
-	public void requestSend(byte dst, byte[] data) throws Exception{
-		requestSend(new MacPacket(dst, address_, data));
+	public void requestSend(byte dst, byte offset, byte[] data) throws Exception{
+		requestSend(new MacPacket(dst, address_, offset, data));
 	}
 	// Send init pack.
 	public void requestSend(byte dst, int len) throws Exception{
