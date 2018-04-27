@@ -151,11 +151,11 @@ public class MacPacket {
         resend_counter_ ++;
     }
 
-    public double getTimestamp(){
+    public double getTimeStamp(){
         return timestamp_;
     }
 
-    public void setTimestamp(double new_timestamp){
+    public void setTimeStamp(double new_timestamp){
         timestamp_ = new_timestamp;
     }
 

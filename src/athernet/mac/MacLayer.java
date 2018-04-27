@@ -65,33 +65,51 @@ class MacLayer{
 		for (int i=0; i<256; i++){ available_q_.offer(i); }
 	}
 
-	public void requestSend(byte dst, byte type, byte[] data){
+	// Send data pack.
+	public void requestSend(byte dst, byte[] data){
+		requestSend(new MacPacket(dst, address_, data));
+	}
+	// Send init pack.
+	public void requestSend(byte dst, int len){
+		requestSend(new MacPacket(dst, address_, len));
+	}
+
+	// Send pack.
+	private void requestSend(MacPacket pack){
 		// Making this pack id unavailable by moving it to 
 		// sending queue.
 		// Using take, we have to wait if necessary.
 		int id = available_q_.take();
 		sending_list_[dst].add(id);
 
-		packet_array_[id] = new MacPacket(/**/);
+		pack.setPacketID((byte) id);
+		packet_array_[id] = pack;
 	}
 
 	private void send(){
+		int id;
+		int status;
+		double curr_time;
 		while (!stop_){
 			for (int dst = 0; dst<4; dst++){
 				ArrayList<Int> sending = sending_list_[dst];
 				// Only cares whatever in the window.
 				for (int i=0; 
-					i<Math.min(sending.size(), window_size); i++){
-					int id = sending.get(i)
-					int status = packet_array_[id].getStatus();
-					double curr_time = System.nanoTime()/1e9;
+				  i<Math.min(sending.size(), window_size); i++){
+					
+					id = sending.get(i)
+					status = packet_array_[id].getStatus();
+					curr_time = System.nanoTime()/1e9;
 					if (status == MacPacket.STATUS_WATING){
 						packet_array_[id].setStatus(MacPacket.STATUS_SENT);
+						packet_array_[id].setTimeStamp(curr_time);
 						while (!recv_.hasSignal()) {thread.sleep(1);}
 						trans_.transmitOnePack(packet_array_[id].toArray());
-					} else if (status == MacPacket.STATUS_SENT &&
-								curr_time - packet_array_[id].getTimeStamp){
-
+					} else if (
+					  status == MacPacket.STATUS_SENT &&
+					  curr_time - packet_array_[id].getTimeStamp() > timeout_){
+						packet_array_[id].setStatus(MacPacket.STATUS_WATING);
+						packet_array_[id].onResendOnce();
 					}
 				}
 			}
@@ -112,6 +130,13 @@ class MacLayer{
 					if (packet_array_[head].getStatus == STATUS_ACKED) {
 						sending_list_[src].remove(0);
 						available_q_.put(id);
+						status_ = MacLayer.LINK_OK;
+					}
+					// It has timeout so many times. We forget about it.
+					if (packet_array_[head].getResendCounter() == max_resend_){
+						sending_list_[src].remove(0);
+						available_q_.put(id);
+						status_ = MacLayer.LINKERR;
 					}
 				}
 			}
@@ -123,16 +148,23 @@ class MacLayer{
 		while (!stop_){
 			pack = MacPacket(recv_.receiveOnePacket());
 			if (pack.getType() = TYPE_ACK_){
-				int id = pack.getAckPackID();
-				int src = pack.getSrc();
+			// An ACK packet.
+				int id = pack.getACKPacketID();
+				int src = pack.getSrcAddr();
 				packet_array_[id].setStatus(STATUS_ACKED);
-			} else {
+			} else if (pack.getDstAddr() == address_) {
+			// Not an ACK and the packet is for me.
 				// Throws it away if the queue if full.
-				data_q_.offer();
+				if data_q_.offer(pack){
+					// Or send an ACK to reply.
+					requestSend(
+						new MacPacket(pack.getSrcAddr, address_, pack.getPacketID())
+					)
+				}
 			}
-
 		}
 	}
 
 	public void getStatus(){ return status_; }
+	public void stopMacLayer() { stop_ = true }
 }
