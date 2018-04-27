@@ -9,7 +9,7 @@ import athernet.physical.OFDM;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-class Receiver{
+public class Receiver{
 	// Input sound.
 	private SoundI i_sound_;
 
