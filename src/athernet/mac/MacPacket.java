@@ -6,19 +6,22 @@ package athernet.mac;
  */
 
 public class MacPacket {
-    public final byte TYPE_ACK = 0;
-    public final byte TYPE_DATA = 1;
-    public final byte TYPE_INIT = 2;
+    public static final byte TYPE_ACK = 0;
+    public static final byte TYPE_DATA = 1;
+    public static final byte TYPE_INIT = 2;
+    public static final int STATUS_WAITING = 0;
+    public static final int STATUS_SENT = 1;
 
-    private byte dist_addr_;            // 2 bits
+    private byte dest_addr;            // 2 bits
     private byte src_addr_;             // 2 bits
-    private byte type_;                 // 4s bits
+    private byte type_;                 // 4 bits
     private byte pack_id_;              // one byte
     private byte[] data_field_;         // 2^n - 3 bytes
 
     // for system maintenance
     private int resend_counter_ = 0;
     private double timestamp_ = 0;
+    private int status_ = 0;
 
     // For ACK Packet
     private byte ack_pack_id_;
@@ -32,7 +35,7 @@ public class MacPacket {
 
     // Constructor, build a MacFrame
     public MacPacket(byte dist_addr, byte src_addr, byte type, byte pack_id, byte[] data_field){
-        dist_addr_ = dist_addr;
+        dest_addr = dist_addr;
         src_addr_ = src_addr;
         type_ = type;
         pack_id_ = pack_id;
@@ -42,7 +45,7 @@ public class MacPacket {
     // Constructor: decode the frames
     public MacPacket(byte[] frame){
         // fill in Mac attributes
-        dist_addr_ = (byte)(frame[0] >> 6);
+        dest_addr = (byte)(frame[0] >> 6);
         src_addr_ = (byte)((frame[0] & 0x30) >> 4);
         type_ = (byte)(frame[0] & 0x0F);
         pack_id_ = frame[1];
@@ -56,7 +59,7 @@ public class MacPacket {
 
     // Constructor: build a ACK Packet
     public MacPacket(byte dist_addr, byte src_addr, byte pack_id, byte[] data){
-        dist_addr_ = dist_addr;
+        dest_addr = dist_addr;
         src_addr_ = src_addr;
         type_ = TYPE_DATA;
         pack_id_ = pack_id;
@@ -65,7 +68,7 @@ public class MacPacket {
 
     // Constructor: build a Data Packet
     public MacPacket(byte dist_addr, byte src_addr, byte pack_id, byte ack_pack_id){
-        dist_addr_ = dist_addr;
+        dest_addr = dist_addr;
         src_addr_ = src_addr;
         type_ = TYPE_ACK;
         pack_id_ = pack_id;
@@ -75,7 +78,7 @@ public class MacPacket {
 
     // Constructor: build a init_request packet
     public MacPacket(byte dist_addr, byte src_addr, byte pack_id, int total_length){
-        dist_addr_ = dist_addr;
+        dest_addr = dist_addr;
         src_addr_ = src_addr;
         type_ = TYPE_ACK;
         pack_id_ = pack_id;
@@ -140,6 +143,23 @@ public class MacPacket {
         timestamp_ = new_timestamp;
     }
 
+    public int get_status(){
+        return status_;
+    }
+
+    public void set_status(int status){
+        status_ = status;
+    }
+
+    // encode all fields to a String
+    byte[] toArray(){
+        byte[] frame = new byte[data_field_.length + 2];
+        frame[0] = (byte)(((dest_addr & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
+        frame[1] = pack_id_;
+        System.arraycopy(data_field_,0,frame,2,data_field_.length);
+        return frame;
+    }
+
     // decode the data field only
     private void decodeDataField(){
         if (type_ == TYPE_ACK){
@@ -156,5 +176,12 @@ public class MacPacket {
         else{
             throw new RuntimeException("Unrecognized MACPacket Type");
         }
+    }
+
+    public static void main(String[] args){
+        // create a new package
+        MacPacket pack_1 = new MacPacket((byte)2,(byte)1,(byte)0,5000 );
+        byte[] pack_1_str = pack_1.toArray();
+
     }
 }
