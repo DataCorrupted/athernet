@@ -1,5 +1,8 @@
 package athernet.mac;
 
+import com.sun.istack.internal.NotNull;
+import org.omg.CORBA.SystemException;
+
 /***
  * The package definition:
  *      DestAddr (2 bits) + SrcAddr (2 bits) + Type (4 bits) + packet_id (one byte) + MAC Payload (2^n - 3 bytes)
@@ -34,16 +37,15 @@ public class MacPacket {
     private int total_length_;
 
     // Constructor, build a MacFrame
-    public MacPacket(byte dest_addr, byte src_addr, byte type, byte pack_id, byte[] data_field){
+    public MacPacket(byte dest_addr, byte src_addr, byte type, byte[] data_field){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = type;
-        pack_id_ = pack_id;
         data_field_ = data_field;
     }
 
     // Constructor: decode the frames
-    public MacPacket(byte[] frame){
+    public MacPacket(@NotNull byte[] frame){
         // fill in Mac attributes
         dest_addr_ = (byte)(frame[0] >> 6);
         src_addr_ = (byte)((frame[0] & 0x30) >> 4);
@@ -57,31 +59,28 @@ public class MacPacket {
     }
 
 
-    // Constructor: build a ACK Packet
-    public MacPacket(byte dest_addr, byte src_addr, byte pack_id, byte[] data){
+    // Constructor: build a Data Packet
+    public MacPacket(byte dest_addr, byte src_addr, byte[] data){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_DATA;
-        pack_id_ = pack_id;
         data_field_ = data;
     }
 
-    // Constructor: build a Data Packet
-    public MacPacket(byte dest_addr, byte src_addr, byte pack_id, byte ack_pack_id){
+    // Constructor: build a ACK Packet
+    public MacPacket(byte dest_addr, byte src_addr, byte ack_pack_id){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_ACK;
-        pack_id_ = pack_id;
         data_field_ = new byte[1];
         data_field_[0] = ack_pack_id;
     }
 
     // Constructor: build a init_request packet
-    public MacPacket(byte dest_addr, byte src_addr, byte pack_id, int total_length){
+    public MacPacket(byte dest_addr, byte src_addr, int total_length){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
-        type_ = TYPE_ACK;
-        pack_id_ = pack_id;
+        type_ = TYPE_INIT;
         data_field_ = new byte[2];
         data_field_[0] = (byte)(total_length >> 8);
         data_field_[1] = (byte)(total_length & 0xFF);
@@ -167,6 +166,10 @@ public class MacPacket {
         status_ = status;
     }
 
+    public void setPacketID(byte pack_id){
+        pack_id_ = pack_id;
+    }
+
     // encode all fields to a String
     byte[] toArray(){
         byte[] frame = new byte[data_field_.length + 2];
@@ -198,6 +201,24 @@ public class MacPacket {
         // create a new package
         MacPacket pack_1 = new MacPacket((byte)2,(byte)1,(byte)0,5000 );
         byte[] pack_1_str = pack_1.toArray();
+
+        MacPacket pack_recv = new MacPacket(pack_1_str);
+
+        for (int i = 0; i < pack_1_str.length; i++) {
+            System.out.println("%x", pack_1_str[i]);
+        }
+
+            if ((pack_recv.getDestAddr() == (byte) 2) ||
+                    (pack_recv.getSrcAddr() == (byte) 1) ||
+                    (pack_recv.getType() == MacPacket.TYPE_INIT) ||
+                    (pack_recv.getPacketID() == 0) ||
+                    (pack_recv.getTotalLength() == (byte) 2) ||
+                    (pack_recv.getACKPacketID() == -1)){
+                System.out.println("Failure");
+            }
+            else{
+                System.out.println("Success");
+            }
 
     }
 }
