@@ -47,7 +47,7 @@ public class MacPacket {
     }
 
     // Constructor: decode the frames
-    public MacPacket(@NotNull byte[] frame){
+    public MacPacket(byte[] frame){
         // fill in Mac attributes
         dest_addr_ = (byte)((frame[0] & 0xB0) >>> 6);
         src_addr_ = (byte)((frame[0] & 0x30) >>> 4);
@@ -201,8 +201,13 @@ public class MacPacket {
     }
 
     public static void main(String[] args){
+        // parameters
+        byte dest_addr = 2;
+        byte src_addr = 1;
+        int total_legnth = 5000;
+
         // create a new package
-        MacPacket pack_1 = new MacPacket((byte)2,(byte)1,5000 );
+        MacPacket pack_1 = new MacPacket(dest_addr,(byte)1,5000 );
         pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
 
