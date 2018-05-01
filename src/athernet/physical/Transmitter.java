@@ -26,7 +26,9 @@ public class Transmitter{
 		modulator_ = new OFDM(48000, 1000, 1000, 8);
 	}
 
-	public void transmitOnePack(byte[] out) throws Exception{
+	public void transmitOnePack(byte[] data) throws Exception{
+		byte[] out = new byte[data.length + 1];
+		System.arraycopy(data, 0, out, 1, data.length);
 		// Add checksum
 		crc8_.update(out, 1, out.length-1);
 		out[0] = (byte) crc8_.getValue();

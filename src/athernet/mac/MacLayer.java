@@ -88,23 +88,29 @@ class MacLayer{
 	public int getStatus(){ return status_; }
 	public void startMacLayer(){
 		send_thread_.start();
+		System.out.println("Thread send() started.");
 		recycle_thread_.start();
+		System.out.println("Thread recycleID() started.");
 		recv_thread_.start();
+		System.out.println("Thread receive() started.");
 	}
 	public void stopMacLayer() throws Exception{ 
 		stop_ = true; 
 		send_thread_.join();
+		System.out.println("Thread send() finished.");
 		recycle_thread_.join();
+		System.out.println("Thread recycleID() finished.");
 		recv_thread_.join();
+		System.out.println("Thread receive() finished.");
 	}
 
 	// Send data pack.
-	public void requestSend(byte dst, byte offset, byte[] data) throws Exception{
-		requestSend(new MacPacket(dst, address_, offset, data));
+	public void requestSend(int dst, int offset, byte[] data) throws Exception{
+		requestSend(new MacPacket((byte)dst, address_, (byte)offset, data));
 	}
 	// Send init pack.
-	public void requestSend(byte dst, int len) throws Exception{
-		requestSend(new MacPacket(dst, address_, len));
+	public void requestSend(int dst, int len) throws Exception{
+		requestSend(new MacPacket((byte)dst, address_, len));
 	}
 
 	// Send pack.
@@ -120,6 +126,7 @@ class MacLayer{
 	}
 
 	private void send() throws Exception{
+		System.out.println("Thread send() started.");
 		int id;
 		int status;
 		double curr_time;
@@ -133,10 +140,10 @@ class MacLayer{
 					status = packet_array_[id].getStatus();
 					curr_time = System.nanoTime()/1e9;
 					if (status == MacPacket.STATUS_WAITING){
-						packet_array_[id].setStatus(MacPacket.STATUS_SENT);
-						packet_array_[id].setTimeStamp(curr_time);
 						while (!recv_.hasSignal()) {Thread.sleep(1);}
 						trans_.transmitOnePack(packet_array_[id].toArray());
+						packet_array_[id].setStatus(MacPacket.STATUS_SENT);
+						packet_array_[id].setTimeStamp(curr_time);
 					} else if (
 					  status == MacPacket.STATUS_SENT &&
 					  curr_time - packet_array_[id].getTimeStamp() > timeout_){
@@ -147,9 +154,11 @@ class MacLayer{
 			}
 			Thread.sleep(sleep_time_);
 		}
+		
 	}
 
 	private void recycleID() throws Exception{
+
 		int head;
 		while (!stop_){
 			for (int src = 0; src < 4; src ++){
@@ -205,13 +214,29 @@ class MacLayer{
 		}
 	}
 
-	public void getOnePack() throws Exception{
+	public MacPacket getOnePack() throws Exception{
 		return data_q_.take();
 	}
 
-	public static void main(String[] args){
-		mac_layer = new MacLayer(0x1);
-		mac_layer.requestSend(0x1, 16);
-		mac_layer.getOnePack();
+	public static void main(String[] args) throws Exception{
+		MacLayer mac_layer = new MacLayer((byte)0x1);
+
+		// hello world.
+		final byte[] data = { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 
+								0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
+		
+		mac_layer.startMacLayer();
+
+		mac_layer.requestSend(0x1, data.length);
+		mac_layer.requestSend(0x1, 0, data);
+		
+		mac_layer.stopMacLayer();
+
+		MacPacket mac_pack;
+		// Length packet must come first.
+		mac_pack = mac_layer.getOnePack();
+		System.out.println(mac_pack.getTotalLength());
+		mac_pack = mac_layer.getOnePack();
+		System.out.println(mac_pack.getData());
 	}
 }
