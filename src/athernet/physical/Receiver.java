@@ -29,7 +29,6 @@ public class Receiver{
 	private double timeout_;
 
 	private int sample_rate_;
-	private int head_size_ = 2;
 
 	public Receiver() throws Exception{
 		this(48000, 0.1, 5000);
@@ -82,17 +81,19 @@ public class Receiver{
 			return new byte[0];
 		}
 		// Initial read.
-		crc8_.update(i_stream, 1, i_stream.length-1);
+		crc8_.update(i_stream, 1, i_stream.length -1);
+		byte[] rcvd_data;
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			System.out.printf("Packet #%4d received.\n", i_stream[1]);
-			i_stream[0] = 1;
+			rcvd_data = new byte[i_stream.length -1];
+			System.arraycopy(i_stream, 1, rcvd_data, 0, rcvd_data.length);
 		} else {
 			// No useful byte in a broken pack.
-			i_stream = new byte[0];
+			rcvd_data = new byte[0];
 			System.out.printf("Failed to receive packet. CRC8 checksum wrong.\n");
 		}
 		crc8_.reset();
-		return i_stream;
+		return rcvd_data;
 	}
 	static public void main(String[] args) throws Exception{
 		FileO o_file = new FileO("./O", FileO.TEXT01);
@@ -114,16 +115,17 @@ public class Receiver{
 	private byte[] testReceive(int byte_cnt, double timeout) throws Exception{
 		byte[] frame = new byte[byte_cnt];
 		int start_pos;
+		int head_size = 1;
 		double start_time = System.nanoTime() / 1e9;
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
 			if (packet.length == 0) { continue; }
-			int pack_cnt = packet[1];	
-			int data_size = packet.length - head_size_;
+			int pack_cnt = packet[0];	
+			int data_size = packet.length - head_size;
 			start_pos = pack_cnt * data_size;
 			for (int i=0; i<data_size; i++){
 				if (start_pos + i < byte_cnt){
-					frame[start_pos + i] = packet[head_size_ + i];
+					frame[start_pos + i] = packet[head_size + i];
 				}
 			}
 		}

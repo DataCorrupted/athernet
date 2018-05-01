@@ -43,8 +43,8 @@ public class Transmitter{
 	static public void main(String[] args) throws Exception{
 		FileI i_file_ = new FileI("./I", FileI.TEXT01);
 		
-		int head_size = 2;
-		int pack_size = 128;
+		int head_size = 1;
+		int pack_size = 127;
 		int byte_read = pack_size - head_size;
 
 		Transmitter transmitter = new Transmitter();
@@ -57,7 +57,7 @@ public class Transmitter{
 		double start_time = System.nanoTime() / 1e9;
 		r = i_file_.read(o_stream, head_size, byte_read);
 		while (r != -1){
-			o_stream[1] = (byte) (pack_cnt & 0xff);
+			o_stream[0] = (byte) (pack_cnt & 0xff);
 			transmitter.transmitOnePack(o_stream);
 			// Read next bunch of data.
 			pack_cnt ++;
