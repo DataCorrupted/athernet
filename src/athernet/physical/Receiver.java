@@ -54,12 +54,17 @@ public class Receiver{
 		timeout_ = timeout;
 	}
 	public boolean hasSignal() { return i_sound_.hasSignal(); }
-	public void startReceive() throws Exception{	
-		recorder_.start();
+	public void startReceive(){	
+		try{
+			recorder_.start();
+		} catch (Exception e){;}
 	}
-	public void stopReceive() throws Exception{
-		i_sound_.stopConcurrentReadThread();
-		recorder_.join();
+	public void stopReceive(){
+		try { 
+			i_sound_.stopConcurrentReadThread();
+			recorder_.join(); 
+		} catch (Exception e){;}
+
 	}
 
 	public byte[] receiveOnePacket() throws Exception{
@@ -84,9 +89,16 @@ public class Receiver{
 		crc8_.update(i_stream, 1, i_stream.length -1);
 		byte[] rcvd_data;
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%4d received.\n", i_stream[1]);
+			System.out.printf("Packet #%4d received.\n", i_stream[2]);
 			rcvd_data = new byte[i_stream.length -1];
 			System.arraycopy(i_stream, 1, rcvd_data, 0, rcvd_data.length);
+			/*
+			System.out.println("Receiving");
+			for (int i=0; i<rcvd_data.length; i++){
+				System.out.print(Integer.toHexString( rcvd_data[i] & 0xFF) + " ");
+			}
+			System.out.println();
+			*/
 		} else {
 			// No useful byte in a broken pack.
 			rcvd_data = new byte[0];

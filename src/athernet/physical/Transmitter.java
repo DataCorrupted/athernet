@@ -31,6 +31,13 @@ public class Transmitter{
 		System.arraycopy(data, 0, out, 1, data.length);
 		// Add checksum
 		crc8_.update(out, 1, out.length-1);
+		/*
+		System.out.println("Sending");
+		for (int i=0; i<out.length; i++){
+			System.out.print(Integer.toHexString( out[i] & 0xFF) + " ");
+		}
+		System.out.println();
+		*/
 		out[0] = (byte) crc8_.getValue();
 		// Modulation
 		double[] wave = modulator_.modulate(out);

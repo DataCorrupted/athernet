@@ -56,7 +56,6 @@ public class MacPacket {
         pack_id_ = frame[1];
         data_field_ = new byte[frame.length - 2];
         System.arraycopy(frame,2,data_field_,0,data_field_.length);
-
         // decode data field
         decodeDataField();
     }
