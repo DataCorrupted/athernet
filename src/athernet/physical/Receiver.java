@@ -30,6 +30,8 @@ public class Receiver{
 
 	private int sample_rate_;
 
+	public boolean echo_ = false;
+
 	public Receiver() throws Exception{
 		this(48000, 0.1, 10000);
 	}
@@ -81,28 +83,30 @@ public class Receiver{
 		}
 		byte[] i_stream = demodulator_.getPacket();
 		if (i_stream.length == 0){
-			// I suppose to get a full length packet, but something unexpected happened.
-			System.out.println("No packet found, possibly time out when waiting for one.");
+			// I suppose to get a full length packet, 
+			// but something unexpected happened.
+			if (echo_) {
+				System.out.println(
+					"No packet found, possibly time out when waiting for one.");
+			}
 			return new byte[0];
 		}
 		// Initial read.
 		crc8_.update(i_stream, 1, i_stream.length -1);
 		byte[] rcvd_data;
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%4d received.\n", i_stream[1]);
+			if (echo_) {
+				System.out.printf("Packet #%4d received.\n", i_stream[1]);
+			}
 			rcvd_data = new byte[i_stream.length -1];
 			System.arraycopy(i_stream, 1, rcvd_data, 0, rcvd_data.length);
-			/*
-			System.out.println("Receiving");
-			for (int i=0; i<rcvd_data.length; i++){
-				System.out.print(Integer.toHexString( rcvd_data[i] & 0xFF) + " ");
-			}
-			System.out.println();
-			*/
 		} else {
 			// No useful byte in a broken pack.
 			rcvd_data = new byte[0];
-			System.out.printf("Failed to receive packet. CRC8 checksum wrong.\n");
+			if (echo_) {
+				System.out.printf(
+					"Failed to receive packet. CRC8 checksum wrong.\n");
+			}
 		}
 		crc8_.reset();
 		return rcvd_data;
@@ -114,6 +118,7 @@ public class Receiver{
 		int file_length = 6250;
 
 		Receiver receiver = new Receiver();
+		receiver.echo_ = true;
 
 		receiver.startReceive();
 		byte[] f = receiver.testReceive(file_length, time_limit);

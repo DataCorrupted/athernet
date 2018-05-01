@@ -50,10 +50,10 @@ public class MacPacket {
     // Constructor: decode the frames
     public MacPacket(byte[] frame){
         // fill in Mac attributes
-        dest_addr_ = (byte)((frame[0] & 0xC0) >>> 6);
-        src_addr_ = (byte)((frame[0] & 0x30) >>> 4);
-        type_ = (byte)(frame[0] & 0x0F);
-        pack_id_ = frame[1];
+        dest_addr_ = (byte)((frame[1] & 0xC0) >>> 6);
+        src_addr_ = (byte)((frame[1] & 0x30) >>> 4);
+        type_ = (byte)(frame[1] & 0x0F);
+        pack_id_ = frame[0];
         data_field_ = new byte[frame.length - 2];
         System.arraycopy(frame,2,data_field_,0,data_field_.length);
         // decode data field
@@ -179,9 +179,9 @@ public class MacPacket {
     // encode all fields to a String
     byte[] toArray(){
         byte[] frame = new byte[data_field_.length + 2];
-        frame[0] = (byte)((dest_addr_ & 0x03) << 6);
-        frame[0] = (byte)(((dest_addr_ & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
-        frame[1] = pack_id_;
+        frame[1] = (byte)((dest_addr_ & 0x03) << 6);
+        frame[1] = (byte)(((dest_addr_ & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
+        frame[0] = pack_id_;
         System.arraycopy(data_field_,0,frame,2,data_field_.length);
         return frame;
     }
