@@ -34,12 +34,9 @@ class MacLayer{
 	// All current using packet is stored here for easy reference.
 	private MacPacket[] packet_array_ = new MacPacket[256];
 	// Sending array for all addresses.
-	// Let's please Java with Object first, but we all know
-	// what type it is, so we cast it down.
-	// This is because Java can't creat generic typed array.
-	@SuppressWarnings("unchecked")
-	private ArrayList<Integer>[] sending_list_ 
-		= (ArrayList<Integer>[]) new Object[4];
+	// Java cannot create generic typed array.
+	private ArrayList<ArrayList<Integer>> sending_list_ 
+		= new ArrayList<ArrayList<Integer>>();
 	// All available ID.
 	private ArrayBlockingQueue<Integer> available_q_ 
 		= new ArrayBlockingQueue<Integer>(256);
@@ -74,6 +71,11 @@ class MacLayer{
 		status_ = MacLayer.LINKIDL;
 		// Init id queue with all available ids.
 		for (int i=0; i<256; i++){ available_q_.offer(i); }
+
+		// Create 4 array for each address.
+		for (int i=0; i<4; i++){
+			sending_list_.add(new ArrayList<Integer>());
+		}
 
 		send_thread_ = new Thread(new Runnable(){
 			public void run() { try { send(); } catch (Exception e){;} }
@@ -119,14 +121,13 @@ class MacLayer{
 		// sending queue.
 		// Using take, we have to wait if necessary.
 		int id = available_q_.take();
-		sending_list_[pack.getDestAddr()].add(id);
+		sending_list_.get(pack.getDestAddr()).add(id);
 
 		pack.setPacketID((byte) id);
 		packet_array_[id] = pack;
 	}
 
 	private void send() throws Exception{
-		System.out.println("Thread send() started.");
 		int id;
 		int status;
 		double curr_time;
@@ -134,14 +135,16 @@ class MacLayer{
 			for (int dst = 0; dst<4; dst++){
 				// Only cares whatever in the window.
 				for (int i=0; 
-				  i<Math.min(sending_list_[dst].size(), window_size_); i++){
+				  i<Math.min(sending_list_.get(dst).size(), window_size_); 
+				  i++){
 					
-					id = sending_list_[dst].get(i);
+					id = sending_list_.get(dst).get(i);
 					status = packet_array_[id].getStatus();
 					curr_time = System.nanoTime()/1e9;
 					if (status == MacPacket.STATUS_WAITING){
-						while (!recv_.hasSignal()) {Thread.sleep(1);}
+						while (recv_.hasSignal()) {Thread.sleep(1);}
 						trans_.transmitOnePack(packet_array_[id].toArray());
+						System.err.printf("Packet #%4d sent.\n", id);
 						packet_array_[id].setStatus(MacPacket.STATUS_SENT);
 						packet_array_[id].setTimeStamp(curr_time);
 					} else if (
@@ -154,7 +157,6 @@ class MacLayer{
 			}
 			Thread.sleep(sleep_time_);
 		}
-		
 	}
 
 	private void recycleID() throws Exception{
@@ -162,21 +164,21 @@ class MacLayer{
 		int head;
 		while (!stop_){
 			for (int src = 0; src < 4; src ++){
-				if (sending_list_[src].size() == 0){ 
+				if (sending_list_.get(src).size() == 0){ 
 					continue; 
 				} else {
-					head = sending_list_[src].get(0);
+					head = sending_list_.get(src).get(0);
 					// Just received ACK for the head. 
 					// Remove it. Recycle packet id.
 					if (
 					  packet_array_[head].getStatus() == MacPacket.STATUS_ACKED){
-						sending_list_[src].remove(0);
+						sending_list_.get(src).remove(0);
 						available_q_.put(head);
 						status_ = MacLayer.LINK_OK;
 					}
 					// It has timeout so many times. We forget about it.
 					if (packet_array_[head].getResendCounter() == max_resend_){
-						sending_list_[src].remove(0);
+						sending_list_.get(src).remove(0);
 						available_q_.put(head);
 						status_ = MacLayer.LINKERR;
 					}
@@ -190,16 +192,23 @@ class MacLayer{
 	}
 
 	private void receive() throws Exception{
+		System.out.println(1);
 		MacPacket mac_pack;
 		while (!stop_){
-			mac_pack = new MacPacket(recv_.receiveOnePacket());
-			if (mac_pack.getType() == MacPacket.TYPE_ACK){
+			byte[] data = recv_.receiveOnePacket();
+			System.out.println(data.length);
+			if (data.length == 0) {
+				continue;
+			} 
+			mac_pack = new MacPacket(data);
 			// An ACK packet.
+			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
 				int src = mac_pack.getSrcAddr();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
-			} else if (mac_pack.getDestAddr() == address_) {
+			
 			// Not an ACK and the packet is for me.
+			} else if (mac_pack.getDestAddr() == address_) {
 				// Throws it away if the queue if full.
 				if (data_q_.offer(mac_pack)){
 					// Or send an ACK to reply.
@@ -217,19 +226,30 @@ class MacLayer{
 	public MacPacket getOnePack() throws Exception{
 		return data_q_.take();
 	}
+	public int countUnsent(byte address){
+		int cnt = 0;
+		for (int i=0; i<sending_list_.get(address).size(); i++){
+			int id = sending_list_.get(address).get(i);
+			if (packet_array_[id].getStatus() == MacPacket.STATUS_WAITING){
+				cnt ++;
+			}
+		}
+		return cnt;
+	}
 
 	public static void main(String[] args) throws Exception{
 		MacLayer mac_layer = new MacLayer((byte)0x1);
 
 		// hello world.
 		final byte[] data = { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 
-								0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
+								0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e, 0x00};
 		
 		mac_layer.startMacLayer();
 
 		mac_layer.requestSend(0x1, data.length);
 		mac_layer.requestSend(0x1, 0, data);
 		
+		Thread.sleep(100);
 		mac_layer.stopMacLayer();
 
 		MacPacket mac_pack;
