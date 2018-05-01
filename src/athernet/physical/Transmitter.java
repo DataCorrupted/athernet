@@ -38,6 +38,7 @@ public class Transmitter{
 		}
 		System.out.println();
 		*/
+
 		out[0] = (byte) crc8_.getValue();
 		// Modulation
 		double[] wave = modulator_.modulate(out);
@@ -51,7 +52,7 @@ public class Transmitter{
 		FileI i_file_ = new FileI("./I", FileI.TEXT01);
 		
 		int head_size = 1;
-		int pack_size = 127;
+		int pack_size = 128;
 		int byte_read = pack_size - head_size;
 
 		Transmitter transmitter = new Transmitter();

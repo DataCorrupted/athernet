@@ -227,7 +227,8 @@ public class OFDM{
 
 			// calculate the length field
 			if ((pack_len_ == -1) && (processing_data_.size() >= 8 * bit_len_ / channel_cnt_)){
-				pack_len_ = decode_length();
+				// CRC is no longer one of the frame.
+				pack_len_ = decode_length() + 1;
 				// Prevent too long pack.
 				if (pack_len_ >= max_len_){
 					state_ = 0;
@@ -304,7 +305,7 @@ public class OFDM{
 		}
 
 		// encode the length
-		byte data_length = (byte)(Math.log(byte_data.length)/Math.log(2));
+		byte data_length = (byte)(Math.log(byte_data.length - 1)/Math.log(2));
 
 		byte[] new_byte_data = new byte[byte_data.length + 1];
 		new_byte_data[0] = data_length;

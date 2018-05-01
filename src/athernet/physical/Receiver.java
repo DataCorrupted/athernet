@@ -31,7 +31,7 @@ public class Receiver{
 	private int sample_rate_;
 
 	public Receiver() throws Exception{
-		this(48000, 0.1, 5000);
+		this(48000, 0.1, 10000);
 	}
 	public Receiver(double timeout) throws Exception{
 		this(48000, 0.1, timeout);
@@ -89,7 +89,7 @@ public class Receiver{
 		crc8_.update(i_stream, 1, i_stream.length -1);
 		byte[] rcvd_data;
 		if ((byte) crc8_.getValue() == i_stream[0]){
-			System.out.printf("Packet #%4d received.\n", i_stream[2]);
+			System.out.printf("Packet #%4d received.\n", i_stream[1]);
 			rcvd_data = new byte[i_stream.length -1];
 			System.arraycopy(i_stream, 1, rcvd_data, 0, rcvd_data.length);
 			/*
