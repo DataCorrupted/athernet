@@ -7,7 +7,7 @@ import athernet.mac.MacPacket;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
-class MacLayer{
+public class MacLayer{
 
 	// Status of the MacLayer
 	public int status_;

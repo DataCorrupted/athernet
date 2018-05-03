@@ -1,12 +1,11 @@
 package athernet.mac;
 
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /***
  * The package definition:
- *      DestAddr (2 bits) + SrcAddr (2 bits) + Type (4 bits) + packet_id (one byte) + MAC Payload (2^n - 3 bytes)
+ *      DestAddr (2 bits) + SrcAddr (2 bits) + Type (4 bits) + packet_id (one byte) + MAC Payload (2^n - 4 bytes)
  */
 
 public class MacPacket {
@@ -22,7 +21,7 @@ public class MacPacket {
     private byte src_addr_;             // 2 bits
     private byte type_;                 // 4 bits
     private byte pack_id_;              // one byte
-    private byte[] data_field_;         // 2^n - 3 bytes
+    private byte[] data_field_;         // 2^n - 4 bytes
 
     // for system maintenance
     private int resend_counter_ = 0;
