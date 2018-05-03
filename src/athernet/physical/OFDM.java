@@ -228,7 +228,7 @@ public class OFDM{
 			// calculate the length field
 			if ((pack_len_ == -1) && (processing_data_.size() >= 8 * bit_len_ / channel_cnt_)){
 				// CRC is no longer one of the frame.
-				pack_len_ = decode_length() + 1;
+				pack_len_ = decodePackLength() + 1;
 				// Prevent too long pack.
 				if (pack_len_ >= max_len_){
 					state_ = 0;
@@ -280,7 +280,7 @@ public class OFDM{
 
 	// Decode the length field
 	// The length field is always in the font of processing_data
-	private int decode_length(){
+	private int decodePackLength(){
 		// only give necessary data to waveToData()
 		double[] length_buffer = new double[8*bit_len_/channel_cnt_];
 		for (int i = 0; i < length_buffer.length; i++){
@@ -295,23 +295,12 @@ public class OFDM{
 			length_boolean[i] = packet_boolean[i];
 		}
 		byte[] tmp = convertBoolsToBytes(length_boolean);
-		return (int)Math.pow(2,tmp[0]&0x7F);
+		return ((int) tmp[0]) & 0xFF;
 	}
 
 	public double[] modulate(byte[] byte_data){
-		// check the length of the input array
-		if (byte_data.length > 256){
-			throw new RuntimeException("OFDM Modulate: the length of input data array is too huge");
-		}
-
 		// encode the length
-		byte data_length = (byte)(Math.log(byte_data.length - 1)/Math.log(2));
-
-		byte[] new_byte_data = new byte[byte_data.length + 1];
-		new_byte_data[0] = data_length;
-		System.arraycopy(byte_data,0,new_byte_data,1,byte_data.length);
-
-		double[] wave = modulateWithLength(new_byte_data);
+		double[] wave = modulateWithLength(byte_data);
 
 		// add the sync header part to the frame and return modulated signal
 		double[] output_frame =

@@ -96,7 +96,7 @@ public class Receiver{
 		byte[] rcvd_data;
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			if (echo_) {
-				System.out.printf("Packet #%4d received.\n", i_stream[1]);
+				System.out.printf("Packet #%4d received.\n", ((int) i_stream[1]) & 0xff);
 			}
 			rcvd_data = new byte[i_stream.length -1];
 			System.arraycopy(i_stream, 1, rcvd_data, 0, rcvd_data.length);
@@ -137,7 +137,7 @@ public class Receiver{
 		while (System.nanoTime()/1e9 - start_time <= timeout){
 			byte[] packet = receiveOnePacket();
 			if (packet.length == 0) { continue; }
-			int pack_cnt = packet[0];	
+			int pack_cnt = ((int) packet[0]) & 0xff;	
 			int data_size = packet.length - head_size;
 			start_pos = pack_cnt * data_size;
 			for (int i=0; i<data_size; i++){

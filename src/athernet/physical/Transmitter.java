@@ -27,10 +27,17 @@ public class Transmitter{
 	}
 
 	public void transmitOnePack(byte[] data) throws Exception{
-		byte[] out = new byte[data.length + 1];
-		System.arraycopy(data, 0, out, 1, data.length);
+
+		// check the length of the input array
+		if (data.length > 255){
+			throw new RuntimeException(
+				"transmitOnePack(byte[]): Too much data to transfer in one pack.");
+		}
+
+		byte[] out = new byte[data.length + 2];
+		System.arraycopy(data, 0, out, 2, data.length);
 		// Add checksum
-		crc8_.update(out, 1, out.length-1);
+		crc8_.update(out, 2, out.length-2);
 		/*
 		System.out.println("Sending");
 		for (int i=0; i<out.length; i++){
@@ -39,7 +46,8 @@ public class Transmitter{
 		System.out.println();
 		*/
 
-		out[0] = (byte) crc8_.getValue();
+		out[0] = (byte) data.length;
+		out[1] = (byte) crc8_.getValue();
 		// Modulation
 		double[] wave = modulator_.modulate(out);
 		// Sound
