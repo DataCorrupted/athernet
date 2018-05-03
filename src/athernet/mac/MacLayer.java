@@ -55,7 +55,7 @@ class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 	public MacLayer(byte address) throws Exception{
-		this(address, 3, 3, 3);
+		this(address, 1, 3, 3);
 	}
 	public MacLayer(
 	  byte address, double timeout, int max_resend, int window_size) 
@@ -267,10 +267,10 @@ class MacLayer{
 								0x20, 0x6f, 0x6c, 0x6c, 0x65, 0x68};
 
 		mac_layer.startMacLayer();
-
-		mac_layer.requestSend(0x1, data1.length + data2.length);
-		Thread.sleep(3000);
-
+		mac_layer.requestSend(new MacPacket((byte)0x1, (byte)0x1, (byte)123));
+		//mac_layer.requestSend(0x1, data1.length + data2.length);
+		Thread.sleep(5000);
+/*
 		mac_layer.requestSend(0x1, 0, data1);
 		mac_layer.requestSend(0x1, 12, data2);
 		Thread.sleep(1000);
@@ -284,7 +284,7 @@ class MacLayer{
 			System.out.println(mac_pack.getData());
 		} else {
 			System.out.println("Error: Packet number mismatch.");
-		}
+		}*/
 
 		mac_layer.stopMacLayer();
 	}
