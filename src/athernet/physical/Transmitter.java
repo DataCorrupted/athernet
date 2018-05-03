@@ -15,6 +15,7 @@ public class Transmitter{
 	// Transmit the sound.
 	private SoundO o_sound_;
 	
+	public void drain() { o_sound_.drain(); }
 	public Transmitter() throws Exception{
 		this(48000);
 	}
@@ -27,7 +28,6 @@ public class Transmitter{
 	}
 
 	public void transmitOnePack(byte[] data) throws Exception{
-
 		// check the length of the input array
 		if (data.length > 255){
 			throw new RuntimeException(
@@ -38,13 +38,6 @@ public class Transmitter{
 		System.arraycopy(data, 0, out, 2, data.length);
 		// Add checksum
 		crc8_.update(out, 2, out.length-2);
-		/*
-		System.out.println("Sending");
-		for (int i=0; i<out.length; i++){
-			System.out.print(Integer.toHexString( out[i] & 0xFF) + " ");
-		}
-		System.out.println();
-		*/
 
 		out[0] = (byte) data.length;
 		out[1] = (byte) crc8_.getValue();
