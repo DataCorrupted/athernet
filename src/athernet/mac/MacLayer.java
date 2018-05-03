@@ -318,9 +318,14 @@ public class MacLayer{
 		// Make sure that init is recived.
 		MacPacket init_pack 
 			= new MacPacket(dst_addr, src_addr, 2, data1.length + data2.length);
+		mac_layer.requestSend(init_pack);
 		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
-			mac_layer.requestSend(init_pack);
-			Thread.sleep(128);
+			if (mac_layer.getStatus() == LINKERR) {
+				mac_layer.requestSend(init_pack);
+				// Normally you should quit. 
+				// But let's continue here.
+				mac_layer.status_ = LINK_OK;
+			}
 		}
 
 		mac_layer.requestSend(dst_addr, 0, data1);
