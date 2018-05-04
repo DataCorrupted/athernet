@@ -131,7 +131,6 @@ public class MacLayer{
 		int status;
 		double curr_time;
 		while (!stop_){
-			trans_ = new Transmitter();
 			for (int dst = 0; dst<4; dst++){
 				// Only cares whatever in the window.
 				for (int i=0; 
@@ -161,7 +160,6 @@ public class MacLayer{
 					}
 				}
 			}
-			trans_.drain();
 			recycleID();
 			Thread.sleep(sleep_time_);
 		}
