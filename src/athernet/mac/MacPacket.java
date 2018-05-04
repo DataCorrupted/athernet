@@ -16,6 +16,7 @@ public class MacPacket {
     public static final int STATUS_WAITING = 0;
     public static final int STATUS_SENT = 1;
     public static final int STATUS_ACKED = 2;
+    public static final int STATUS_LOST = -1;
 
     private byte dest_addr_;            // 2 bits
     private byte src_addr_;             // 2 bits

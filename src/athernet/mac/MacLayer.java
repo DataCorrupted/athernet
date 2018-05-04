@@ -10,7 +10,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class MacLayer{
 
 	// Status of the MacLayer
-	public int status_;
+	private int status_;
 	public static final int LINKIDL = 0;
 	public static final int LINK_OK = 1;
 	public static final int LINKERR = -1;
@@ -53,6 +53,7 @@ public class MacLayer{
 
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
+
 	public MacLayer(byte address) throws Exception{
 		this(address, 1.5, 3, 6);
 	}
@@ -184,14 +185,12 @@ public class MacLayer{
 				}
 				// It has timeout so many times. We forget about it.
 				if (packet_array_[head].getResendCounter() == max_resend_){
+					packet_array_[head].setStatus(MacPacket.STATUS_LOST);
 					sending_list_.get(src).remove(0);
 					available_q_.put(head);
 					status_ = MacLayer.LINKERR;
 				}
 			}
-		}
-		if (available_q_.size() == 256){
-			status_ = MacLayer.LINKIDL;
 		}
 	}
 
@@ -204,19 +203,22 @@ public class MacLayer{
 				continue;
 			} 
 			mac_pack = new MacPacket(data);
-			System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
 			// An ACK packet.
 			// Meaning this is sender's receiver.
+			if (mac_pack.getDestAddr() != address_){
+				continue;
+			}			
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
 				int src = mac_pack.getSrcAddr();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 				System.out.printf(
-					"Packet #%d ACK received.\n",
+					"Packet #%4d ACK received.\n",
 					mac_pack.getACKPacketID()
 				);
-			// Not an ACK and the packet is for me.
-			} else if (mac_pack.getDestAddr() == address_) {
+			// Not an ACK.
+			} else {
+				System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
 				// Throws it away if the queue if full.
 				if (data_q_.offer(mac_pack)){
 					// Or send an ACK to reply.
@@ -267,10 +269,20 @@ public class MacLayer{
 		}
 	}
 
+	private static final String test_str1_ = "Hello world. ";
+	private static final String test_str2_ = "I just sent 4 floating length packages,";
+	private static final String test_str3_ = " including 2 sentences and a signature.";
+	private static final String test_str4_ = " --P.R.";
+
+	private static final String test_str_ = test_str1_ + test_str2_ + test_str3_ + test_str4_;
+
 	public static void receiver() throws Exception{
 		byte src_addr = 0x1;
 		byte dst_addr = 0x2;
 		MacLayer mac_layer = new MacLayer(dst_addr);
+		mac_layer.startMacLayer();
+
+		double tic = System.nanoTime() / 1e9;
 		MacPacket mac_pack = mac_layer.getOnePack();
 
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
@@ -296,42 +308,59 @@ public class MacLayer{
 			System.arraycopy(chunk, 0, data, offset, chunk.length);
 		}
 
+		double toc = System.nanoTime() / 1e9;
 
+		String received_str = new String(data);
+		System.out.println(
+			"Receiving completed. You should receive the following sentence: \n");
+		System.out.println(test_str_);
+		System.out.println("\nYou received: \n");
+		System.out.println(received_str + "\n");
+
+		Thread.sleep(2000);
+
+		mac_layer.stopMacLayer();
+
+		System.out.printf("Transmition took: %3.3fs\n", (toc - tic));
 	}
 	public static void sender() throws Exception{
 		byte src_addr = 0x1;
 		byte dst_addr = 0x2;
+
+		final byte[] data1 = test_str1_.getBytes();
+		final byte[] data2 = test_str2_.getBytes();
+		final byte[] data3 = test_str3_.getBytes();
+		final byte[] data4 = test_str4_.getBytes();
+
+		final int pack_cnt = 4;
+		final int data_length = 98;
+
 		MacLayer mac_layer = new MacLayer(src_addr);
 
-		// hello world.
-		final byte[] data1 = { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 
-								0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e};
-		// .dlrow olleh
-		final byte[] data2 = {0x2e, 0x64, 0x6c, 0x72, 0x6f, 0x77,
-								0x20, 0x6f, 0x6c, 0x6c, 0x65, 0x68};
-		
-		// Ask receiver to show debug information.
-		mac_layer.recv_.echo_ = false;
-		
 		mac_layer.startMacLayer();
 		
 		// Make sure that init is recived.
 		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, 2, data1.length + data2.length);
+			= new MacPacket(dst_addr, src_addr, pack_cnt, data_length);
 		mac_layer.requestSend(init_pack);
 		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
 			if (mac_layer.getStatus() == LINKERR) {
-				mac_layer.requestSend(init_pack);
-				// Normally you should quit. 
-				// But let's continue here.
-				mac_layer.status_ = LINK_OK;
+				System.err.println("Link Error!");
+				mac_layer.stopMacLayer();
+				return;
 			}
+			Thread.sleep(20);
+			//System.out.println(1);
 		}
+		System.out.println(2);
 
 		mac_layer.requestSend(dst_addr, 0, data1);
-		mac_layer.requestSend(dst_addr, 12, data2);
+		mac_layer.requestSend(dst_addr, 13, data2);
+		mac_layer.requestSend(dst_addr, 52, data3);
+		mac_layer.requestSend(dst_addr, 91, data4);
 
-		Thread.sleep(10000);
+
+		Thread.sleep(2000);
 
 		mac_layer.stopMacLayer();
 
