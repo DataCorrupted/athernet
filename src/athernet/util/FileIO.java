@@ -33,10 +33,15 @@ public class FileIO{
 			}
 		}
 	}
+	public int getSize(){
+		return (int) file_.length();
+	}
 
 	public static void main(String[] args) throws Exception{
 		FileI i_file = new FileI("./I", BIN);
 		FileO o_file = new FileO("./O", TEXT01);
+		
+		System.out.println(i_file.getSize());
 		
 		int r=0;
 		byte[] f = new byte[1000];

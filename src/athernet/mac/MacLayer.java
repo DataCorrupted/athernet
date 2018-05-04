@@ -114,7 +114,7 @@ public class MacLayer{
 	}
 
 	// Send pack.
-	private int requestSend(MacPacket pack) throws Exception{
+	public int requestSend(MacPacket pack) throws Exception{
 		// Making this pack id unavailable by moving it to 
 		// sending queue.
 		// Using take, we have to wait if necessary.
@@ -255,112 +255,5 @@ public class MacLayer{
 			}
 		}
 		return cnt;
-	}
-
-	public static void main(String[] args) throws Exception{
-		if (args.length == 0){
-			System.err.println("No parameter given.");
-		} else if (args[0].equals("-S")) {
-			sender();
-		} else if (args[0].equals("-R")) {
-			receiver();
-		}
-	}
-
-	private static final String test_str1_ = "Hello world. ";
-	private static final String test_str2_ = "I just sent 4 floating length packages,";
-	private static final String test_str3_ = " including 2 sentences and a signature.";
-	private static final String test_str4_ = " --P.R.";
-
-	private static final String test_str_ = test_str1_ + test_str2_ + test_str3_ + test_str4_;
-
-	public static void receiver() throws Exception{
-		byte src_addr = 0x1;
-		byte dst_addr = 0x2;
-		MacLayer mac_layer = new MacLayer(dst_addr);
-		mac_layer.startMacLayer();
-
-		double tic = System.nanoTime() / 1e9;
-		MacPacket mac_pack = mac_layer.getOnePack();
-
-		if (mac_pack.getType() != MacPacket.TYPE_INIT){
-			System.err.println("Error, no init received.");
-			return;
-		}
-		int length = mac_pack.getTotalLength();
-		int pack_cnt = mac_pack.getTotalPack();
-
-		System.out.printf(
-			"Received sending request for %d bytes.\n", 
-			length);
-
-		byte[] data = new byte[length];
-		for (int i=0; i<pack_cnt; i++){
-
-			mac_pack = mac_layer.getOnePack();
-			int offset = mac_pack.getOffset();
-			byte[] chunk = mac_pack.getData();
-
-			// This shouldn't cause overflow error. 
-			// But if so, let it be, so we can debug easier.
-			System.arraycopy(chunk, 0, data, offset, chunk.length);
-		}
-
-		double toc = System.nanoTime() / 1e9;
-
-		String received_str = new String(data);
-		System.out.println(
-			"Receiving completed. You should receive the following sentence: \n");
-		System.out.println(test_str_);
-		System.out.println("\nYou received: \n");
-		System.out.println(received_str + "\n");
-
-		Thread.sleep(5000);
-
-		mac_layer.stopMacLayer();
-
-		System.out.printf("Transmition took: %3.3fs\n", (toc - tic));
-	}
-	public static void sender() throws Exception{
-		byte src_addr = 0x1;
-		byte dst_addr = 0x2;
-
-		final byte[] data1 = test_str1_.getBytes();
-		final byte[] data2 = test_str2_.getBytes();
-		final byte[] data3 = test_str3_.getBytes();
-		final byte[] data4 = test_str4_.getBytes();
-
-		final int pack_cnt = 4;
-		final int data_length = 98;
-
-		MacLayer mac_layer = new MacLayer(src_addr);
-
-		mac_layer.startMacLayer();
-		
-		// Make sure that init is recived.
-		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, pack_cnt, data_length);
-		mac_layer.requestSend(init_pack);
-		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
-			if (mac_layer.getStatus() == LINKERR) {
-				System.err.println("Link Error!");
-				mac_layer.stopMacLayer();
-				return;
-			}
-			Thread.sleep(20);
-			//System.out.println(1);
-		}
-		System.out.println(2);
-
-		mac_layer.requestSend(dst_addr, 0, data1);
-		mac_layer.requestSend(dst_addr, 13, data2);
-		mac_layer.requestSend(dst_addr, 52, data3);
-		mac_layer.requestSend(dst_addr, 91, data4);
-
-
-		Thread.sleep(5000);
-
-		mac_layer.stopMacLayer();
-
 	}
 }
