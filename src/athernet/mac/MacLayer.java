@@ -317,7 +317,7 @@ public class MacLayer{
 		System.out.println("\nYou received: \n");
 		System.out.println(received_str + "\n");
 
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 
 		mac_layer.stopMacLayer();
 
@@ -360,7 +360,7 @@ public class MacLayer{
 		mac_layer.requestSend(dst_addr, 91, data4);
 
 
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 
 		mac_layer.stopMacLayer();
 
