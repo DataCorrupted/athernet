@@ -41,7 +41,7 @@ public class FileIO{
 		FileI i_file = new FileI("./I", BIN);
 		FileO o_file = new FileO("./O", TEXT01);
 		
-		System.out.println(i_file.getSize());
+		System.out.println(i_file.getSize() + "bytes in total.");
 		
 		int r=0;
 		byte[] f = new byte[1000];

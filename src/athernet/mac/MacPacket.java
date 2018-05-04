@@ -17,6 +17,9 @@ public class MacPacket {
     public static final int STATUS_SENT = 1;
     public static final int STATUS_ACKED = 2;
     public static final int STATUS_LOST = -1;
+    public static final int STATUS_TAKEN = 3;
+
+    public void take() { status_ = STATUS_TAKEN; }
 
     private byte dest_addr_;            // 2 bits
     private byte src_addr_;             // 2 bits

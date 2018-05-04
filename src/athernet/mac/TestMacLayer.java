@@ -6,11 +6,12 @@ import athernet.util.CheckIO;
 
 import athernet.mac.MacLayer;
 import athernet.mac.MacPacket;
+import athernet.mac.MacLink;
 
 class TestMacLayer{
 
-	private static final byte src_addr = 0x1;
-	private static final byte dst_addr = 0x2;
+	private static final byte src_addr = (byte) 0x2;
+	private static final byte dst_addr = (byte) 0x1;
 
 	public static void main(String[] args) throws Exception{
 		if (args.length == 0){
@@ -23,6 +24,8 @@ class TestMacLayer{
 			transmit_file();
 		} else if (args[0].equals("--receive-file")){
 			receive_file();
+		} else {
+			System.err.println("No such argument.");
 		}
 	}
 
@@ -39,10 +42,10 @@ class TestMacLayer{
 
 		// Make sure that the init pack is sent.
 		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, 0, 0);
+			= new MacPacket(dst_addr, src_addr, 0, total_size);
 		mac_layer.requestSend(init_pack);
 		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
-			if (mac_layer.getStatus() == MacLayer.LINKERR) {
+			if (mac_layer.getStatus(dst_addr) == MacLink.LINKERR) {
 				System.err.println("Link Error!");
 				mac_layer.stopMacLayer();
 				return;
@@ -74,7 +77,7 @@ class TestMacLayer{
 		mac_layer.startMacLayer();
 
 		// Receive head length.
-		MacPacket mac_pack = mac_layer.getOnePack();
+		MacPacket mac_pack = mac_layer.getOnePack(src_addr);
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
 			System.err.println("Error, no init received.");
 			return;
@@ -88,7 +91,7 @@ class TestMacLayer{
 		// Receive each and every chunk of data.
 		byte[] data = new byte[length];
 		for (int i=0; i<pack_cnt; i++){
-			mac_pack = mac_layer.getOnePack();
+			mac_pack = mac_layer.getOnePack(src_addr);
 			int offset = mac_pack.getOffset();
 			byte[] chunk = mac_pack.getData();
 			System.arraycopy(chunk, 0, data, offset, chunk.length);
@@ -117,7 +120,7 @@ class TestMacLayer{
 		double tic = System.nanoTime() / 1e9;
 
 		// Header first.
-		MacPacket mac_pack = mac_layer.getOnePack();
+		MacPacket mac_pack = mac_layer.getOnePack(src_addr);
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
 			System.err.println("Error, no init received.");
 			return;
@@ -130,7 +133,7 @@ class TestMacLayer{
 
 		byte[] data = new byte[length];
 		for (int i=0; i<pack_cnt; i++){
-			mac_pack = mac_layer.getOnePack();
+			mac_pack = mac_layer.getOnePack(src_addr);
 			int offset = mac_pack.getOffset();
 			byte[] chunk = mac_pack.getData();
 
@@ -148,7 +151,7 @@ class TestMacLayer{
 		System.out.println("\nYou received: \n");
 		System.out.println(received_str + "\n");
 
-		Thread.sleep(3000);
+		Thread.sleep(10000);
 		System.out.printf("Transmition took: %3.3fs\n", (toc - tic));
 		mac_layer.stopMacLayer();
 	}
@@ -167,10 +170,10 @@ class TestMacLayer{
 		
 		// Make sure that init is recived.
 		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, pack_cnt, data_length);
+			= new MacPacket(dst_addr, src_addr, 2, data_length);
 		mac_layer.requestSend(init_pack);
 		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
-			if (mac_layer.getStatus() == MacLayer.LINKERR) {
+			if (mac_layer.getStatus(dst_addr) == MacLink.LINKERR) {
 				System.err.println("Link Error!");
 				mac_layer.stopMacLayer();
 				return;
@@ -180,10 +183,10 @@ class TestMacLayer{
 
 		mac_layer.requestSend(dst_addr, 0, data1);
 		mac_layer.requestSend(dst_addr, 13, data2);
-		mac_layer.requestSend(dst_addr, 52, data3);
+/*		mac_layer.requestSend(dst_addr, 52, data3);
 		mac_layer.requestSend(dst_addr, 91, data4);
-
-		Thread.sleep(3000);
+*/
+		Thread.sleep(10000);
 
 		mac_layer.stopMacLayer();
 	}
