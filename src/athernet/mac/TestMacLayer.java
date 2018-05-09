@@ -8,7 +8,7 @@ import athernet.mac.MacLayer;
 import athernet.mac.MacPacket;
 
 class TestMacLayer{
-
+/*
 	private static final byte src_addr = 0x1;
 	private static final byte dst_addr = 0x2;
 
@@ -187,4 +187,5 @@ class TestMacLayer{
 
 		mac_layer.stopMacLayer();
 	}
+	*/
 }
