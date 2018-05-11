@@ -2,6 +2,7 @@ package athernet.tools;
 
 import athernet.mac.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MacPerf {
@@ -17,6 +18,8 @@ public class MacPerf {
         System.out.println("MacPerf dest_addr: "+dest_addr);
         src_addr_ = src_addr;
         dest_addr_ = dest_addr;
+
+        record_sent_ = new ArrayList<Integer>();
 
         try{
             mac_layer_ = new MacLayer(src_addr_,dest_addr);
