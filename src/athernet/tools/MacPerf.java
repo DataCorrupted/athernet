@@ -6,37 +6,23 @@ import java.util.List;
 
 public class MacPerf {
     private byte dest_addr_;
+    private byte src_addr_;
     private MacLayer mac_layer_;
 
     // record # of package sent in each second
     private List<Integer> record_sent_;
     private int num_unsent_pack_;
 
-    MacPerf(byte dest_addr){
+    MacPerf(byte src_addr, byte dest_addr){
         System.out.println("MacPerf dest_addr: "+dest_addr);
+        src_addr_ = src_addr;
         dest_addr_ = dest_addr;
 
         try{
-            mac_layer_ = new MacLayer(dest_addr);
+            mac_layer_ = new MacLayer(src_addr_,dest_addr);
         }
         catch (Exception exception){
             System.out.println("MacLayer throw exception");
-        }
-    }
-
-    // get
-    public static byte get_dest_addr(String[] args){
-        if (args[0].toLowerCase().equals("node1")){
-            return 1;
-        }
-        else if (args[0].toLowerCase().equals("node2")){
-            return 2;
-        }
-        else if (args[0].toLowerCase().equals("node3")){
-            return 3;
-        }
-        else{
-            throw new IllegalArgumentException("Invalid argument for destination address");
         }
     }
 
@@ -49,7 +35,7 @@ public class MacPerf {
 
         // request send it
         try {
-            mac_layer_.requestSend(dest_addr_, 0, out);
+            mac_layer_.requestSend(0, out);
         }
         catch (Exception exception){
             System.out.println("requestSend throw exception");
@@ -84,7 +70,7 @@ public class MacPerf {
             }
 
             // give 15 packages to sender if needed
-            int new_num_unsent_pack =  mac_layer_.countUnsent(dest_addr_);
+            int new_num_unsent_pack =  mac_layer_.countUnsent();
             if( new_num_unsent_pack == 0){
                 System.out.println("[WARN], unset package reach 0, maybe you need to put more packets in");
             }
@@ -107,11 +93,10 @@ public class MacPerf {
     }
 
     public static void main(String[] args){
-        // get dest address and start perfing
-        byte dest_addr = get_dest_addr(args);
-        MacPerf mac_perf = new MacPerf(dest_addr);
+        NodeConfig node_config = new NodeConfig(args);
+
+        MacPerf mac_perf = new MacPerf(node_config.get_src_addr(),node_config.get_dest_addr());
 
         mac_perf.start_perfing();
-
     }
 }
