@@ -34,7 +34,7 @@ public class FileIO{
 		}
 	}
 	public int getSize(){
-		return (int) file_.length();
+		return (int) file_.length() / ((file_format_ == BIN)? 1: 8);
 	}
 
 	public static void main(String[] args) throws Exception{

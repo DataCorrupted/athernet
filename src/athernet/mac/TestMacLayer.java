@@ -19,10 +19,10 @@ class TestMacLayer{
 			test_send();
 		} else if (args[0].equals("--test-receive")) {
 			test_receive();
-//		} else if (args[0].equals("--transmit-file")){
-//			transmit_file();
-//		} else if (args[0].equals("--receive-file")){
-//			receive_file();
+		} else if (args[0].equals("--transmit-file")){
+			transmit_file();
+		} else if (args[0].equals("--receive-file")){
+			receive_file();
 		} else {
 			System.err.println("No such option.");
 		}
@@ -112,11 +112,11 @@ class TestMacLayer{
 
 		mac_layer.stopMacLayer();
 	}
-/*
+
 	public static void transmit_file() throws Exception{
 
 		// Start the mac layer.
-		MacLayer mac_layer = new MacLayer(src_addr);
+		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
 		mac_layer.startMacLayer();
 
 		double start_time = System.nanoTime() / 1e9;
@@ -126,7 +126,7 @@ class TestMacLayer{
 
 		// Make sure that the init pack is sent.
 		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, 0, 0);
+			= new MacPacket(dst_addr, src_addr, total_size);
 		mac_layer.requestSend(init_pack);
 		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
 			if (mac_layer.getStatus() == MacLayer.LINKERR) {
@@ -137,19 +137,27 @@ class TestMacLayer{
 			Thread.sleep(20);
 		}
 
-		int pack_size = 128;
+		int pack_size = 50;
 		byte[] out_data = new byte[pack_size];
 		int r = 0;
 		short pack_cnt = 0;
 
+		r = i_file_.read(out_data, 0, pack_size);
 		while (r != -1){
+			// Send it.
+			mac_layer.requestSend(pack_cnt*pack_size, out_data);
+			pack_cnt ++;
 			// Read next bunch of data.
 			r = i_file_.read(out_data, 0, pack_size);
-			// Send it.
-			mac_layer.requestSend(dst_addr, pack_cnt*pack_size, out_data);
-			pack_cnt ++;
+			Thread.sleep(20);
 		}
-
+		while (!mac_layer.isIdle()){ 
+			Thread.sleep(100); 
+			if (mac_layer.getStatus() == MacLayer.LINKERR){
+				System.err.println("Link Error!");
+				break;
+			}
+		}
 		double end_time = System.nanoTime() / 1e9;
 		System.out.println("Time used for transmition: " + (end_time - start_time));
 		// Remember to stop it.
@@ -157,9 +165,9 @@ class TestMacLayer{
 	}
 
 	public static void receive_file() throws Exception{
-		MacLayer mac_layer = new MacLayer(dst_addr);
+		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
 		mac_layer.startMacLayer();
-
+		mac_layer.echo();
 		// Receive head length.
 		MacPacket mac_pack = mac_layer.getOnePack();
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
@@ -167,20 +175,28 @@ class TestMacLayer{
 			return;
 		}
 		int length = mac_pack.getTotalLength();
-		int pack_cnt = mac_pack.getTotalPack();
 		System.out.printf(
 			"Received sending request for %d bytes.\n", 
 			length);
 
 		// Receive each and every chunk of data.
 		byte[] data = new byte[length];
-		for (int i=0; i<pack_cnt; i++){
+		int total_len = 0;
+		int offset = 0;
+		while (total_len < length){
 			mac_pack = mac_layer.getOnePack();
-			int offset = mac_pack.getOffset();
 			byte[] chunk = mac_pack.getData();
-			System.arraycopy(chunk, 0, data, offset, chunk.length);
+			total_len += chunk.length;
+			// This shouldn't cause overflow error. 
+			// But if so, let it be, so we can debug easier.
+			if (((offset+1) * chunk.length) < length){
+				System.arraycopy(chunk, 0, data, offset*chunk.length, chunk.length);
+			} else {
+				System.arraycopy(
+					chunk, 0, data, offset*chunk.length, length - offset * chunk.length);
+			}
+			offset += 1;
 		}
-
 		// Write the file and check correctness.
 		FileO o_file = new FileO("./O", FileO.TEXT01);
 		o_file.write(data, 0, data.length);
@@ -189,6 +205,6 @@ class TestMacLayer{
 
 		mac_layer.stopMacLayer();
 	}
-*/
+
 
 }
