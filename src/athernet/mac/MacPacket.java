@@ -90,8 +90,8 @@ public class MacPacket {
         src_addr_ = src_addr;
         type_ = TYPE_INIT;
         data_field_ = new byte[2];
-        data_field_[1] = (byte)((total_length & 0xFF00) >>> 8);
-        data_field_[2] = (byte)(total_length & 0xFF);
+        data_field_[0] = (byte)((total_length & 0xFF00) >>> 8);
+        data_field_[1] = (byte)(total_length & 0xFF);
     }
 
     public byte getPacketID(){

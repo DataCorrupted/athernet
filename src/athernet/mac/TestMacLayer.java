@@ -23,6 +23,8 @@ class TestMacLayer{
 //			transmit_file();
 //		} else if (args[0].equals("--receive-file")){
 //			receive_file();
+		} else {
+			System.err.println("No such option.");
 		}
 	}
 	private static final String test_str1_ = "Hello world. ";
@@ -36,10 +38,9 @@ class TestMacLayer{
 		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
 		mac_layer.startMacLayer();
 
-		double tic = System.nanoTime() / 1e9;
-
 		// Header first.
 		MacPacket mac_pack = mac_layer.getOnePack();
+		double tic = System.nanoTime() / 1e9;
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
 			System.err.println("Error, no init received.");
 			return;
@@ -51,11 +52,13 @@ class TestMacLayer{
 
 		int pack_cnt = 4;
 		byte[] data = new byte[length];
-		for (int i=0; i<pack_cnt; i++){
+
+		int total_len = 0;
+		while (total_len < length){
 			mac_pack = mac_layer.getOnePack();
 			int offset = mac_pack.getOffset();
 			byte[] chunk = mac_pack.getData();
-
+			total_len += chunk.length;
 			// This shouldn't cause overflow error. 
 			// But if so, let it be, so we can debug easier.
 			System.arraycopy(chunk, 0, data, offset, chunk.length);
