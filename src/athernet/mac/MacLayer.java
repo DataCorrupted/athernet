@@ -59,7 +59,7 @@ public class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 1.5, 3, 5);
+		this(src_address, dst_address, 0.5, 3, 80);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 
@@ -150,7 +150,7 @@ public class MacLayer{
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
-					while (recv_.hasSignal()) {Thread.sleep(15);}
+					//while (recv_.hasSignal()) {Thread.sleep(15);}
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					System.err.printf("Packet #%4d sent.\n", id);
 					packet_array_[id].setTimeStamp(curr_time);
@@ -222,7 +222,7 @@ public class MacLayer{
 				);
 			// Not an ACK.
 			} else {
-				//System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
+				System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
 				// Throws it away if the queue if full.
 				if (countDataPack() + window_pack_cnt <= 256){
 					// Or send an ACK to reply.

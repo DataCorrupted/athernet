@@ -119,7 +119,7 @@ class TestMacLayer{
 		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
 		mac_layer.startMacLayer();
 
-		double start_time = System.nanoTime() / 1e9;
+		double tic = System.nanoTime() / 1e9;
 
 		FileI i_file_ = new FileI("./I", FileI.TEXT01);
 		int total_size = i_file_.getSize();
@@ -137,7 +137,7 @@ class TestMacLayer{
 			Thread.sleep(20);
 		}
 
-		int pack_size = 50;
+		int pack_size = 125;
 		byte[] out_data = new byte[pack_size];
 		int r = 0;
 		short pack_cnt = 0;
@@ -158,8 +158,8 @@ class TestMacLayer{
 				break;
 			}
 		}
-		double end_time = System.nanoTime() / 1e9;
-		System.out.println("Time used for transmition: " + (end_time - start_time));
+		double toc = System.nanoTime() / 1e9;
+		System.out.println("Time used for transmition: " + (toc - tic));
 		// Remember to stop it.
 		mac_layer.stopMacLayer();
 	}
@@ -167,9 +167,9 @@ class TestMacLayer{
 	public static void receive_file() throws Exception{
 		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
 		mac_layer.startMacLayer();
-		mac_layer.echo();
 		// Receive head length.
 		MacPacket mac_pack = mac_layer.getOnePack();
+		double tic = System.nanoTime() / 1e9;
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
 			System.err.println("Error, no init received.");
 			return;
@@ -197,13 +197,14 @@ class TestMacLayer{
 			}
 			offset += 1;
 		}
+		double toc = System.nanoTime() / 1e9;
+		mac_layer.stopMacLayer();
 		// Write the file and check correctness.
 		FileO o_file = new FileO("./O", FileO.TEXT01);
 		o_file.write(data, 0, data.length);
 		CheckIO checker = new CheckIO();
 		System.out.println(checker.summary());		
-
-		mac_layer.stopMacLayer();
+		System.out.println("Time used for transmition: " + (toc - tic));
 	}
 
 
