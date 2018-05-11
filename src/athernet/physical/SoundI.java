@@ -42,7 +42,7 @@ public class SoundI implements Runnable {
 			double[] wave = byteBufToDouble(in);
 			for (int i=0; i<wave.length; i++){
 				// Update avg power.
-				avg_power_ = avg_power_ * 63 / 64 + wave[i] * wave[i] / 64;
+				avg_power_ = avg_power_ * 23 / 24 + wave[i] * wave[i] / 24;
 				while (!double_q_.offer(wave[i])){
 					// Overflow.
 					//System.out.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
