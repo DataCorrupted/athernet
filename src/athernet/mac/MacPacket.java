@@ -86,16 +86,13 @@ public class MacPacket {
     }
 
     // Constructor: build a init_request packet
-    public MacPacket(byte dest_addr, byte src_addr, int pack_cnt, int total_length){
+    public MacPacket(byte dest_addr, byte src_addr, int total_length){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_INIT;
-        pack_cnt_ = pack_cnt;
-        data_field_ = new byte[4];
-        data_field_[0] = (byte)((pack_cnt & 0xFF00) >>> 8);
-        data_field_[1] = (byte)(pack_cnt & 0xFF);
-        data_field_[2] = (byte)((total_length & 0xFF00) >>> 8);
-        data_field_[3] = (byte)(total_length & 0xFF);
+        data_field_ = new byte[2];
+        data_field_[0] = (byte)((total_length & 0xFF00) >>> 8);
+        data_field_[1] = (byte)(total_length & 0xFF);
     }
 
     public byte getPacketID(){
@@ -120,15 +117,6 @@ public class MacPacket {
             return ack_pack_id_;
         }
         else{
-            return -1;
-        }
-    }
-
-    // return -1 on error
-    public int getTotalPack(){
-        if (type_ == TYPE_INIT) {
-            return pack_cnt_;
-        } else {
             return -1;
         }
     }
@@ -212,8 +200,7 @@ public class MacPacket {
             System.arraycopy(data_field_,1,data_,0,data_.length);
         }
         else if (type_ == TYPE_INIT){
-            total_length_ = (int)((data_field_[2] & 0xFF) << 8) + (int)(data_field_[3] & 0xFF);
-            pack_cnt_ = (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
+            total_length_ = (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
         }
         else{
             throw new RuntimeException("Unrecognized MACPacket Type");

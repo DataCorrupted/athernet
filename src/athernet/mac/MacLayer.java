@@ -11,8 +11,7 @@ public class MacLayer{
 
 	// Status of the MacLayer
 	private int status_;
-	public static final int LINKIDL = 0;
-	public static final int LINK_OK = 1;
+	public static final int LINKBSY = 1;
 	public static final int LINKERR = -1;
 
 	// The caller of MacLayer should assign a Mac Address.
@@ -39,15 +38,17 @@ public class MacLayer{
 	private ArrayList<Integer> sending_list_ = new ArrayList<Integer>();
 	// All available ID.
 	private ArrayBlockingQueue<Integer> available_q_ 
-		= new ArrayBlockingQueue<Integer>(256);
+		= new ArrayBlockingQueue<Integer>(300);
 
 	// Buffer for all received data.
 	private MacPacket[] received_array_ = new MacPacket[256];
 	private int head_idx_ = 0;
 	private int window_pack_cnt = 0;
 
+	private ArrayList<MacPacket> gc = new ArrayList<MacPacket>();
+
 	private ArrayBlockingQueue<MacPacket> data_q_ 
-		= new ArrayBlockingQueue<MacPacket>(256);
+		= new ArrayBlockingQueue<MacPacket>(300);
 
 	// Seperate threads to do their jobs.
 	Thread send_thread_;	
@@ -57,9 +58,8 @@ public class MacLayer{
 
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
-
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 1.5, 3, 6);
+		this(src_address, dst_address, 1.5, 3, 5);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 
@@ -74,7 +74,7 @@ public class MacLayer{
 		recv_ = new Receiver();
 		trans_ = new Transmitter();
 		
-		status_ = MacLayer.LINKIDL;
+		status_ = MacLayer.LINKBSY;
 		// Init id queue with all available ids.
 		for (int i=0; i<256; i++){ available_q_.offer(i); }
 
@@ -110,8 +110,8 @@ public class MacLayer{
 			requestSend(new MacPacket(dst_addr_, src_addr_, (byte)offset, data));
 	}
 	// Send init pack.
-	public int requestSend(int pack_cnt, int len) throws Exception{
-		return requestSend(new MacPacket(dst_addr_, src_addr_, pack_cnt, len));
+	public int requestSend(int len) throws Exception{
+		return requestSend(new MacPacket(dst_addr_, src_addr_, len));
 	}
 
 	// Send pack.
@@ -124,6 +124,7 @@ public class MacLayer{
 
 		pack.setPacketID((byte) id);
 		packet_array_[id] = pack;
+		gc.add(pack);
 		return id;
 	}
 
@@ -131,6 +132,8 @@ public class MacLayer{
 		int id;
 		int status;
 		double curr_time;
+		long curr = 0;
+		long last = 0;
 		while (!stop_){
 			// Only cares whatever in the window.
 			for (int i=0; 
@@ -147,7 +150,7 @@ public class MacLayer{
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
-					while (recv_.hasSignal()) {Thread.sleep(1);}
+					while (recv_.hasSignal()) {Thread.sleep(15);}
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					System.err.printf("Packet #%4d sent.\n", id);
 					packet_array_[id].setTimeStamp(curr_time);
@@ -170,20 +173,28 @@ public class MacLayer{
 			return;
 		}
 		int head = sending_list_.get(0);
-		// Just received ACK for the head. 
-		// Remove it. Recycle packet id.
-		if (
-		  packet_array_[head].getStatus() == MacPacket.STATUS_ACKED){
+		while (packet_array_[head].getStatus() == MacPacket.STATUS_ACKED 
+		  || packet_array_[head].getResendCounter() == max_resend_){
+			// Just received ACK for the head. 
+			// Remove it. Recycle packet id.
+			if (
+			  packet_array_[head].getStatus() == MacPacket.STATUS_ACKED){
+				status_ = MacLayer.LINKBSY;
+			}
+			// It has timeout so many times. We forget about it.
+			if (packet_array_[head].getResendCounter() == max_resend_){
+				packet_array_[head].setStatus(MacPacket.STATUS_LOST);
+				status_ = MacLayer.LINKERR;
+				System.out.printf(
+					"Packet #%4d cannot be delivered due to link error.\n", 
+					packet_array_[head].getPacketID());
+			}
 			sending_list_.remove(0);
-			available_q_.put(head);
-			status_ = MacLayer.LINK_OK;
-		}
-		// It has timeout so many times. We forget about it.
-		if (packet_array_[head].getResendCounter() == max_resend_){
-			packet_array_[head].setStatus(MacPacket.STATUS_LOST);
-			sending_list_.remove(0);
-			available_q_.put(head);
-			status_ = MacLayer.LINKERR;
+			available_q_.put(head);		
+			if (sending_list_.size() == 0) {
+				break;
+			}
+			head = sending_list_.get(0);	
 		}
 	}
 
@@ -211,7 +222,7 @@ public class MacLayer{
 				);
 			// Not an ACK.
 			} else {
-				System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
+				//System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
 				// Throws it away if the queue if full.
 				if (countDataPack() + window_pack_cnt <= 256){
 					// Or send an ACK to reply.
@@ -221,6 +232,13 @@ public class MacLayer{
 							src_addr_, 
 							mac_pack.getPacketID()
 					));
+
+					System.out.printf(
+						"Packet type %s confirmed. ACK packet #%d sending.\n", 
+						(mac_pack.getType() == MacPacket.TYPE_INIT) ? 
+							"Init": "Data",
+						id
+					);
 					if (getIdxInWindow(mac_pack.getPacketID()) < window_size_){
 						received_array_[mac_pack.getPacketID()] = mac_pack;
 						window_pack_cnt ++;
@@ -233,14 +251,7 @@ public class MacLayer{
 							window_pack_cnt --;
 							// Move window.
 							head_idx_ = (head_idx_ + 1) % 256;
-
 						}
-						System.out.printf(
-							"Packet type %s confirmed. ACK packet #%d sending.\n", 
-							(mac_pack.getType() == MacPacket.TYPE_INIT) ? 
-								"Init": "Data",
-							id
-						);
 					}
 				} else {
 					System.out.println(
@@ -271,4 +282,6 @@ public class MacLayer{
 		}
 		return cnt;
 	}
+	public void echo() { recv_.echo_ = true; }
+	public boolean isIdle(){ return available_q_.size() == 256; }
 }
