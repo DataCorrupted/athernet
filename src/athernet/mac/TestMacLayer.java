@@ -33,7 +33,7 @@ class TestMacLayer{
 	private static final String test_str_ = test_str1_ + test_str2_ + test_str3_ + test_str4_;
 
 	public static void test_receive() throws Exception{
-		MacLayer mac_layer = new MacLayer(dst_addr);
+		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
 		mac_layer.startMacLayer();
 
 		double tic = System.nanoTime() / 1e9;
@@ -83,7 +83,7 @@ class TestMacLayer{
 		final int pack_cnt = 4;
 		final int data_length = 98;
 
-		MacLayer mac_layer = new MacLayer(src_addr);
+		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
 
 		mac_layer.startMacLayer();
 		
@@ -100,10 +100,10 @@ class TestMacLayer{
 			Thread.sleep(20);
 		}
 
-		mac_layer.requestSend(dst_addr, 0, data1);
-		mac_layer.requestSend(dst_addr, 13, data2);
-		mac_layer.requestSend(dst_addr, 52, data3);
-		mac_layer.requestSend(dst_addr, 91, data4);
+		mac_layer.requestSend(0, data1);
+		mac_layer.requestSend(13, data2);
+		mac_layer.requestSend(52, data3);
+		mac_layer.requestSend(91, data4);
 
 		Thread.sleep(3000);
 

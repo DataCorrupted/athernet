@@ -110,8 +110,8 @@ public class MacLayer{
 			requestSend(new MacPacket(dst_addr_, src_addr_, (byte)offset, data));
 	}
 	// Send init pack.
-	public int requestSend(int pack_cnt, int len) throws Exception{
-		return requestSend(new MacPacket(dst_addr_, src_addr_, pack_cnt, len));
+	public int requestSend(int len) throws Exception{
+		return requestSend(new MacPacket(dst_addr_, src_addr_, len));
 	}
 
 	// Send pack.
