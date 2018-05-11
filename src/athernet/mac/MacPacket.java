@@ -12,6 +12,7 @@ public class MacPacket {
     public static final byte TYPE_ACK = 0;
     public static final byte TYPE_DATA = 1;
     public static final byte TYPE_INIT = 2;
+    public static final byte TYPE_MACPING = 3;
 
     public static final int STATUS_WAITING = 0;
     public static final int STATUS_SENT = 1;
