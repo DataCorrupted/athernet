@@ -45,13 +45,12 @@ public class MacLayer{
 	private int head_idx_ = 0;
 	private int window_pack_cnt = 0;
 
-	private ArrayList<MacPacket> gc = new ArrayList<MacPacket>();
-
 	private ArrayBlockingQueue<MacPacket> data_q_ 
 		= new ArrayBlockingQueue<MacPacket>(300);
 
 	// Whether or not to use CSMA
-	private boolean csma_ = true;
+	// By default it's turned off.
+	private boolean csma_ = false;
 	private int backoff_time_ = 10;
 
 	// Seperate threads to do their jobs.
@@ -128,7 +127,6 @@ public class MacLayer{
 
 		pack.setPacketID((byte) id);
 		packet_array_[id] = pack;
-		gc.add(pack);
 		return id;
 	}
 

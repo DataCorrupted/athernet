@@ -15,14 +15,20 @@ class TestMacLayer{
 	public static void main(String[] args) throws Exception{
 		if (args.length == 0){
 			System.err.println("No parameter given.");
-		} else if (args[0].equals("--test-send")) {
-			test_send();
-		} else if (args[0].equals("--test-receive")) {
-			test_receive();
+		} else if (args[0].equals("--transmit-test")) {
+			transmit_test();
+		} else if (args[0].equals("--receive-test")) {
+			receive_test();
 		} else if (args[0].equals("--transmit-file")){
 			transmit_file();
 		} else if (args[0].equals("--receive-file")){
 			receive_file();
+		} else if (args[0].equals("--csma-test")) {
+			if (args.length < 2) {
+				System.err.println("A TEXT01 formatted file is required to test CSMA.");
+			} else { 
+				;//csma_test(args[1].equals("--client")); 
+			}
 		} else {
 			System.err.println("No such option.");
 		}
@@ -34,7 +40,7 @@ class TestMacLayer{
 
 	private static final String test_str_ = test_str1_ + test_str2_ + test_str3_ + test_str4_;
 
-	public static void test_receive() throws Exception{
+	public static void receive_test() throws Exception{
 		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
 		mac_layer.startMacLayer();
 
@@ -77,7 +83,7 @@ class TestMacLayer{
 		System.out.printf("Transmition took: %3.3fs\n", (toc - tic));
 		mac_layer.stopMacLayer();
 	}
-	public static void test_send() throws Exception{
+	public static void transmit_test() throws Exception{
 		final byte[] data1 = test_str1_.getBytes();
 		final byte[] data2 = test_str2_.getBytes();
 		final byte[] data3 = test_str3_.getBytes();
@@ -112,16 +118,9 @@ class TestMacLayer{
 
 		mac_layer.stopMacLayer();
 	}
-
-	public static void transmit_file() throws Exception{
-
-		// Start the mac layer.
-		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
-		mac_layer.startMacLayer();
-
-		double tic = System.nanoTime() / 1e9;
-
-		FileI i_file_ = new FileI("./I", FileI.TEXT01);
+	public static void transmit_file(String file, MacLayer mac_layer) throws Exception{
+		// Prepare file.
+		FileI i_file_ = new FileI(file, FileI.TEXT01);
 		int total_size = i_file_.getSize();
 
 		// Make sure that the init pack is sent.
@@ -158,54 +157,110 @@ class TestMacLayer{
 				break;
 			}
 		}
+	}
+	public static void transmit_file() throws Exception{
+		// Start the mac layer.
+		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
+		
+		mac_layer.startMacLayer();
+		double tic = System.nanoTime() / 1e9;
+
+		transmit_file("./I", mac_layer);
+		
 		double toc = System.nanoTime() / 1e9;
-		System.out.println("Time used for transmition: " + (toc - tic));
-		// Remember to stop it.
 		mac_layer.stopMacLayer();
+
+		System.out.println("Time used for transmition: " + (toc - tic));
 	}
 
-	public static void receive_file() throws Exception{
-		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
-		mac_layer.startMacLayer();
+	public static byte[] receive_file(MacLayer mac_layer) throws Exception{
 		// Receive head length.
 		MacPacket mac_pack = mac_layer.getOnePack();
-		double tic = System.nanoTime() / 1e9;
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
 			System.err.println("Error, no init received.");
-			return;
+			return new byte[0];
 		}
 		int length = mac_pack.getTotalLength();
 		System.out.printf(
 			"Received sending request for %d bytes.\n", 
 			length);
-
 		// Receive each and every chunk of data.
 		byte[] data = new byte[length];
 		int total_len = 0;
-		int offset = 0;
+		int pack_cnt = 0;
 		while (total_len < length){
 			mac_pack = mac_layer.getOnePack();
 			byte[] chunk = mac_pack.getData();
 			total_len += chunk.length;
 			// This shouldn't cause overflow error. 
 			// But if so, let it be, so we can debug easier.
-			if (((offset+1) * chunk.length) < length){
-				System.arraycopy(chunk, 0, data, offset*chunk.length, chunk.length);
+			if (((pack_cnt+1) * chunk.length) < length){
+				System.arraycopy(chunk, 0, data, pack_cnt*chunk.length, chunk.length);
 			} else {
+				// That the data is full yet more is transfered, then we ignore the rest.
 				System.arraycopy(
-					chunk, 0, data, offset*chunk.length, length - offset * chunk.length);
+					chunk, 0, data, pack_cnt*chunk.length, length - pack_cnt * chunk.length);
 			}
-			offset += 1;
+			pack_cnt += 1;
 		}
+		return data;
+	}
+	private static byte[] data = new byte[0];
+	public static void receive_file() throws Exception{
+		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
+		mac_layer.startMacLayer();
+		double tic = System.nanoTime() / 1e9;
+		
+		data = receive_file(mac_layer);
+		
 		double toc = System.nanoTime() / 1e9;
 		mac_layer.stopMacLayer();
+
+		saveAndCheckData();	
+		System.out.println("Time used for transmition: " + (toc - tic));
+	}
+	public static void csma_test(String file, boolean is_client) throws Exception{
+		MacLayer mac_layer;
+		if (is_client){
+			mac_layer = new MacLayer(src_addr, dst_addr);
+		} else {
+			mac_layer = new MacLayer(dst_addr, src_addr);
+		}
+		// Turn on csma.
+		mac_layer.turnCSMA();
+		mac_layer.startMacLayer();
+		
+		Thread transmit_thread = new Thread(new Runnable(){
+			public void run() { 
+				try { transmit_file(file, mac_layer); } catch (Exception e) { ; }
+			}
+		});
+		Thread receive_thread = new Thread(new Runnable(){
+			public void run(){
+				try { data = receive_file(mac_layer); } catch (Exception e) { ; }
+			}
+		});
+		receive_thread.start();
+		// Wait for the other side to start 
+		Thread.sleep(1000);
+		transmit_thread.start();		
+
+		transmit_thread.join();
+		receive_thread.join();
+		saveAndCheckData();
+		mac_layer.stopMacLayer();
+	}
+
+	private static void saveAndCheckData() throws Exception{
+		// Received nothing.
+		if (data.length == 0){ 
+			System.err.println("Received nothing.");
+			return; 
+		}
 		// Write the file and check correctness.
 		FileO o_file = new FileO("./O", FileO.TEXT01);
 		o_file.write(data, 0, data.length);
 		CheckIO checker = new CheckIO();
-		System.out.println(checker.summary());		
-		System.out.println("Time used for transmition: " + (toc - tic));
+		System.out.println(checker.summary());	
 	}
-
-
 }
