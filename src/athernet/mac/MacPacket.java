@@ -230,6 +230,7 @@ public class MacPacket {
 
         // create a new package
         MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, System.nanoTime() );
+        // MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, data );
 
         // for reply packet test only
         pack_1.convertMacRequestToMacReply();
