@@ -12,9 +12,11 @@ public class MacPerf {
 
     // record # of package sent in each second
     private List<Integer> record_sent_;
-    private int num_unsent_pack_;
+    private int num_pack_sending;
 
     public MacPerf(byte src_addr, byte dest_addr){
+        num_pack_sending = 0;
+
         System.out.println("MacPerf dest_addr: "+dest_addr);
         src_addr_ = src_addr;
         dest_addr_ = dest_addr;
@@ -24,6 +26,7 @@ public class MacPerf {
         try{
             mac_layer_ = new MacLayer(src_addr_,dest_addr);
             mac_layer_.startMacLayer();
+            mac_layer_.turnEcho();
         }
         catch (Exception exception){
             System.out.println("MacLayer throw exception");
@@ -61,7 +64,7 @@ public class MacPerf {
     public void start_perfing(){
         for (int i = 0; i < 30; i++){
             requestSendOnce();
-            num_unsent_pack_++;
+            num_pack_sending++;
         }
 
         while(true){
@@ -79,8 +82,8 @@ public class MacPerf {
                 System.out.println("[WARN], unset package reach 0, maybe you need to put more packets in");
             }
 
-            record_sent_.add(num_unsent_pack_ - new_num_unsent_pack);
-            num_unsent_pack_ = new_num_unsent_pack;
+            record_sent_.add(num_pack_sending - new_num_unsent_pack);
+            num_pack_sending = new_num_unsent_pack;
             print_speed();
             record_sent_.remove(0);
 
@@ -88,7 +91,7 @@ public class MacPerf {
             if (new_num_unsent_pack < 30){
                 for (int i = 0; i < 15; i++){
                     requestSendOnce();
-                    num_unsent_pack_++;
+                    num_pack_sending++;
                 }
             }
 
