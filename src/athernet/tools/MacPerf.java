@@ -62,6 +62,8 @@ public class MacPerf {
     }
 
     public void start_perfing(){
+        int max_size = 3;
+
         for (int i = 0; i < 30; i++){
             requestSendOnce();
             num_pack_sending++;
@@ -85,7 +87,9 @@ public class MacPerf {
             record_sent_.add(num_pack_sending - new_num_unsent_pack);
             num_pack_sending = new_num_unsent_pack;
             print_speed();
-            record_sent_.remove(0);
+            if (record_sent_.size() == max_size) {
+                record_sent_.remove(0);
+            }
 
             // add new packets if needed
             if (new_num_unsent_pack < 30){
