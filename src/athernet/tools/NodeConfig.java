@@ -11,11 +11,6 @@ public class NodeConfig {
         // infer the src_address from the dest_address
         if (dest_addr_ == 1){src_addr_ = 2;}
         else{src_addr_ = 1;}
-
-        System.out.print("The src address: ");
-        System.out.println(src_addr_);
-        System.out.print("The dest address: ");
-        System.out.println(dest_addr_);
     }
 
     public byte get_src_addr(){return src_addr_;}
@@ -32,5 +27,12 @@ public class NodeConfig {
         else{
             throw new IllegalArgumentException("Invalid argument for destination address");
         }
+    }
+
+
+    public static void main(String args[]){
+        NodeConfig test_config = new NodeConfig(args);
+        System.out.printf("src_addr: %d\n", test_config.get_src_addr());
+        System.out.printf("dest_addr: %d\n", test_config.get_dest_addr());
     }
 }
