@@ -1,6 +1,7 @@
 package athernet.mac;
 
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /***
@@ -39,6 +40,10 @@ public class MacPacket {
 
     // For InitRequest Packet
     private int total_length_;
+
+    // For MacPing Packet
+    private long timestamp_macping_;
+
     // Total number of packets about to be sent.
     private int pack_cnt_;
 
@@ -93,6 +98,17 @@ public class MacPacket {
         data_field_ = new byte[2];
         data_field_[0] = (byte)((total_length & 0xFF00) >>> 8);
         data_field_[1] = (byte)(total_length & 0xFF);
+    }
+
+    // Constructor: build a MACPING packet
+    public MacPacket(byte dest_addr, byte src_addr, long timestamp_ns){
+        dest_addr_ = dest_addr;
+        src_addr_ = src_addr;
+        type_ = TYPE_MACPING;
+
+        // convert the timestamp_ into byte[]
+        timestamp_macping_ = timestamp_ns;
+        data_field_ = longToBytes(timestamp_ns);
     }
 
     public byte getPacketID(){
@@ -151,6 +167,15 @@ public class MacPacket {
         }
     }
 
+    public long get_timestamp_macping(){
+        if (type_ == TYPE_MACPING){
+            return timestamp_macping_;
+        }
+        else {
+            return -1;
+        }
+    }
+
     public int getResendCounter(){
         return resend_counter_;
     }
@@ -202,9 +227,25 @@ public class MacPacket {
         else if (type_ == TYPE_INIT){
             total_length_ = (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
         }
+        else if (type_ == TYPE_MACPING){
+            timestamp_macping_ = bytesToLong(data_field_);
+        }
         else{
             throw new RuntimeException("Unrecognized MACPacket Type");
         }
+    }
+
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
+
+    public long bytesToLong(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(bytes);
+        buffer.flip();//need flip
+        return buffer.getLong();
     }
 
     public static void main(String[] args){
