@@ -52,6 +52,7 @@ public class MacLayer{
 
 	// Whether or not to use CSMA
 	private boolean csma_ = true;
+	private int backoff_time_ = 10;
 
 	// Seperate threads to do their jobs.
 	Thread send_thread_;	
@@ -153,7 +154,7 @@ public class MacLayer{
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
-					while (csma_ && recv_.hasSignal()) {Thread.sleep(15);}
+					while (csma_ && recv_.hasSignal()) {Thread.sleep(backoff_time_);}
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					System.err.printf("Packet #%4d sent.\n", id);
 					packet_array_[id].setTimeStamp(curr_time);
