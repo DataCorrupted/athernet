@@ -7,6 +7,9 @@ import athernet.mac.MacPacket;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class MacLayer{
 	// Whether mac layer displays debug information.
 	private boolean echo_ = true;
@@ -60,6 +63,8 @@ public class MacLayer{
 	Thread recv_thread_;
 	// Manually stop all the threads.
 	private boolean stop_ = false;
+	private final Lock mutex_ = new ReentrantLock(true);
+
 
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
@@ -121,6 +126,8 @@ public class MacLayer{
 
 	// Send pack.
 	public int requestSend(MacPacket pack) throws Exception{
+
+		mutex_.lock();
 		// Making this pack id unavailable by moving it to 
 		// sending queue.
 		// Using take, we have to wait if necessary.
@@ -129,6 +136,7 @@ public class MacLayer{
 
 		pack.setPacketID((byte) id);
 		packet_array_[id] = pack;
+		mutex_.unlock();
 		return id;
 	}
 
