@@ -103,12 +103,16 @@ public class MacPing {
         unconfirmed_time.add(packet.get_timestamp_macping());
     }
 
-    public static void main(String args[]){
-        NodeConfig node_config = new NodeConfig(args);
+    public static void main(String[] args){
+        if (args.length == 0){
+            NodeConfig node_config = new NodeConfig(args);
 
-        MacPing mac_ping = 
-            new MacPing(node_config.get_src_addr(), node_config.get_dest_addr());
-        mac_ping.start_ping();
+            MacPing mac_ping = 
+                new MacPing(node_config.get_src_addr(), node_config.get_dest_addr());
+            mac_ping.start_ping();
+        } else if (args[1].equals("-S") || args[1].equals("--server")){
+            MacLayer mac_layer_ = new MacLayer();
+            mac_layer_.startMacLayer();
+        }
     }
-
 }
