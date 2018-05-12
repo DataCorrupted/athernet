@@ -69,7 +69,7 @@ public class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 0.5, 3, 30);
+		this(src_address, dst_address, 0.5, 3, 5);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 
@@ -126,13 +126,16 @@ public class MacLayer{
 
 	// Send pack.
 	public int requestSend(MacPacket pack) throws Exception{
-
 		mutex_.lock();
 		// Making this pack id unavailable by moving it to 
 		// sending queue.
 		// Using take, we have to wait if necessary.
 		int id = available_q_.take();
-		sending_list_.add(id);
+		if (pack.getType() != MacPacket.TYPE_ACK) {
+			sending_list_.add(id);
+		} else {
+			sending_list_.add(0, id);
+		}
 
 		pack.setPacketID((byte) id);
 		packet_array_[id] = pack;
