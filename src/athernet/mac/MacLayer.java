@@ -293,11 +293,12 @@ public class MacLayer{
 	public int countDataPack() {
 		return data_q_.size();
 	}
-	public int countUnsent(){
+	public int countUnAcked(){
 		int cnt = 0;
 		for (int i=0; i<sending_list_.size(); i++){
 			int id = sending_list_.get(i);
-			if (packet_array_[id].getStatus() == MacPacket.STATUS_WAITING){
+			if (packet_array_[id].getStatus() == MacPacket.STATUS_WAITING ||
+			  packet_array_[id].getStatus() == MacPacket.STATUS_SENT){
 				cnt ++;
 			}
 		}
