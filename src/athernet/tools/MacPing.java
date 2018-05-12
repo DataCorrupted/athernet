@@ -99,7 +99,7 @@ public class MacPing {
         }
 
         // save the packet_id
-        unconfirmed_ids.add(packet.getPacketID());
+        unconfirmed_ids.add((byte) packet.getPacketID());
         unconfirmed_time.add(packet.get_timestamp_macping());
     }
 

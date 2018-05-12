@@ -126,9 +126,9 @@ public class MacPacket {
         dest_addr_ = temp;
     }
 
-    // return -1 on error
-    public byte getACKPacketID(){
-        return (type_ == TYPE_ACK) ? ack_pack_id_: -1;
+    // returintn -1 on error
+    public int getACKPacketID(){
+        return (type_ == TYPE_ACK) ? ((int) ack_pack_id_) & 0xff: -1;
     }
 
     // return -1 on error
@@ -150,7 +150,7 @@ public class MacPacket {
         return (type_ == TYPE_MACPING_REQST)? timestamp_macping_: -1;
     }
 
-    public byte getPacketID(){ return pack_id_; }
+    public int getPacketID(){ return ((int)pack_id_) & 0xff; }
 
     public byte getSrcAddr(){ return src_addr_; }
     
