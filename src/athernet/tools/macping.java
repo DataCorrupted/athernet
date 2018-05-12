@@ -35,15 +35,16 @@ public class macping {
     // GetOnePack
     public void start_ping(){
         while(true){
-            sendOnePacket();
-
+            if (mac_layer_.isIdle()) { sendOnePacket(); }
             // receive one packet
             if (mac_layer_.countDataPack() != 0) {
                 try {
                     MacPacket received_pack = mac_layer_.getOnePack();
                     long curr_time = System.nanoTime();
                     long rtt = curr_time - received_pack.get_timestamp_macping();
-                    System.out.printf("Received packid: %d, RTT: %d\n", received_pack.getPacketID(), rtt);
+                    System.out.printf(
+                        "Received packid: %d, RTT: %d\n", 
+                        received_pack.getPacketID(), rtt);
 
                     // print timeout
                     while (unconfirmed_ids.get(0) != received_pack.getPacketID()){
@@ -99,7 +100,8 @@ public class macping {
     public static void main(String args[]){
         NodeConfig node_config = new NodeConfig(args);
 
-        macping mac_ping = new macping(node_config.get_src_addr(), node_config.get_dest_addr());
+        macping mac_ping = 
+            new macping(node_config.get_src_addr(), node_config.get_dest_addr());
         mac_ping.start_ping();
     }
 

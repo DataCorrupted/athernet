@@ -134,8 +134,6 @@ public class MacLayer{
 		int id;
 		int status;
 		double curr_time;
-		long curr = 0;
-		long last = 0;
 		while (!stop_){
 			// Only cares whatever in the window.
 			for (int i=0; 
