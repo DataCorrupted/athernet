@@ -68,6 +68,11 @@ public class MacLayer{
 
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
+
+	public MacLayer(byte src_address, byte dst_address, int sliding_window) throws Exception{
+		this(src_address, dst_address, 0.5, 3, sliding_window);
+	}
+
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
 		this(src_address, dst_address, 0.5, 3, 5);
 	}

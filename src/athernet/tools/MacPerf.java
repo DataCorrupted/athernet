@@ -24,7 +24,7 @@ public class MacPerf {
         record_sent_ = new ArrayList<Integer>();
 
         try{
-            mac_layer_ = new MacLayer(src_addr_,dest_addr);
+            mac_layer_ = new MacLayer(src_addr_,dest_addr,20);
             mac_layer_.startMacLayer();
             mac_layer_.turnEcho();
         }
