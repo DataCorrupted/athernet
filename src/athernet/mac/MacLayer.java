@@ -242,7 +242,7 @@ public class MacLayer{
 						new MacPacket(
 							dst_addr_, 
 							src_addr_, 
-							mac_pack.getPacketID()
+							(byte) mac_pack.getPacketID()
 					));
 
 					if (echo_) { System.out.printf(

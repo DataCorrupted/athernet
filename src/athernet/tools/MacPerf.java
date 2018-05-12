@@ -100,7 +100,7 @@ public class MacPerf {
     }
 
     public static void main(String[] args) throws Exception{
-        NodeConfig node_config = new NodeConfig(args);
+        //NodeConfig node_config = new NodeConfig(args);
         if (args.length == 0){
             MacPerf mac_perf = 
                 new MacPerf((byte)0x1, (byte)0x2);
@@ -112,6 +112,10 @@ public class MacPerf {
             MacLayer mac_layer_ = 
                 new MacLayer((byte)0x2, (byte)0x1);
             mac_layer_.startMacLayer();
+            while (true){
+                mac_layer_.getOnePack();
+                Thread.sleep(10);
+            }
         } else {
             System.err.println("No such option.");
         }
