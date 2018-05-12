@@ -77,7 +77,7 @@ public class MacPerf {
             }
 
             // give 15 packages to sender if needed
-            int new_num_unsent_pack =  mac_layer_.countUnsent();
+            int new_num_unsent_pack =  mac_layer_.countUnAcked();
             if( new_num_unsent_pack == 0){
                 System.out.println("[WARN], unset package reach 0, maybe you need to put more packets in");
             }
