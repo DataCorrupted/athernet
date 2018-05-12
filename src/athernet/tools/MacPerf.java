@@ -103,12 +103,14 @@ public class MacPerf {
         NodeConfig node_config = new NodeConfig(args);
         if (args.length == 1){
             MacPerf mac_perf = 
-                new MacPerf(0x1, 0x2);
+                new MacPerf((byte)0x1, (byte)0x2);
             mac_perf.start_perfing();
         
         } else if (args[1].equals("-S") || args[1].equals("--server")){
+            System.out.println("Server started.");
+            
             MacLayer mac_layer_ = 
-                new MacLayer(0x2, 0x1);
+                new MacLayer((byte)0x2, (byte)0x1);
             mac_layer_.startMacLayer();
         } else {
             System.err.println("No such option.");
