@@ -23,6 +23,7 @@ public class MacPerf {
 
         try{
             mac_layer_ = new MacLayer(src_addr_,dest_addr);
+            mac_layer_.startMacLayer();
         }
         catch (Exception exception){
             System.out.println("MacLayer throw exception");
