@@ -42,7 +42,7 @@ public class MacPerf {
 
         // request send it
         try {
-            mac_layer_.requestSend(0, out);
+            mac_layer_.requestSend( out);
         }
         catch (Exception exception){
             System.out.println("requestSend throw exception");

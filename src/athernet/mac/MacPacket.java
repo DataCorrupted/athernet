@@ -37,7 +37,6 @@ public class MacPacket {
     private byte ack_pack_id_;
 
     // For Data Packet
-    private byte offset_;               // one byte
     private byte[] data_;
 
     // For InitRequest Packet
@@ -72,15 +71,13 @@ public class MacPacket {
 
 
     // Constructor: build a Data Packet
-    public MacPacket(byte dest_addr, byte src_addr, byte offset, byte[] data){
+    public MacPacket(byte dest_addr, byte src_addr, byte[] data){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_DATA;
-        offset_ = offset;
 
-        data_field_ = new byte[data.length + 1];
-        data_field_[0] = offset;
-        System.arraycopy(data,0,data_field_,1,data.length);
+        data_field_ = new byte[data.length];
+        System.arraycopy(data,0,data_field_,0,data.length);
     }
 
     // Constructor: build a ACK Packet
@@ -136,11 +133,6 @@ public class MacPacket {
         return (type_ == TYPE_INIT) ? total_length_: -1;
     }
 
-    // return -1 on error
-    public byte getOffset(){
-        return (type_ == TYPE_DATA)? offset_: -1;
-    }
-
     // return empty array on error
     public byte[] getData(){
         return (type_ == TYPE_DATA)? data_: new byte[0];
@@ -190,9 +182,8 @@ public class MacPacket {
             ack_pack_id_ = data_field_[0];
         }
         else if (type_ == TYPE_DATA){
-            offset_ = data_field_[0];
-            data_ = new byte[data_field_.length - 1];
-            System.arraycopy(data_field_,1,data_,0,data_.length);
+            data_ = new byte[data_field_.length];
+            System.arraycopy(data_field_,0,data_,0,data_.length);
         }
         else if (type_ == TYPE_INIT){
             total_length_ = 
@@ -228,14 +219,13 @@ public class MacPacket {
         int total_legnth_test = 50000;
 
         // for data packet
-        byte offset = 0;
         byte[] data = {1,3,4,5,6};
 
         // for ACK packet
         byte ack_packet_id = (byte)240;
 
         // create a new package
-        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test,ack_packet_id );
+        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test,data );
         pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
 
@@ -251,7 +241,7 @@ public class MacPacket {
         else if(pack_recv.getSrcAddr() != src_addr_test){
             System.out.println("SrcAddr Mismatch");
         }
-        else if(pack_recv.getType() != MacPacket.TYPE_ACK){
+        else if(pack_recv.getType() != MacPacket.TYPE_DATA){
             System.out.println("Type Mismatch");
         }
         else if(pack_recv.getPacketID() != 0){
@@ -260,17 +250,17 @@ public class MacPacket {
         else if(pack_recv.getTotalLength() != -1){
             System.out.println("TotalLength Mismatch");
         }
-        else if(pack_recv.getACKPacketID() != ack_packet_id){
+        else if(pack_recv.getACKPacketID() != -1){
             System.out.println("ACKPacketID Mismatch");
         }
-//        else if(!Arrays.equals(pack_recv.getData(),data)){
-//            System.out.println("--------Data Mismatch---------");
-//            byte[] tmp = pack_recv.getData();
-//            for (int i = 0; i < tmp.length; i++){
-//                System.out.println(tmp[i]);
-//            }
-//            System.out.println("Data Mismatch");
-//        }
+        else if(!Arrays.equals(pack_recv.getData(),data)){
+            System.out.println("--------Data Mismatch---------");
+            byte[] tmp = pack_recv.getData();
+            for (int i = 0; i < tmp.length; i++){
+                System.out.println(tmp[i]);
+            }
+            System.out.println("Data Mismatch");
+        }
         else {
             System.out.println("Success");
         }
