@@ -99,11 +99,20 @@ public class MacPerf {
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception{
         NodeConfig node_config = new NodeConfig(args);
+        if (args.length == 1){
+            MacPerf mac_perf = 
+                new MacPerf(node_config.get_src_addr(),node_config.get_dest_addr());
+            mac_perf.start_perfing();
+        
+        } else if (args[1].equals("-S") || args[1].equals("--server")){
+            MacLayer mac_layer_ = 
+                new MacLayer(node_config.get_src_addr(), node_config.get_dest_addr());
+            mac_layer_.startMacLayer();
+        } else {
+            System.err.println("No such option.");
+        }
 
-        MacPerf mac_perf = new MacPerf(node_config.get_src_addr(),node_config.get_dest_addr());
-
-        mac_perf.start_perfing();
     }
 }
