@@ -267,12 +267,13 @@ public class MacLayer{
 						"Data queue is full, ignoring this packet.");
 				}
 
-			// Mac ping.
-			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING) {
-				;
+			// Mac request.
+			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
+				mac_pack.convertMacReqToMacReply();
+				requestSend(mac_pack);
 
 			// Mac reply. 
-			} else if (mac_pack.getType() == MacPacket.TYPE_MACRPLY) {
+			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REPLY) {
 				data_q_.offer(mac_pack);
 		}
 	}
