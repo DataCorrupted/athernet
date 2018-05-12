@@ -145,10 +145,12 @@ public class MacLayer{
 				status = packet_array_[id].getStatus();
 				curr_time = System.nanoTime()/1e9;
 				if (status == MacPacket.STATUS_WAITING){
-					if (packet_array_[id].getType() != MacPacket.TYPE_ACK){
+					if (packet_array_[id].getType() == MacPacket.TYPE_DATA ||
+					  packet_array_[id].getType() == MacPacket.TYPE_INIT){
 						packet_array_[id].setStatus(MacPacket.STATUS_SENT);
 					} else {
 						// ACK packet don't need to be acked back. 
+						// MAC ping reply and request too.
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
@@ -211,12 +213,13 @@ public class MacLayer{
 				continue;
 			} 
 			mac_pack = new MacPacket(data);
-			// An ACK packet.
 			// Meaning this is sender's receiver.
 			if (mac_pack.getDestAddr() != src_addr_ 
 			  || mac_pack.getSrcAddr() != dst_addr_){
 				continue;
-			}			
+			}
+
+			// An ACK packet.
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
@@ -224,8 +227,10 @@ public class MacLayer{
 					"Packet #%4d ACK received.\n",
 					mac_pack.getACKPacketID()
 				);
-			// Not an ACK.
-			} else {
+
+			// Data or Init.
+			} else if (mac_pack.getType() == MacPacket.TYPE_INIT ||
+			  mac_pack.getType() == MacPacket.TYPE_DATA){
 				System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
 				// Throws it away if the queue if full.
 				if (countDataPack() + window_pack_cnt <= 256){
@@ -261,7 +266,15 @@ public class MacLayer{
 					System.out.println(
 						"Data queue is full, ignoring this packet.");
 				}
-			}
+
+			// Mac request.
+			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
+				mac_pack.convertMacReqToMacReply();
+				requestSend(mac_pack);
+
+			// Mac reply. 
+			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REPLY) {
+				data_q_.offer(mac_pack);
 		}
 	}
 

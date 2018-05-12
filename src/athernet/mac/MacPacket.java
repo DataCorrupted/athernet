@@ -6,14 +6,15 @@ import java.util.Arrays;
 
 /***
  * The package definition:
- *      DestAddr (2 bits) + SrcAddr (2 bits) + Type (4 bits) + packet_id (one byte) + MAC Payload (2^n - 4 bytes)
+ *      DestAddr (2 bits) + SrcAddr (2 bits) + Type (4 bits) + packet_id (one byte) + 
+ *      MAC Payload (2^n - 4 bytes)
  */
 
 public class MacPacket {
     public static final byte TYPE_ACK = 0;
     public static final byte TYPE_DATA = 1;
     public static final byte TYPE_INIT = 2;
-    public static final byte TYPE_MACPING_REQ = 3;
+    public static final byte TYPE_MACPING_REQST = 3;
     public static final byte TYPE_MACPING_REPLY = 4;
 
     public static final int STATUS_WAITING = 0;
@@ -105,113 +106,79 @@ public class MacPacket {
     public MacPacket(byte dest_addr, byte src_addr, long timestamp_ns){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
-        type_ = TYPE_MACPING_REQ;
+        type_ = TYPE_MACPING_REQST;
 
         // convert the timestamp_ into byte[]
         timestamp_macping_ = timestamp_ns;
         data_field_ = longToBytes(timestamp_ns);
     }
 
-    public void setTypeReply(){ type_ = TYPE_MACPING_REPLY; }
-
-    public byte getPacketID(){
-        return pack_id_;
-    }
-
-    public byte getSrcAddr(){
-        return src_addr_;
-    }
-
-    public byte getDestAddr(){
-        return dest_addr_;
-    }
-
-    public byte getType(){
-        return type_;
+    public void convertMacReqToMacReply(){ 
+        if (type_ != TYPE_MACPING_REQST){
+            System.err.println(
+                "Warning: Converting non Mac-request packet to mac-reply.");
+            return;
+        }
+        type_ = TYPE_MACPING_REPLY; 
+        // Swap address.
+        byte temp = src_addr_;
+        src_addr_ = dest_addr_;
+        dest_addr_ = temp;
     }
 
     // return -1 on error
     public byte getACKPacketID(){
-        if (type_ == TYPE_ACK){
-            return ack_pack_id_;
-        }
-        else{
-            return -1;
-        }
+        return (type_ == TYPE_ACK) ? ack_pack_id_: -1;
     }
 
     // return -1 on error
     public int getTotalLength(){
-        if (type_ == TYPE_INIT){
-            return total_length_;
-        }
-        else{
-            return -1;
-        }
+        return (type_ == TYPE_INIT) ? total_length_: -1;
     }
 
     // return -1 on error
     public byte getOffset(){
-        if (type_ == TYPE_DATA){
-            return offset_;
-        }
-        else{
-            return -1;
-        }
+        return (type_ == TYPE_DATA)? offset_: -1;
     }
 
     // return empty array on error
     public byte[] getData(){
-        if (type_ == TYPE_DATA){
-            return data_;
-        }
-        else{
-            return new byte[0];
-        }
+        return (type_ == TYPE_DATA)? data_;: new byte[0];
     }
 
     public long get_timestamp_macping(){
-        if (type_ == TYPE_MACPING_REQ){
-            return timestamp_macping_;
-        }
-        else {
-            return -1;
-        }
+        return (type_ == TYPE_MACPING_REQST)? timestamp_macping_: -1;
     }
 
-    public int getResendCounter(){
-        return resend_counter_;
-    }
+    public byte getPacketID(){ return pack_id_; }
 
-    public void onResendOnce(){
-        resend_counter_ ++;
-    }
+    public byte getSrcAddr(){ return src_addr_; }
+    
+    public byte getDestAddr(){ return dest_addr_; }
+    
+    public byte getType(){ return type_; }
 
-    public double getTimeStamp(){
-        return timestamp_;
-    }
+    public int getResendCounter(){ return resend_counter_; }
 
-    public void setTimeStamp(double new_timestamp){
-        timestamp_ = new_timestamp;
-    }
+    public void onResendOnce(){ resend_counter_ ++; }
 
-    public int getStatus(){
-        return status_;
-    }
+    public double getTimeStamp(){ return timestamp_; }
 
-    public void setStatus(int status){
-        status_ = status;
-    }
+    public void setTimeStamp(double new_timestamp){ timestamp_ = new_timestamp; }
 
-    public void setPacketID(byte pack_id){
-        pack_id_ = pack_id;
-    }
+    public int getStatus(){ return status_; }
+
+    public void setStatus(int status){ status_ = status; }
+
+    public void setPacketID(byte pack_id){ pack_id_ = pack_id; }
 
     // encode all fields to a String
     byte[] toArray(){
         byte[] frame = new byte[data_field_.length + 2];
-        frame[1] = (byte)((dest_addr_ & 0x03) << 6);
-        frame[1] = (byte)(((dest_addr_ & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F));
+        frame[1] = 
+            (byte)(
+                ((dest_addr_ & 0x03) << 6) | ((src_addr_ & 0x03) << 4) | (type_ & 0x0F)
+            );
         frame[0] = pack_id_;
         System.arraycopy(data_field_,0,frame,2,data_field_.length);
         return frame;
@@ -228,9 +195,10 @@ public class MacPacket {
             System.arraycopy(data_field_,1,data_,0,data_.length);
         }
         else if (type_ == TYPE_INIT){
-            total_length_ = (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
+            total_length_ = 
+                (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
         }
-        else if (type_ == TYPE_MACPING_REQ){
+        else if (type_ == TYPE_MACPING_REQST){
             timestamp_macping_ = bytesToLong(data_field_);
         }
         else{
