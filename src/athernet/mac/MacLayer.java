@@ -152,6 +152,8 @@ public class MacLayer{
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
+					// Sleep for 0.5ms;
+					Thread.sleep(0, 5000);
 					while (csma_ && recv_.hasSignal()) {Thread.sleep(backoff_time_);}
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					System.err.printf("Packet #%4d sent.\n", id);
