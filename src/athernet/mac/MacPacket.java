@@ -112,6 +112,8 @@ public class MacPacket {
         data_field_ = longToBytes(timestamp_ns);
     }
 
+    public void setTypeReply(){ type_ = TYPE_MACPING_REPLY; }
+
     public byte getPacketID(){
         return pack_id_;
     }
