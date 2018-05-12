@@ -13,7 +13,8 @@ public class MacPacket {
     public static final byte TYPE_ACK = 0;
     public static final byte TYPE_DATA = 1;
     public static final byte TYPE_INIT = 2;
-    public static final byte TYPE_MACPING = 3;
+    public static final byte TYPE_MACPING_REQ = 3;
+    public static final byte TYPE_MACPING_REPLY = 4;
 
     public static final int STATUS_WAITING = 0;
     public static final int STATUS_SENT = 1;
@@ -104,7 +105,7 @@ public class MacPacket {
     public MacPacket(byte dest_addr, byte src_addr, long timestamp_ns){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
-        type_ = TYPE_MACPING;
+        type_ = TYPE_MACPING_REQ;
 
         // convert the timestamp_ into byte[]
         timestamp_macping_ = timestamp_ns;
@@ -168,7 +169,7 @@ public class MacPacket {
     }
 
     public long get_timestamp_macping(){
-        if (type_ == TYPE_MACPING){
+        if (type_ == TYPE_MACPING_REQ){
             return timestamp_macping_;
         }
         else {
@@ -227,7 +228,7 @@ public class MacPacket {
         else if (type_ == TYPE_INIT){
             total_length_ = (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
         }
-        else if (type_ == TYPE_MACPING){
+        else if (type_ == TYPE_MACPING_REQ){
             timestamp_macping_ = bytesToLong(data_field_);
         }
         else{
