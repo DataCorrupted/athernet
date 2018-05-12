@@ -3,11 +3,9 @@ package athernet.tools;
 import athernet.mac.MacLayer;
 import athernet.mac.MacPacket;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
-public class macping {
+public class MacPing {
     private byte dest_addr_;
     private byte src_addr_;
 
@@ -15,7 +13,7 @@ public class macping {
     private ArrayList<Byte> unconfirmed_ids;
     private ArrayList<Long> unconfirmed_time;
 
-    public macping(byte src_addr, byte dest_addr){
+    public MacPing(byte src_addr, byte dest_addr){
         System.out.println("MacPing dest_addr: "+dest_addr);
         src_addr_ = src_addr;
         dest_addr_ = dest_addr;
@@ -25,6 +23,7 @@ public class macping {
 
         try{
             mac_layer_ = new MacLayer(src_addr_,dest_addr);
+            mac_layer_.startMacLayer();
         }
         catch (Exception exception){
             System.out.println("MacLayer throw exception");
@@ -66,6 +65,13 @@ public class macping {
                 unconfirmed_time.remove(0);
                 unconfirmed_ids.remove(0);
             }
+
+            try {
+                Thread.sleep(500);
+            }
+            catch (Exception exception){
+                System.out.println("Thread.sleep throw exception");
+            }
         }
     }
 
@@ -99,7 +105,7 @@ public class macping {
     public static void main(String args[]){
         NodeConfig node_config = new NodeConfig(args);
 
-        macping mac_ping = new macping(node_config.get_src_addr(), node_config.get_dest_addr());
+        MacPing mac_ping = new MacPing(node_config.get_src_addr(), node_config.get_dest_addr());
         mac_ping.start_ping();
     }
 
