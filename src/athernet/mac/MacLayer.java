@@ -287,6 +287,6 @@ public class MacLayer{
 		return cnt;
 	}
 	public void turnCSMA() { csma_ = !csma_; }
-	public void turnEcho() { recv_.echo_ = !recv_.echo; }
+	public void turnEcho() { recv_.echo_ = !recv_.echo_; }
 	public boolean isIdle(){ return available_q_.size() == 256; }
 }
