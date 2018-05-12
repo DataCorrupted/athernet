@@ -193,6 +193,9 @@ public class MacPacket {
         else if (type_ == TYPE_MACPING_REQST){
             timestamp_macping_ = bytesToLong(data_field_);
         }
+        else if (type_ == TYPE_MACPING_REPLY){
+            timestamp_macping_ = bytesToLong(data_field_);
+        }
         else{
             throw new RuntimeException("Unrecognized MACPacket Type");
         }
@@ -226,7 +229,14 @@ public class MacPacket {
         byte ack_packet_id = (byte)240;
 
         // create a new package
-        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test,data );
+        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, System.nanoTime() );
+
+        // for reply packet test only
+        pack_1.convertMacRequestToMacReply();
+        byte tmp_addr = src_addr_test;
+        src_addr_test = dest_addr_test;
+        dest_addr_test = tmp_addr;
+
         pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
 
@@ -242,7 +252,8 @@ public class MacPacket {
         else if(pack_recv.getSrcAddr() != src_addr_test){
             System.out.println("SrcAddr Mismatch");
         }
-        else if(pack_recv.getType() != MacPacket.TYPE_DATA){
+        else if(pack_recv.getType() != MacPacket.TYPE_MACPING_REPLY){
+            System.out.println(pack_recv.type_);
             System.out.println("Type Mismatch");
         }
         else if(pack_recv.getPacketID() != 0){
@@ -254,14 +265,14 @@ public class MacPacket {
         else if(pack_recv.getACKPacketID() != -1){
             System.out.println("ACKPacketID Mismatch");
         }
-        else if(!Arrays.equals(pack_recv.getData(),data)){
-            System.out.println("--------Data Mismatch---------");
-            byte[] tmp = pack_recv.getData();
-            for (int i = 0; i < tmp.length; i++){
-                System.out.println(tmp[i]);
-            }
-            System.out.println("Data Mismatch");
-        }
+//        else if(!Arrays.equals(pack_recv.getData(),data)){
+//            System.out.println("--------Data Mismatch---------");
+//            byte[] tmp = pack_recv.getData();
+//            for (int i = 0; i < tmp.length; i++){
+//                System.out.println(tmp[i]);
+//            }
+//            System.out.println("Data Mismatch");
+//        }
         else {
             System.out.println("Success");
         }

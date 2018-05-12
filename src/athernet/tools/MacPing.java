@@ -39,6 +39,7 @@ public class MacPing {
 
             // receive one packet
             if (mac_layer_.countDataPack() != 0) {
+                System.out.println("mac_layer countDataPack != 0");
                 try {
                     MacPacket received_pack = mac_layer_.getOnePack();
                     long curr_time = System.nanoTime();
