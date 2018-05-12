@@ -113,7 +113,7 @@ public class MacPacket {
         data_field_ = longToBytes(timestamp_ns);
     }
 
-    public void convertMacReqToMacReply(){ 
+    public void convertMacRequestToMacReply(){ 
         if (type_ != TYPE_MACPING_REQST){
             System.err.println(
                 "Warning: Converting non Mac-request packet to mac-reply.");
@@ -143,7 +143,7 @@ public class MacPacket {
 
     // return empty array on error
     public byte[] getData(){
-        return (type_ == TYPE_DATA)? data_;: new byte[0];
+        return (type_ == TYPE_DATA)? data_: new byte[0];
     }
 
     public long get_timestamp_macping(){

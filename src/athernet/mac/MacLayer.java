@@ -269,12 +269,13 @@ public class MacLayer{
 
 			// Mac request.
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
-				mac_pack.convertMacReqToMacReply();
+				mac_pack.convertMacRequestToMacReply();
 				requestSend(mac_pack);
 
 			// Mac reply. 
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REPLY) {
 				data_q_.offer(mac_pack);
+			}
 		}
 	}
 
