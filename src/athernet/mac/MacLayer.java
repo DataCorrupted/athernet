@@ -62,7 +62,7 @@ public class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 0.5, 3, 80);
+		this(src_address, dst_address, 0.5, 3, 10);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 
@@ -91,20 +91,20 @@ public class MacLayer{
 	public int getStatus(){ return status_; }
 	public void startMacLayer(){
 		recv_thread_.start();
-		System.out.println("Thread receive() started.");
+		System.out.println("\nThread receive() started.");
 		recv_.startReceive();
 		System.out.println("Thread record() started.");
 		send_thread_.start();
-		System.out.println("Thread send() started.");
+		System.out.println("Thread send() started.\n");
 	}
 	public void stopMacLayer() throws Exception{ 
 		stop_ = true; 
 		recv_thread_.join();
-		System.out.println("Thread receive() finished.");
+		System.out.println("\nThread receive() finished.");
 		recv_.stopReceive();
 		System.out.println("Thread record() finished.");
 		send_thread_.join();
-		System.out.println("Thread send() finished.");
+		System.out.println("Thread send() finished.\n");
 	}
 
 	// Send data pack.
