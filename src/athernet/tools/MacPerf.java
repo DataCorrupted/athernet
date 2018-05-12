@@ -58,7 +58,7 @@ public class MacPerf {
         }
 
         double speed = (tmp_sum+0.0)/record_sent_.size()*61*8;
-        System.out.println(String.format("Speed: %f bps", speed));
+        System.out.println(String.format("Speed: %d bps", (int)speed));
     }
 
     public void start_perfing(){
