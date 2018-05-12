@@ -14,7 +14,7 @@ public class MacPerf {
     private List<Integer> record_sent_;
     private int num_unsent_pack_;
 
-    MacPerf(byte src_addr, byte dest_addr){
+    public MacPerf(byte src_addr, byte dest_addr){
         System.out.println("MacPerf dest_addr: "+dest_addr);
         src_addr_ = src_addr;
         dest_addr_ = dest_addr;
