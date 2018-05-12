@@ -17,7 +17,7 @@ public class MacPerf {
     public MacPerf(byte src_addr, byte dest_addr){
         num_pack_sending = 0;
 
-        System.out.println("MacPerf dest_addr: "+dest_addr);
+        // System.out.println("MacPerf dest_addr: "+dest_addr);
         src_addr_ = src_addr;
         dest_addr_ = dest_addr;
 
@@ -100,25 +100,28 @@ public class MacPerf {
     }
 
     public static void main(String[] args) throws Exception{
-        //NodeConfig node_config = new NodeConfig(args);
-        if (args.length == 0){
-            MacPerf mac_perf = 
-                new MacPerf((byte)0x1, (byte)0x2);
-            mac_perf.start_perfing();
-        
-        } else if (args[1].equals("-S") || args[1].equals("--server")){
-            System.out.println("Server started.");
+        NodeConfig node_config = new NodeConfig(args);
+        System.out.printf("Source Address: %d\n", node_config.get_src_addr());
+        System.out.printf("Target Address: %d\n", node_config.get_dest_addr());
 
-            MacLayer mac_layer_ = 
-                new MacLayer((byte)0x2, (byte)0x1);
-            mac_layer_.startMacLayer();
-            while (true){
-                mac_layer_.getOnePack();
-                Thread.sleep(10);
-            }
-        } else {
-            System.err.println("No such option.");
-        }
+//        if (args.length == 0){
+        MacPerf mac_perf =
+            new MacPerf(node_config.get_src_addr(), node_config.get_dest_addr());
+        mac_perf.start_perfing();
+        
+//        } else if (args[1].equals("-S") || args[1].equals("--server")){
+//            System.out.println("Server started.");
+//
+//            MacLayer mac_layer_ =
+//                new MacLayer((byte)0x2, (byte)0x1);
+//            mac_layer_.startMacLayer();
+//            while (true){
+//                mac_layer_.getOnePack();
+//                Thread.sleep(10);
+//            }
+//        } else {
+//            System.err.println("No such option.");
+//        }
 
     }
 }
