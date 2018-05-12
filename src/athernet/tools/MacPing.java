@@ -110,7 +110,7 @@ public class MacPing {
                 new MacPing(node_config.get_src_addr(), node_config.get_dest_addr());
             mac_ping.start_ping();
         
-        } else if (args[1].equals("-S") || args[1].equals("--server")){
+        } else if (args[0].equals("-S") || args[1].equals("--server")){
             MacLayer mac_layer_ = 
                 new MacLayer(node_config.get_src_addr(), node_config.get_dest_addr());
             mac_layer_.startMacLayer();

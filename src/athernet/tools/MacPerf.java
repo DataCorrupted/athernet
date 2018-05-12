@@ -101,14 +101,14 @@ public class MacPerf {
 
     public static void main(String[] args) throws Exception{
         NodeConfig node_config = new NodeConfig(args);
-        if (args.length == 1){
+        if (args.length == 0){
             MacPerf mac_perf = 
                 new MacPerf((byte)0x1, (byte)0x2);
             mac_perf.start_perfing();
         
         } else if (args[1].equals("-S") || args[1].equals("--server")){
             System.out.println("Server started.");
-            
+
             MacLayer mac_layer_ = 
                 new MacLayer((byte)0x2, (byte)0x1);
             mac_layer_.startMacLayer();
