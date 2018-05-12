@@ -297,7 +297,7 @@ public class MacLayer{
 		int cnt = 0;
 		for (int i=0; i<sending_list_.size(); i++){
 			int id = sending_list_.get(i);
-			if (packet_array_[id] != null &&
+			if (packet_array_[id].getType() == MacPacket.TYPE_DATA &&
 			  (packet_array_[id].getStatus() == MacPacket.STATUS_WAITING ||
 			  packet_array_[id].getStatus() == MacPacket.STATUS_SENT)){
 				cnt ++;
