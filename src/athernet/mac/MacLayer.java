@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class MacLayer{
+	// Whether mac layer displays debug information.
+	private boolean echo_ = true;
 
 	// Status of the MacLayer
 	private int status_;
@@ -62,7 +64,7 @@ public class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 0.5, 3, 10);
+		this(src_address, dst_address, 0.5, 3, 30);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 
@@ -156,12 +158,12 @@ public class MacLayer{
 					Thread.sleep(0, 5000);
 					while (csma_ && recv_.hasSignal()) {Thread.sleep(backoff_time_);}
 					trans_.transmitOnePack(packet_array_[id].toArray());
-					System.err.printf("Packet #%4d sent.\n", id);
+					if (echo_){ System.err.printf("Packet #%4d sent.\n", id); }
 					packet_array_[id].setTimeStamp(curr_time);
 				} else if (
 				  status == MacPacket.STATUS_SENT &&
 				  curr_time - packet_array_[id].getTimeStamp() > timeout_){
-					System.err.printf("Packet #%4d timeout, resend.\n", id);
+					if (echo_){ System.err.printf("Packet #%4d timeout, resend.\n", id); }
 					packet_array_[id].setStatus(MacPacket.STATUS_WAITING);
 					packet_array_[id].onResendOnce();
 				}
@@ -221,15 +223,18 @@ public class MacLayer{
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
-				System.out.printf(
+				if (echo_) { System.out.printf(
 					"Packet #%4d ACK received.\n",
 					mac_pack.getACKPacketID()
-				);
+				);}
 
 			// Data or Init.
 			} else if (mac_pack.getType() == MacPacket.TYPE_INIT ||
 			  mac_pack.getType() == MacPacket.TYPE_DATA){
-				System.out.printf("Packet #%4d received. ", mac_pack.getPacketID());
+				if (echo_){ System.out.printf(
+						"Packet #%4d received. ", 
+						mac_pack.getPacketID()); 
+				}
 				// Throws it away if the queue if full.
 				if (countDataPack() + window_pack_cnt <= 256){
 					// Or send an ACK to reply.
@@ -240,12 +245,12 @@ public class MacLayer{
 							mac_pack.getPacketID()
 					));
 
-					System.out.printf(
+					if (echo_) { System.out.printf(
 						"Packet type %s confirmed. ACK packet #%d sending.\n", 
 						(mac_pack.getType() == MacPacket.TYPE_INIT) ? 
 							"Init": "Data",
 						id
-					);
+					);}
 					if (getIdxInWindow(mac_pack.getPacketID()) < window_size_){
 						received_array_[mac_pack.getPacketID()] = mac_pack;
 						window_pack_cnt ++;
@@ -299,6 +304,7 @@ public class MacLayer{
 		return cnt;
 	}
 	public void turnCSMA() { csma_ = !csma_; }
-	public void turnEcho() { recv_.echo_ = !recv_.echo_; }
+	public void turnRecvEcho() { recv_.echo_ = !recv_.echo_; }
+	public void turnEcho() { echo_ = !echo_; }
 	public boolean isIdle(){ return available_q_.size() == 256; }
 }
