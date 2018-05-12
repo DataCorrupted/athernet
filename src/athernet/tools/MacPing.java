@@ -49,7 +49,7 @@ public class MacPing {
 
                     // print timeout
                     while (unconfirmed_ids.get(0) != received_pack.getPacketID()){
-                        System.out.printf("Packet %d Timeout\n", unconfirmed_ids.get(0));
+                        System.out.printf("[MacPing1] Packet %d Timeout\n", unconfirmed_ids.get(0));
                         unconfirmed_ids.remove(0);
                         unconfirmed_time.remove(0);
                     }
@@ -63,8 +63,8 @@ public class MacPing {
             }
 
             // check timeout
-            while((unconfirmed_time.size() > 0) &&(unconfirmed_time.get(0) + 2e9) > System.nanoTime()){
-                System.out.printf("Packet %d Timeout\n", unconfirmed_ids.get(0));
+            while((unconfirmed_time.size() > 0) && (unconfirmed_time.get(0) + 2e9) < System.nanoTime()){
+                System.out.printf("[MacPing2] Packet %d Timeout\n", unconfirmed_ids.get(0));
                 unconfirmed_time.remove(0);
                 unconfirmed_ids.remove(0);
             }
