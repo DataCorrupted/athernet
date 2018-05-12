@@ -24,6 +24,7 @@ public class MacPing {
         try{
             mac_layer_ = new MacLayer(src_addr_, dest_addr);
             mac_layer_.startMacLayer();
+            // mac_layer_.turnEcho();
         }
         catch (Exception exception){
             System.out.println("MacLayer throw exception");
@@ -34,7 +35,8 @@ public class MacPing {
     // GetOnePack
     public void start_ping(){
         while(true){
-            if (mac_layer_.isIdle()) { sendOnePacket(); }
+                sendOnePacket();
+
             // receive one packet
             if (mac_layer_.countDataPack() != 0) {
                 try {
@@ -61,14 +63,16 @@ public class MacPing {
             }
 
             // check timeout
-            while((unconfirmed_time.get(0) + 2e9) > System.nanoTime()){
+            while((unconfirmed_time.size() > 0) &&(unconfirmed_time.get(0) + 2e9) > System.nanoTime()){
                 System.out.printf("Packet %d Timeout\n", unconfirmed_ids.get(0));
                 unconfirmed_time.remove(0);
                 unconfirmed_ids.remove(0);
             }
 
             try {
+                System.out.println("Debug: start sleeping");
                 Thread.sleep(500);
+                System.out.println("Debug: stop sleeping");
             }
             catch (Exception exception){
                 System.out.println("Thread.sleep throw exception");
@@ -89,14 +93,14 @@ public class MacPing {
             System.out.println("MacLayer throw exception");
         }
 
-        while(packet.getPacketID() == 0){
+        // while(!mac_layer_.isIdle()){
             try {
-                Thread.sleep(0, 20);
+                Thread.sleep(0, 100);
             }
             catch (Exception exception){
                 System.out.println("Thread throw exception");
             }
-        }
+        // }
 
         // save the packet_id
         unconfirmed_ids.add((byte) packet.getPacketID());
@@ -105,6 +109,9 @@ public class MacPing {
 
     public static void main(String[] args) throws Exception{
         NodeConfig node_config = new NodeConfig(args);
+        System.out.printf("Source Address: %d\n", node_config.get_src_addr());
+        System.out.printf("Target Address: %d\n", node_config.get_dest_addr());
+
         if (args.length == 1){
             MacPing mac_ping = 
                 new MacPing(node_config.get_src_addr(), node_config.get_dest_addr());
