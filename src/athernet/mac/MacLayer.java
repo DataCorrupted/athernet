@@ -69,12 +69,11 @@ public class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 
+	public MacLayer(byte src_address, byte dst_address) throws Exception{
+		this(src_address, dst_address, 0.5, 3, 50);
+	}
 	public MacLayer(byte src_address, byte dst_address, int sliding_window) throws Exception{
 		this(src_address, dst_address, 0.5, 3, sliding_window);
-	}
-
-	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 0.5, 3, 5);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 
@@ -120,9 +119,9 @@ public class MacLayer{
 	}
 
 	// Send data pack.
-	public int requestSend(int offset, byte[] data) throws Exception{
+	public int requestSend(byte[] data) throws Exception{
 		return 
-			requestSend(new MacPacket(dst_addr_, src_addr_, (byte)offset, data));
+			requestSend(new MacPacket(dst_addr_, src_addr_, data));
 	}
 	// Send init pack.
 	public int requestSend(int len) throws Exception{

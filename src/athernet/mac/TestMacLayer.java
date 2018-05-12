@@ -62,12 +62,11 @@ class TestMacLayer{
 		int total_len = 0;
 		while (total_len < length){
 			mac_pack = mac_layer.getOnePack();
-			int offset = mac_pack.getOffset();
 			byte[] chunk = mac_pack.getData();
-			total_len += chunk.length;
 			// This shouldn't cause overflow error. 
 			// But if so, let it be, so we can debug easier.
-			System.arraycopy(chunk, 0, data, offset, chunk.length);
+			System.arraycopy(chunk, 0, data, total_len, chunk.length);
+			total_len += chunk.length;
 		}
 
 		double toc = System.nanoTime() / 1e9;
@@ -109,10 +108,10 @@ class TestMacLayer{
 			Thread.sleep(20);
 		}
 
-		mac_layer.requestSend(0, data1);
-		mac_layer.requestSend(13, data2);
-		mac_layer.requestSend(52, data3);
-		mac_layer.requestSend(91, data4);
+		mac_layer.requestSend(data1);
+		mac_layer.requestSend(data2);
+		mac_layer.requestSend(data3);
+		mac_layer.requestSend(data4);
 
 		Thread.sleep(3000);
 
@@ -147,7 +146,7 @@ class TestMacLayer{
 		r = i_file_.read(out_data, 0, pack_size);
 		while (r != -1){
 			// Send it.
-			mac_layer.requestSend(pack_cnt*pack_size, out_data);
+			mac_layer.requestSend(out_data);
 			pack_cnt ++;
 			// Read next bunch of data.
 			r = i_file_.read(out_data, 0, pack_size);
