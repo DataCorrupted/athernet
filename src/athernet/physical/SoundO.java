@@ -52,15 +52,15 @@ public class SoundO {
 		// I should shut the lines down by calling close() in the
 		// descructor, but funny thing is, there is no such a thing
 		// in Java, as memory is managed by java, not the programmer.
-		this.o_line_.start();
+		// this.o_line_.start();
 	}
 
 	// Given a ByteBuffer, play it.
 	private void play(ByteBuffer out) throws LineUnavailableException {
-		//this.o_line_.start();
+		this.o_line_.start();
 		this.o_line_.write(out.array(), 0, out.capacity());
-		//this.o_line_.drain();
-		//this.o_line_.stop();
+		this.o_line_.drain();
+		this.o_line_.stop();
 	}
 
 	private ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
