@@ -48,7 +48,6 @@ public class SoundO {
 		this.o_line_ = (SourceDataLine)AudioSystem.getLine(o_info_);
 
 		o_line_.open(this.format_);
-		this.o_line_.start();
 		// Now this is disturbing. 
 		// I should shut the lines down by calling close() in the
 		// descructor, but funny thing is, there is no such a thing
@@ -57,7 +56,10 @@ public class SoundO {
 
 	// Given a ByteBuffer, play it.
 	private void play(ByteBuffer out) throws LineUnavailableException {
+		this.o_line_.start();
 		this.o_line_.write(out.array(), 0, out.capacity());
+		this.o_line_.drain();
+		this.o_line_.stop();
 	}
 
 	private ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
