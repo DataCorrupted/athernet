@@ -50,6 +50,9 @@ public class MacLayer{
 	private ArrayBlockingQueue<MacPacket> data_q_ 
 		= new ArrayBlockingQueue<MacPacket>(300);
 
+	// Whether or not to use CSMA
+	private boolean csma_ = true;
+
 	// Seperate threads to do their jobs.
 	Thread send_thread_;	
 	Thread recv_thread_;
@@ -150,7 +153,7 @@ public class MacLayer{
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
-					//while (recv_.hasSignal()) {Thread.sleep(15);}
+					while (csma_ && recv_.hasSignal()) {Thread.sleep(15);}
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					System.err.printf("Packet #%4d sent.\n", id);
 					packet_array_[id].setTimeStamp(curr_time);
@@ -282,6 +285,7 @@ public class MacLayer{
 		}
 		return cnt;
 	}
-	public void echo() { recv_.echo_ = true; }
+	public void turnCSMA() { csma_ = !csma_; }
+	public void turnEcho() { recv_.echo_ = !recv_.echo; }
 	public boolean isIdle(){ return available_q_.size() == 256; }
 }
