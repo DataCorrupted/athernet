@@ -135,7 +135,8 @@ public class MacLayer{
 		// sending queue.
 		// Using take, we have to wait if necessary.
 		int id = available_q_.take();
-		if (pack.getType() != MacPacket.TYPE_ACK) {
+		if (pack.getType() != MacPacket.TYPE_ACK ||
+		  pack.getType() != MacPacket.TYPE_MACPING_REPLY) {
 			sending_list_.add(id);
 		} else {
 			sending_list_.add(0, id);
@@ -170,9 +171,16 @@ public class MacLayer{
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
 					// Sleep for 0.5ms;
+					// Backoff.
 					Thread.sleep(0, 5000);
 					while (csma_ && recv_.hasSignal()) {Thread.sleep(backoff_time_);}
+					// Should it be a Ping packet, add a time stamp.
+					if (packet_array_[id].getType() == MacPacket.TYPE_MACPING_REQST){
+						packet_array_[id].setTimeStampMacping();
+					}
+
 					trans_.transmitOnePack(packet_array_[id].toArray());
+					
 					if (echo_){ System.err.printf("Packet #%4d sent.\n", id); }
 					packet_array_[id].setTimeStamp(curr_time);
 				} else if (
@@ -288,13 +296,13 @@ public class MacLayer{
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
 				if (echo_){ 
 					double passed_time = 
-						(mac_pack.getTimestampMacping() - System.nanoTime()) / 1e9;
+						(System.nanoTime() - mac_pack.getTimestampMacping()) / 1e9;
 					System.out.printf(
-						"Packet #%4d received," + 
-						" it's a mac request packet sent at %3.2f."+
-						"%3.2fs(0.5RTT) has passed. Estimated RTT: %3.2f.\n",
+						"Packet #%4d received %3.2f\n", passed_time /*+ 
+						" it's a mac request packet sent at %3.2f. "+
+						"%3.2fs(0.5RTT) has passed. Estimated RTT: %3.2fs.\n",
 						mac_pack.getPacketID(), mac_pack.getTimestampMacping() / 1e9,
-						passed_time, passed_time * 2
+						passed_time, passed_time * 2*/
 				);}
 				mac_pack.convertMacRequestToMacReply();
 				requestSend(mac_pack);
