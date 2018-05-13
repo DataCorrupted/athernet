@@ -28,7 +28,7 @@ public class MacPing {
         try{
             mac_layer_ = new MacLayer(src_addr_, dest_addr);
             mac_layer_.startMacLayer();
-            // mac_layer_.turnEcho();
+            mac_layer_.turnEcho();
         }
         catch (Exception exception){
             System.out.println("MacLayer throw exception");
@@ -37,9 +37,9 @@ public class MacPing {
 
     // RequestSend(mac_pack)
     // GetOnePack
-    public void start_ping(){
+    public void start_ping() throws Exception{
         while(true){
-            if (counter % 10 == 0) {
+            if (counter % 200 == 0) {
                 sendOnePacket();
                 counter = 0;
             }
@@ -47,29 +47,27 @@ public class MacPing {
 
             // receive one packet
             if (mac_layer_.countDataPack() != 0) {
-                System.out.println("mac_layer countDataPack != 0");
-                try {
-                    MacPacket received_pack = mac_layer_.getOnePack();
-                    int packid = received_pack.getPacketID();
+                // System.out.println("mac_layer countDataPack != 0");
+                MacPacket received_pack = mac_layer_.getOnePack();
+                // System.out.printf("[MacPing::receive] SystemTime: %d\n",System.currentTimeMillis());
+                int packid = received_pack.getPacketID();
+                System.out.printf("packid: %d\n",packid);
 
-                    // print timeout
-                    while ((unconfirmed_ids.size() > 0) && unconfirmed_ids.get(0) != received_pack.getPacketID()){
-                        System.out.printf("[MacPing1] Packet %d Timeout\n", unconfirmed_ids.get(0));
-                        unconfirmed_ids.remove(0);
-                        unconfirmed_time.remove(0);
-                    }
-
-                    double rtt = (System.currentTimeMillis() - unconfirmed_time.get(0))/1e3;
-
-                    System.out.printf(
-                        "Received packid: %d, RTT: %.9f\n", packid, rtt);
-
-                    // remove the received one
+                // print timeout
+                while ((unconfirmed_ids.size() > 0) && (unconfirmed_ids.get(0) != packid)){
+                    System.out.printf("[MacPing1] Packet %d Timeout\n", unconfirmed_ids.get(0));
                     unconfirmed_ids.remove(0);
                     unconfirmed_time.remove(0);
-                } catch (Exception exception) {
-                    System.out.println("mac_layer_.getOnePack received one exception");
                 }
+
+                double rtt = (System.currentTimeMillis() - unconfirmed_time.get(0))/1e3;
+
+                System.out.printf(
+                    "Received packid: %d, RTT: %.9f\n", packid, rtt);
+
+                // remove the received one
+                unconfirmed_ids.remove(0);
+                unconfirmed_time.remove(0);
             }
 
             // check timeout
@@ -80,7 +78,7 @@ public class MacPing {
             }
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(1);
             }
             catch (Exception exception){
                 System.out.println("Thread.sleep throw exception");
@@ -113,6 +111,7 @@ public class MacPing {
         // save the packet_id
         unconfirmed_ids.add((byte) packet.getPacketID());
         unconfirmed_time.add(System.currentTimeMillis());
+        // System.out.printf("[MacPing::send] SystemTime: %d\n",System.currentTimeMillis());
     }
 
     public static void main(String[] args) throws Exception{
