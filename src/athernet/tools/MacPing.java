@@ -13,10 +13,14 @@ public class MacPing {
     private ArrayList<Byte> unconfirmed_ids;
     private ArrayList<Long> unconfirmed_time;
 
+    private int counter = 0;
+
     public MacPing(byte src_addr, byte dest_addr){
         System.out.println("MacPing dest_addr: "+dest_addr);
         src_addr_ = src_addr;
         dest_addr_ = dest_addr;
+
+        counter = 0;
 
         unconfirmed_ids = new ArrayList<Byte>();
         unconfirmed_time = new ArrayList<Long>();
@@ -35,7 +39,11 @@ public class MacPing {
     // GetOnePack
     public void start_ping(){
         while(true){
+            if (counter % 5 == 0) {
                 sendOnePacket();
+                counter = 0;
+            }
+            counter ++;
 
             // receive one packet
             if (mac_layer_.countDataPack() != 0) {
@@ -43,7 +51,7 @@ public class MacPing {
                 try {
                     MacPacket received_pack = mac_layer_.getOnePack();
                     long curr_time = System.nanoTime();
-                    long rtt = curr_time - received_pack.getTimestampMacping();
+                    long rtt = received_pack.getTimestampMacping();
                     System.out.printf(
                         "Received packid: %d, RTT: %.9f\n",
                         received_pack.getPacketID(), (rtt/1e9));
@@ -71,9 +79,7 @@ public class MacPing {
             }
 
             try {
-                System.out.println("Debug: start sleeping");
-                Thread.sleep(500);
-                System.out.println("Debug: stop sleeping");
+                Thread.sleep(100);
             }
             catch (Exception exception){
                 System.out.println("Thread.sleep throw exception");
