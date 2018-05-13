@@ -91,7 +91,7 @@ public class MacPing {
 
     private void sendOnePacket(){
         long curr_time = 0;
-        MacPacket packet = new MacPacket(dest_addr_,src_addr_,curr_time);
+        MacPacket packet = new MacPacket(dest_addr_,src_addr_);
         packet.setPacketID((byte)0);
 
         try {
@@ -112,7 +112,7 @@ public class MacPing {
 
         // save the packet_id
         unconfirmed_ids.add((byte) packet.getPacketID());
-        unconfirmed_time.add(packet.getTimestampMacping());
+        unconfirmed_time.add(System.currentTimeMillis());
     }
 
     public static void main(String[] args) throws Exception{
