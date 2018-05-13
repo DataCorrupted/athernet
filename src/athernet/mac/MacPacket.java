@@ -30,6 +30,7 @@ public class MacPacket {
     private int resend_counter_ = 0;
     private double timestamp_ = 0;
     private long timestamp_ms_ = 0;
+    private long received_ms_ = 0;
     private int status_ = 0;
 
     // For ACK Packet
@@ -124,6 +125,14 @@ public class MacPacket {
         else{
             return -1;
         }
+    }
+
+    public long getReceivedMS(){
+        return received_ms_;
+    }
+
+    public void setReceivedMS(long curr_ms){
+        received_ms_ = curr_ms;
     }
 
     public void setTimestampMs(long time_ms){
