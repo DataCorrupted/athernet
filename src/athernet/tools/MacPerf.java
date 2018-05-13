@@ -92,8 +92,8 @@ public class MacPerf {
             }
 
             // add new packets if needed
-            if (new_num_unsent_pack < 30){
-                for (int i = 0; i < 15; i++){
+            if (new_num_unsent_pack < 5){
+                for (int i = 0; i < 5; i++){
                     requestSendOnce();
                     num_pack_sending++;
                 }
