@@ -297,13 +297,17 @@ public class MacLayer{
 				if (echo_){ 
 					double passed_time = 
 						(System.nanoTime() - mac_pack.getTimestampMacping()) / 1e9;
-					System.out.printf(
-						"Packet #%4d received %3.2f\n", passed_time /*+ 
-						" it's a mac request packet sent at %3.2f. "+
+					/*System.out.printf(
+						"Packet #%4d received, " + 
+						"it's a mac request packet sent at %3.2f. "+
 						"%3.2fs(0.5RTT) has passed. Estimated RTT: %3.2fs.\n",
 						mac_pack.getPacketID(), mac_pack.getTimestampMacping() / 1e9,
-						passed_time, passed_time * 2*/
-				);}
+						passed_time, passed_time * 2
+				);*/
+					System.out.printf(
+						"Packet #%4d received.\n", mac_pack.getPacketID()
+					);
+				}
 				mac_pack.convertMacRequestToMacReply();
 				requestSend(mac_pack);
 
@@ -313,6 +317,7 @@ public class MacLayer{
 					"Packet #%4d received, I got a reply for your request.\n",
 					mac_pack.getPacketID()
 				);}
+				mac_pack.setRTT();
 				data_q_.offer(mac_pack);
 			}
 		}
