@@ -175,6 +175,8 @@ public class MacPacket {
         } else if (type_ == TYPE_INIT){
             total_length_ = 
                 (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
+        } else if (type_ == TYPE_MACPING_REPLY || type_ == TYPE_MACPING_REQST){
+            data_ = new byte[0];
         } else{
             throw new RuntimeException("Unrecognized MACPacket Type");
         }
