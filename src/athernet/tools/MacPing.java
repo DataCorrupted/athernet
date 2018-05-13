@@ -57,7 +57,7 @@ public class MacPing {
                 for (int i = 0; i < sent_packs.size(); i++){
                     if (sent_packs.get(i).getPacketID() == packid){
                         // received packet found
-                        double rtt = (received_pack.getReceivedMS() - received_pack.getTimestampMs())/ 1e3;
+                        double rtt = (received_pack.getReceivedMS() - sent_packs.get(i).getTimestampMs())/ 1e3;
 
                         System.out.printf(
                                 "Received packid: %d, RTT: %.9f\n", packid, rtt);
