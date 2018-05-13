@@ -12,6 +12,9 @@ class TestMacLayer{
 	private static final byte src_addr = 0x1;
 	private static final byte dst_addr = 0x2;
 
+	private static double tic;
+	private static double toc;
+
 	public static void main(String[] args) throws Exception{
 		if (args.length == 0){
 			System.err.println("No parameter given.");
@@ -124,9 +127,7 @@ class TestMacLayer{
 		FileI i_file_ = new FileI(file, FileI.TEXT01);
 		int total_size = i_file_.getSize();
 
-		mac_layer.startMacLayer();
-		double tic = System.nanoTime() / 1e9;
-
+		tic = System.nanoTime() / 1e9;
 		// Make sure that the init pack is sent.
 		MacPacket init_pack 
 			= new MacPacket(dst_addr, src_addr, total_size);
@@ -161,25 +162,24 @@ class TestMacLayer{
 				break;
 			}
 		}
-		mac_layer.stopMacLayer();
 		
-		double toc = System.nanoTime() / 1e9;
-		System.out.println("Time used for transmition: " + (toc - tic));
-
+		toc = System.nanoTime() / 1e9;
 	}
 	public static void transmit_file() throws Exception{
 		// Start the mac layer.
 		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
-		
+		mac_layer.startMacLayer();
+
 		transmit_file("./I", mac_layer);
+
+		mac_layer.stopMacLayer();
+		System.out.println("Time used for transmition: " + (toc - tic));
 	}
 
-	public static byte[] receive_file(MacLayer mac_layer) throws Exception{
-		mac_layer.startMacLayer();
-		
+	public static byte[] receive_file(MacLayer mac_layer) throws Exception{		
 		// Receive head length.
 		MacPacket mac_pack = mac_layer.getOnePack();
-		double tic = System.nanoTime() / 1e9;
+		tic = System.nanoTime() / 1e9;
 		if (mac_pack.getType() != MacPacket.TYPE_INIT){
 			System.err.println("Error, no init received.");
 			return new byte[0];
@@ -207,18 +207,19 @@ class TestMacLayer{
 			}
 			pack_cnt += 1;
 		}
+		toc = System.nanoTime() / 1e9;
 		
-		mac_layer.stopMacLayer();
-		double toc = System.nanoTime() / 1e9;
-		System.out.println("Time used for transmition: " + (toc - tic));
 		return data;
 	}
 	private static byte[] data = new byte[0];
 	public static void receive_file() throws Exception{
 		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
-
-		data = receive_file(mac_layer);
+		mac_layer.startMacLayer();
 		
+		data = receive_file(mac_layer);
+
+		mac_layer.stopMacLayer();
+		System.out.println("Time used for transmition: " + (toc - tic));
 		saveAndCheckData();	
 	}
 	public static void csma_test(String file, boolean is_client) throws Exception{
@@ -228,26 +229,41 @@ class TestMacLayer{
 		} else {
 			mac_layer = new MacLayer(dst_addr, src_addr);
 		}
-		// Turn on csma.
-		mac_layer.turnCSMA();
 		
-		Thread transmit_thread = new Thread(new Runnable(){
-			public void run() { 
-				try { transmit_file(file, mac_layer); } catch (Exception e) { ; }
-			}
-		});
 		Thread receive_thread = new Thread(new Runnable(){
 			public void run(){
 				try { data = receive_file(mac_layer); } catch (Exception e) { ; }
 			}
 		});
+		Thread transmit_thread = new Thread(new Runnable(){
+			public void run() { 
+				try { transmit_file(file, mac_layer); } catch (Exception e) { ; }
+			}
+		});
+
+		// Turn on csma.
+		mac_layer.turnCSMA();
+		mac_layer.startMacLayer();
+
+		double tic = System.nanoTime() / 1e9;
+
 		receive_thread.start();
+		System.out.println("Receive thread started.");
 		// Wait for the other side to start 
 		Thread.sleep(1000);
-		transmit_thread.start();		
+		transmit_thread.start();
+		System.out.println("Transmit thread started.");
 
 		transmit_thread.join();
+		System.out.println("Receive thread stoped.");
 		receive_thread.join();
+		System.out.println("Transmit thread stopped.");
+		
+		double toc = System.nanoTime() / 1e9;
+
+		mac_layer.stopMacLayer();
+
+		System.out.println("Time used for transmition: " + (toc - tic));
 		saveAndCheckData();
 	}
 
