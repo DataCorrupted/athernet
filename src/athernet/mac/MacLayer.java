@@ -253,7 +253,7 @@ public class MacLayer{
 			} else if (mac_pack.getType() == MacPacket.TYPE_INIT ||
 			  mac_pack.getType() == MacPacket.TYPE_DATA){
 				if (echo_){ System.out.printf(
-					"Packet #%4d received. \n", mac_pack.getPacketID()); 
+					"Packet #%4d received.", mac_pack.getPacketID()); 
 				}
 				// Throws it away if the queue if full.
 				if (countDataPack() + window_pack_cnt <= 256){

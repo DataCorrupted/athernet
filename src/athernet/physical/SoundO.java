@@ -38,7 +38,7 @@ public class SoundO {
 		this.setUpDevice();		
 	}
 	private void setUpDevice() throws Exception{
-		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_, 480);
+		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_);
 		
 		if (!AudioSystem.isLineSupported(this.o_info_)){
 			System.out.println(
