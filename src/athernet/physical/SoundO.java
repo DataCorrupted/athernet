@@ -56,11 +56,11 @@ public class SoundO {
 
 	// Given a ByteBuffer, play it.
 	private void play(ByteBuffer out) throws LineUnavailableException {
-		this.o_line_.start();
+		//this.o_line_.start();
 		// System.out.printf("[SoundO] SystemTime: %d\n",System.currentTimeMillis());
 		this.o_line_.write(out.array(), 0, out.capacity());
-		this.o_line_.drain();
-		this.o_line_.stop();
+		//this.o_line_.drain();
+		//this.o_line_.stop();
 	}
 
 	private ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
