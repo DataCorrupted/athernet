@@ -290,8 +290,8 @@ public class MacLayer{
 						"Packet #%4d received," + 
 						" it's a mac request packet sent at %3.2f."+
 						"%3.2fs(0.5RTT) has passed.\n",
-						mac_pack.getPacketID(), mac_pack.getTimestampMacPing() / 1e9,
-						(mac_pack.getTimestampMacPing() - System.nanoTime()) / 1e9
+						mac_pack.getPacketID(), mac_pack.getTimestampMacping() / 1e9,
+						(mac_pack.getTimestampMacping() - System.nanoTime()) / 1e9
 				);}
 				mac_pack.convertMacRequestToMacReply();
 				requestSend(mac_pack);
