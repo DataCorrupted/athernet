@@ -142,10 +142,10 @@ public class MacPacket {
     }
 
     public void setTimestampMacping(){
-        timestamp_macping_ = System.nanoTime();
+        timestamp_macping_ = System.currentTimeMillis();
     }
     public void setRTT(){
-        timestamp_macping_ = System.nanoTime() - timestamp_macping_;
+        timestamp_macping_ = System.currentTimeMillis() - timestamp_macping_;  
     }
 
     public int getPacketID(){ return ((int)pack_id_) & 0xff; }

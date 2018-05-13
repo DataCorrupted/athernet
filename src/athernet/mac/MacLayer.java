@@ -72,7 +72,8 @@ public class MacLayer{
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
 		this(src_address, dst_address, 0.5, 3, 50);
 	}
-	public MacLayer(byte src_address, byte dst_address, int sliding_window) throws Exception{
+	public MacLayer(
+	  byte src_address, byte dst_address, int sliding_window) throws Exception{
 		this(src_address, dst_address, 0.5, 3, sliding_window);
 	}
 	public MacLayer(
@@ -296,7 +297,8 @@ public class MacLayer{
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
 				if (echo_){ 
 					double passed_time = 
-						(System.nanoTime() - mac_pack.getTimestampMacping()) / 1e9;
+						(System.currentTimeMillis() - mac_pack.getTimestampMacping()) 
+						/ 1e9;
 					/*System.out.printf(
 						"Packet #%4d received, " + 
 						"it's a mac request packet sent at %3.2f. "+
@@ -304,8 +306,10 @@ public class MacLayer{
 						mac_pack.getPacketID(), mac_pack.getTimestampMacping() / 1e9,
 						passed_time, passed_time * 2
 				);*/
+					System.out.println(passed_time);
 					System.out.printf(
-						"Packet #%4d received.\n", mac_pack.getPacketID()
+						"Packet #%4d received, it's a mac request packet.\n", 
+						mac_pack.getPacketID()
 					);
 				}
 				mac_pack.convertMacRequestToMacReply();
