@@ -116,6 +116,15 @@ public class MacPacket {
         dest_addr_ = temp;
     }
 
+    public byte getSubPackid(){
+        if ((type_ == TYPE_MACPING_REPLY) || (type_ == TYPE_MACPING_REQST)) {
+            return data_field_[0];
+        }
+        else{
+            return -1;
+        }
+    }
+
     // returintn -1 on error
     public int getACKPacketID(){
         return (type_ == TYPE_ACK) ? ((int) ack_pack_id_) & 0xff: -1;
@@ -151,7 +160,15 @@ public class MacPacket {
 
     public void setStatus(int status){ status_ = status; }
 
-    public void setPacketID(byte pack_id){ pack_id_ = pack_id; }
+    public void setPacketID(byte pack_id){
+        pack_id_ = pack_id;
+
+        // for MacPing Request, the sub_packid = packid
+        if (type_ == TYPE_MACPING_REQST){
+            data_field_ = new byte[1];
+            data_field_[0] = pack_id;
+        }
+    }
 
     // encode all fields to a String
     byte[] toArray(){
