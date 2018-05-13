@@ -20,8 +20,8 @@ public class MacLayer{
 	public static final int LINKERR = -1;
 
 	// The caller of MacLayer should assign a Mac Address.
-	private byte src_addr_;
-	private byte dst_addr_;
+	public byte src_addr_;
+	public byte dst_addr_;
 
 	// The maximum resend time before we rule a link failure.
 	private int max_resend_;
@@ -233,12 +233,14 @@ public class MacLayer{
 				continue;
 			} 
 			mac_pack = new MacPacket(data);
+			//System.out.println(mac_pack.getDestAddr() + " "  +  mac_pack.getSrcAddr());
+			//System.out.println(src_addr_ + " "  +  dst_addr_);
+
 			// Meaning this is sender's receiver.
 			if (mac_pack.getDestAddr() != src_addr_ 
 			  || mac_pack.getSrcAddr() != dst_addr_){
 				continue;
 			}
-
 
 			// An ACK packet.
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){

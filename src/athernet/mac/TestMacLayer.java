@@ -130,7 +130,7 @@ class TestMacLayer{
 		tic = System.nanoTime() / 1e9;
 		// Make sure that the init pack is sent.
 		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, total_size);
+			= new MacPacket(mac_layer.dst_addr_, mac_layer.src_addr_, total_size);
 		mac_layer.requestSend(init_pack);
 		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
 			if (mac_layer.getStatus() == MacLayer.LINKERR) {
@@ -232,7 +232,7 @@ class TestMacLayer{
 		}
 		mac_layer.startMacLayer();
 		Thread.sleep(1000);
-		transmit_file(file, mac_layer);
+		//transmit_file(file, mac_layer);
 		data = receive_file(mac_layer);
 /*		
 		Thread receive_thread = new Thread(new Runnable(){
