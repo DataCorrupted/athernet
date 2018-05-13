@@ -69,11 +69,11 @@ public class MacLayer{
 	private int sleep_time_ = 20;
 
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
-		this(src_address, dst_address, 0.5, 3, 50);
+		this(src_address, dst_address, 1.5, 5, 50);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, int sliding_window) throws Exception{
-		this(src_address, dst_address, 0.5, 3, sliding_window);
+		this(src_address, dst_address, 1.5, 5, sliding_window);
 	}
 	public MacLayer(
 	  byte src_address, byte dst_address, 

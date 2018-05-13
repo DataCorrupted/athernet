@@ -246,7 +246,11 @@ class TestMacLayer{
 		});
 
 		// Turn on csma.
+<<<<<<< HEAD
 		//mac_layer.turnCSMA();
+=======
+		// mac_layer.turnCSMA();
+>>>>>>> 0a00f36b4a0473f2f3d172010863219d95f5b971
 		mac_layer.startMacLayer();
 
 		double tic = System.nanoTime() / 1e9;
