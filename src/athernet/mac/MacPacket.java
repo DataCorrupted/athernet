@@ -120,7 +120,7 @@ public class MacPacket {
 
     public int getSubPackid(){
         if ((type_ == TYPE_MACPING_REPLY) || (type_ == TYPE_MACPING_REQST)) {
-            return ((int)data_field_[1]) & 0xff;
+            return ((int)data_field_[0]) & 0xff;
         }
         else{
             return -1;
