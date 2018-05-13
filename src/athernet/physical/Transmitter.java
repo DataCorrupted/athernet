@@ -5,6 +5,9 @@ import athernet.util.CRC8;
 import athernet.physical.SoundO;
 import athernet.physical.OFDM;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Transmitter{
 	// Add given data's crc sum.
 	private CRC8 crc8_ ;
@@ -15,6 +18,9 @@ public class Transmitter{
 	// Transmit the sound.
 	private SoundO o_sound_;
 	
+	// Locks the transmitter. Only one can be transmitted at one time.
+	private final Lock mutex_ = new ReentrantLock(true);
+
 	public void drain() { o_sound_.drain(); }
 	public Transmitter() throws Exception{
 		this(48000);
@@ -28,6 +34,7 @@ public class Transmitter{
 	}
 
 	public void transmitOnePack(byte[] data) throws Exception{
+		mutex_.lock();
 		// check the length of the input array
 		if (data.length > 255){
 			throw new RuntimeException(
@@ -47,6 +54,7 @@ public class Transmitter{
 		o_sound_.sound(wave);
 		// Reset CRC8
 		crc8_.reset();	
+		mutex_.unlock();
 	}
 
 	static public void main(String[] args) throws Exception{

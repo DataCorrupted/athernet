@@ -65,7 +65,6 @@ public class MacLayer{
 	private boolean stop_ = false;
 	private final Lock mutex_ = new ReentrantLock(true);
 
-	public long curr = System.currentTimeMillis();
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 
@@ -179,7 +178,6 @@ public class MacLayer{
 					}
 
 					trans_.transmitOnePack(packet_array_[id].toArray());
-					System.out.println(System.currentTimeMillis() - curr );
 					if (echo_){ System.err.printf("Packet #%4d sent.\n", id); }
 					packet_array_[id].setTimeStamp(curr_time);
 				} else if (
@@ -230,7 +228,6 @@ public class MacLayer{
 		MacPacket mac_pack;
 		while (!stop_){
 			byte[] data = recv_.receiveOnePacket();
-			curr = System.currentTimeMillis();
 			if (data.length == 0) {
 				continue;
 			} 
@@ -301,7 +298,7 @@ public class MacLayer{
 					);
 				}
 				mac_pack.convertMacRequestToMacReply();
-				requestSend(mac_pack);
+				trans_.transmitOnePack(mac_pack.toArray());
 
 			// Mac reply. 
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REPLY) {
