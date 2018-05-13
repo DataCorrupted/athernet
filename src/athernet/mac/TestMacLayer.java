@@ -232,7 +232,7 @@ class TestMacLayer{
 		}
 		mac_layer.startMacLayer();
 		Thread.sleep(1000);
-		//transmit_file(file, mac_layer);
+		transmit_file(file, mac_layer);
 		data = receive_file(mac_layer);
 /*		
 		Thread receive_thread = new Thread(new Runnable(){
