@@ -118,9 +118,9 @@ public class MacPacket {
         dest_addr_ = temp;
     }
 
-    public byte getSubPackid(){
+    public int getSubPackid(){
         if ((type_ == TYPE_MACPING_REPLY) || (type_ == TYPE_MACPING_REQST)) {
-            return data_field_[0];
+            return ((int)data_field_[1]) & 0xff;
         }
         else{
             return -1;

@@ -49,7 +49,7 @@ public class MacPing {
                 // System.out.println("mac_layer countDataPack != 0");
                 MacPacket received_pack = mac_layer_.getOnePack();
                 // System.out.printf("[MacPing::receive] SystemTime: %d\n",System.currentTimeMillis());
-                int packid = received_pack.getSubPackid();
+                byte packid = received_pack.getSubPackid();
                 System.out.printf("packid: %d\n",packid);
 
                 // find the packet
