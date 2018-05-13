@@ -39,7 +39,7 @@ public class MacPing {
     // GetOnePack
     public void start_ping(){
         while(true){
-            if (counter % 5 == 0) {
+            if (counter % 10 == 0) {
                 sendOnePacket();
                 counter = 0;
             }
@@ -50,14 +50,14 @@ public class MacPing {
                 System.out.println("mac_layer countDataPack != 0");
                 try {
                     MacPacket received_pack = mac_layer_.getOnePack();
-                    long curr_time = System.nanoTime();
                     long rtt = received_pack.getTimestampMacping();
+                    System.out.printf("System Time: %ld", System.currentTimeMillis());
                     System.out.printf(
                         "Received packid: %d, RTT: %.9f\n",
-                        received_pack.getPacketID(), (rtt/1e9));
+                        received_pack.getPacketID(), (rtt/1e3));
 
                     // print timeout
-                    while (unconfirmed_ids.get(0) != received_pack.getPacketID()){
+                    while ((unconfirmed_ids.size() > 0) && unconfirmed_ids.get(0) != received_pack.getPacketID()){
                         System.out.printf("[MacPing1] Packet %d Timeout\n", unconfirmed_ids.get(0));
                         unconfirmed_ids.remove(0);
                         unconfirmed_time.remove(0);
@@ -72,7 +72,7 @@ public class MacPing {
             }
 
             // check timeout
-            while((unconfirmed_time.size() > 0) && (unconfirmed_time.get(0) + 2e9) < System.nanoTime()){
+            while((unconfirmed_time.size() > 0) && (unconfirmed_time.get(0) + 2e3) < System.currentTimeMillis()){
                 System.out.printf("[MacPing2] Packet %d Timeout\n", unconfirmed_ids.get(0));
                 unconfirmed_time.remove(0);
                 unconfirmed_ids.remove(0);
@@ -89,7 +89,7 @@ public class MacPing {
 
 
     private void sendOnePacket(){
-        long curr_time = System.nanoTime();
+        long curr_time = 0;
         MacPacket packet = new MacPacket(dest_addr_,src_addr_,curr_time);
         packet.setPacketID((byte)0);
 
