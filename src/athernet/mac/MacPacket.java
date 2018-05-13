@@ -29,6 +29,7 @@ public class MacPacket {
     // for system maintenance
     private int resend_counter_ = 0;
     private double timestamp_ = 0;
+    private long timestamp_ms_ = 0;
     private int status_ = 0;
 
     // For ACK Packet
@@ -123,6 +124,14 @@ public class MacPacket {
         else{
             return -1;
         }
+    }
+
+    public void setTimestampMs(long time_ms){
+        timestamp_ms_ = time_ms;
+    }
+
+    public long getTimestampMs(){
+        return timestamp_ms_;
     }
 
     // returintn -1 on error
