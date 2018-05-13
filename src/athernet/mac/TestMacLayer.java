@@ -141,6 +141,7 @@ class TestMacLayer{
 			Thread.sleep(20);
 		}
 
+		Thread.sleep(1000);
 		int pack_size = 125;
 		byte[] out_data = new byte[pack_size];
 		int r = 0;
@@ -167,7 +168,7 @@ class TestMacLayer{
 	}
 	public static void transmit_file() throws Exception{
 		// Start the mac layer.
-		MacLayer mac_layer = new MacLayer(src_addr, dst_addr, 10);
+		MacLayer mac_layer = new MacLayer(src_addr, dst_addr, 50);
 		mac_layer.startMacLayer();
 
 		transmit_file("./I", mac_layer);
@@ -213,7 +214,7 @@ class TestMacLayer{
 	}
 	private static byte[] data = new byte[0];
 	public static void receive_file() throws Exception{
-		MacLayer mac_layer = new MacLayer(dst_addr, src_addr, 10);
+		MacLayer mac_layer = new MacLayer(dst_addr, src_addr, 50);
 		mac_layer.startMacLayer();
 		
 		data = receive_file(mac_layer);
@@ -229,7 +230,10 @@ class TestMacLayer{
 		} else {
 			mac_layer = new MacLayer(dst_addr, src_addr);
 		}
-		
+		mac_layer.startMacLayer();
+		transmit_file(file, mac_layer);
+		data = receive_file(mac_layer);
+/*		
 		Thread receive_thread = new Thread(new Runnable(){
 			public void run(){
 				try { data = receive_file(mac_layer); } catch (Exception e) { ; }
@@ -242,7 +246,7 @@ class TestMacLayer{
 		});
 
 		// Turn on csma.
-		mac_layer.turnCSMA();
+		//mac_layer.turnCSMA();
 		mac_layer.startMacLayer();
 
 		double tic = System.nanoTime() / 1e9;
@@ -260,7 +264,7 @@ class TestMacLayer{
 		System.out.println("Receive thread stopped.");
 		
 		double toc = System.nanoTime() / 1e9;
-
+*/
 		mac_layer.stopMacLayer();
 
 		System.out.println("Time used for transmition: " + (toc - tic));
