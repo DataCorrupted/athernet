@@ -229,70 +229,7 @@ class TestMacLayer{
 		} else {
 			mac_layer = new MacLayer(dst_addr, src_addr);
 		}
-///////////////////////////////////////////////////////////////////////
-		mac_layer.startMacLayer();
-		Thread.sleep(1000);
-		// Prepare file.
-		FileI i_file_ = new FileI(file, FileI.TEXT01);
-		int total_size = i_file_.getSize();
-		// Make sure that the init pack is sent.
-		MacPacket init_pack 
-			= new MacPacket(dst_addr, src_addr, total_size);
-		mac_layer.requestSend(init_pack);
-		while (init_pack.getStatus() != MacPacket.STATUS_ACKED) {
-			if (mac_layer.getStatus() == MacLayer.LINKERR) {
-				System.err.println("Link Error!");
-				mac_layer.stopMacLayer();
-				return;
-			}
-			Thread.sleep(20);
-		}
-		MacPacket mac_pack = mac_layer.getOnePack();
-		tic = System.nanoTime() / 1e9;
-		if (mac_pack.getType() != MacPacket.TYPE_INIT){
-			System.err.println("Error, no init received.");
-			return;
-		}
-		int length = mac_pack.getTotalLength();
-		System.out.printf(
-			"Received sending request for %d bytes.\n", 
-			length);
-
-		int pack_size = 125;
-		byte[] out_data = new byte[pack_size];
-		int r = i_file_.read(out_data, 0, pack_size);
-		short pack_cnt = 0;
-
-		int total_len = 0;
-		// Receive each and every chunk of data.
-		byte[] data = new byte[length];
-		while (total_len < length || r!= -1){
-			if (total_len < length) {
-				mac_pack = mac_layer.getOnePack();
-				byte[] chunk = mac_pack.getData();
-				total_len += chunk.length;
-				// This shouldn't cause overflow error. 
-				// But if so, let it be, so we can debug easier.
-				if (((pack_cnt+1) * chunk.length) < length){
-					System.arraycopy(chunk, 0, data, pack_cnt*chunk.length, chunk.length);
-				} else {
-					// That the data is full yet more is transfered, then we ignore the rest.
-					System.arraycopy(
-						chunk, 0, data, pack_cnt*chunk.length, length - pack_cnt * chunk.length);
-				}
-				pack_cnt += 1;
-			}
-			if (r != -1){
-				// Send it.
-				mac_layer.requestSend(out_data);
-				pack_cnt ++;
-				// Read next bunch of data.
-				r = i_file_.read(out_data, 0, pack_size);
-				Thread.sleep(20);
-			}
-		}
-////////////////////////////////////////////////////////////////////
-/*		
+		
 		Thread receive_thread = new Thread(new Runnable(){
 			public void run(){
 				try { data = receive_file(mac_layer); } catch (Exception e) { ; }
@@ -323,7 +260,7 @@ class TestMacLayer{
 		System.out.println("Receive thread stopped.");
 		
 		double toc = System.nanoTime() / 1e9;
-*/
+
 		mac_layer.stopMacLayer();
 
 		System.out.println("Time used for transmition: " + (toc - tic));
