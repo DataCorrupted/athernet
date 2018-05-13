@@ -65,7 +65,7 @@ public class MacLayer{
 	private boolean stop_ = false;
 	private final Lock mutex_ = new ReentrantLock(true);
 
-
+	public long curr = System.currentTimeMillis();
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 
@@ -183,7 +183,7 @@ public class MacLayer{
 					}
 
 					trans_.transmitOnePack(packet_array_[id].toArray());
-					
+					System.out.println(System.currentTimeMillis() - curr );
 					if (echo_){ System.err.printf("Packet #%4d sent.\n", id); }
 					packet_array_[id].setTimeStamp(curr_time);
 				} else if (
@@ -231,10 +231,10 @@ public class MacLayer{
 	}
 
 	private void receive() throws Exception{
-
 		MacPacket mac_pack;
 		while (!stop_){
 			byte[] data = recv_.receiveOnePacket();
+			curr = System.currentTimeMillis();
 			if (data.length == 0) {
 				continue;
 			} 
@@ -298,19 +298,6 @@ public class MacLayer{
 			// Mac request.
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
 				if (echo_){ 
-					double passed_time = 
-						(System.currentTimeMillis() - mac_pack.getTimestampMacping()) 
-						/ 1e3;
-					/*System.out.printf(
-						"Packet #%4d received, " + 
-						"it's a mac request packet sent at %3.2f. "+
-						"%3.2fs(0.5RTT) has passed. Estimated RTT: %3.2fs.\n",
-						mac_pack.getPacketID(), mac_pack.getTimestampMacping() / 1e9,
-						passed_time, passed_time * 2
-				);*/
-					System.out.println(mac_pack.getTimestampMacping());
-					System.out.println(System.currentTimeMillis());
-					System.out.println(passed_time);
 					System.out.printf(
 						"Packet #%4d received, it's a mac request packet.\n", 
 						mac_pack.getPacketID()
