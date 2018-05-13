@@ -121,7 +121,7 @@ public class MacPing {
         } else if (args[1].equals("-S") || args[1].equals("--server")){
             System.err.println("Server started.");
             MacLayer mac_layer_ = 
-                new MacLayer(node_config.get_src_addr(), node_config.get_dest_addr());
+                new MacLayer(node_config.get_dest_addr(), node_config.get_src_addr());
             mac_layer_.startMacLayer();
         } else {
             System.err.println("No such option.");
