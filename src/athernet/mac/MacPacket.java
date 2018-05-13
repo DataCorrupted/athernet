@@ -141,8 +141,8 @@ public class MacPacket {
         return ((type_ == TYPE_MACPING_REQST)||(type_ == TYPE_MACPING_REPLY))? timestamp_macping_: -1;
     }
 
-    public void setTimestampMacping(long timestamp_macping){
-        timestamp_macping_ = timestamp_macping;
+    public void setTimestampMacping(){
+        timestamp_macping_ = System.nanoTime();
     }
 
     public int getPacketID(){ return ((int)pack_id_) & 0xff; }
