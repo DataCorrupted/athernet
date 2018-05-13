@@ -40,9 +40,6 @@ public class MacPacket {
     // For InitRequest Packet
     private int total_length_;
 
-    // For MacPing Packet
-    private long timestamp_macping_;
-
     // Total number of packets about to be sent.
     private int pack_cnt_;
 
@@ -99,14 +96,11 @@ public class MacPacket {
     }
 
     // Constructor: build a MACPING packet
-    public MacPacket(byte dest_addr, byte src_addr, long timestamp_ns){
+    public MacPacket(byte dest_addr, byte src_addr){
         dest_addr_ = dest_addr;
         src_addr_ = src_addr;
         type_ = TYPE_MACPING_REQST;
-
-        // convert the timestamp_ into byte[]
-        timestamp_macping_ = timestamp_ns;
-        data_field_ = longToBytes(timestamp_ns);
+        data_field_ = new byte[0];
     }
 
     public void convertMacRequestToMacReply(){ 
@@ -135,18 +129,6 @@ public class MacPacket {
     // return empty array on error
     public byte[] getData(){
         return (type_ == TYPE_DATA)? data_: new byte[0];
-    }
-
-    public long getTimestampMacping(){
-        return ((type_ == TYPE_MACPING_REQST)||(type_ == TYPE_MACPING_REPLY))? timestamp_macping_: -1;
-    }
-
-    public void setTimestampMacping(){
-        timestamp_macping_ = System.currentTimeMillis();
-        data_field_ = longToBytes(timestamp_macping_);
-    }
-    public void setRTT(){
-        timestamp_macping_ = System.currentTimeMillis() - timestamp_macping_;  
     }
 
     public int getPacketID(){ return ((int)pack_id_) & 0xff; }
@@ -187,37 +169,15 @@ public class MacPacket {
     private void decodeDataField(){
         if (type_ == TYPE_ACK){
             ack_pack_id_ = data_field_[0];
-        }
-        else if (type_ == TYPE_DATA){
+        } else if (type_ == TYPE_DATA){
             data_ = new byte[data_field_.length];
             System.arraycopy(data_field_,0,data_,0,data_.length);
-        }
-        else if (type_ == TYPE_INIT){
+        } else if (type_ == TYPE_INIT){
             total_length_ = 
                 (int)((data_field_[0] & 0xFF) << 8) + (int)(data_field_[1] & 0xFF);
-        }
-        else if (type_ == TYPE_MACPING_REQST){
-            timestamp_macping_ = bytesToLong(data_field_);
-        }
-        else if (type_ == TYPE_MACPING_REPLY){
-            timestamp_macping_ = bytesToLong(data_field_);
-        }
-        else{
+        } else{
             throw new RuntimeException("Unrecognized MACPacket Type");
         }
-    }
-
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
-
-    public long bytesToLong(byte[] bytes) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.put(bytes);
-        buffer.flip();//need flip
-        return buffer.getLong();
     }
 
     public static void main(String[] args){
