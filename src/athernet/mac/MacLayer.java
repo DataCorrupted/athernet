@@ -177,10 +177,6 @@ public class MacLayer{
 						Thread.sleep(0, 5000);
 						while (recv_.hasSignal()) {Thread.sleep(backoff_time_);}
 					}
-					// Should it be a Ping packet, add a time stamp.
-					if (packet_array_[id].getType() == MacPacket.TYPE_MACPING_REQST){
-						packet_array_[id].setTimestampMacping();
-					}
 
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					System.out.println(System.currentTimeMillis() - curr );

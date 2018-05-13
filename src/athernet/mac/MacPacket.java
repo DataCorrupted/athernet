@@ -197,7 +197,7 @@ public class MacPacket {
         long timestamp_test = 12004830;
 
         // create a new package
-        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, timestamp_test );
+        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test);
         // MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, data );
 
         // for reply packet test only
@@ -233,9 +233,6 @@ public class MacPacket {
         }
         else if(pack_recv.getACKPacketID() != -1){
             System.out.println("ACKPacketID Mismatch");
-        }
-        else if (pack_recv.getTimestampMacping() != timestamp_test){
-            System.out.println("Timestamp mismatch");
         }
 //        else if(!Arrays.equals(pack_recv.getData(),data)){
 //            System.out.println("--------Data Mismatch---------");
