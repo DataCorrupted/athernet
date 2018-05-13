@@ -53,6 +53,7 @@ public class MacPing {
                 System.out.printf("packid: %d\n",packid);
 
                 // find the packet
+                Boolean found_flag = false;
                 for (int i = 0; i < sent_packs.size(); i++){
                     if (sent_packs.get(i).getPacketID() == packid){
                         // received packet found
@@ -62,8 +63,13 @@ public class MacPing {
                                 "Received packid: %d, RTT: %.9f\n", packid, rtt);
 
                         sent_packs.remove(i);
+                        found_flag = true;
                         break;
                     }
+                }
+
+                if (!found_flag){
+                    System.out.printf("No matching for received packet. PackID: %d \n", packid);
                 }
             }
 
@@ -95,14 +101,14 @@ public class MacPing {
             System.out.println("MacLayer throw exception");
         }
 
-        // while(!mac_layer_.isIdle()){
+        while(packet.getTimestampMs() == 0){
             try {
-                Thread.sleep(0, 100);
+                Thread.sleep(20);
             }
             catch (Exception exception){
                 System.out.println("Thread throw exception");
             }
-        // }
+        }
 
         // save the packet_id
 
