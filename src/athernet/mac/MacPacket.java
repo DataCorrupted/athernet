@@ -143,6 +143,7 @@ public class MacPacket {
 
     public void setTimestampMacping(){
         timestamp_macping_ = System.currentTimeMillis();
+        data_field_ = longToBytes(timestamp_macping_);
     }
     public void setRTT(){
         timestamp_macping_ = System.currentTimeMillis() - timestamp_macping_;  
@@ -240,10 +241,10 @@ public class MacPacket {
         // MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, data );
 
         // for reply packet test only
-        pack_1.convertMacRequestToMacReply();
-        byte tmp_addr = src_addr_test;
-        src_addr_test = dest_addr_test;
-        dest_addr_test = tmp_addr;
+//        pack_1.convertMacRequestToMacReply();
+//        byte tmp_addr = src_addr_test;
+//        src_addr_test = dest_addr_test;
+//        dest_addr_test = tmp_addr;
 
         pack_1.setPacketID((byte)0);
         byte[] pack_1_str = pack_1.toArray();
@@ -260,7 +261,7 @@ public class MacPacket {
         else if(pack_recv.getSrcAddr() != src_addr_test){
             System.out.println("SrcAddr Mismatch");
         }
-        else if(pack_recv.getType() != MacPacket.TYPE_MACPING_REPLY){
+        else if(pack_recv.getType() != MacPacket.TYPE_MACPING_REQST){
             System.out.println(pack_recv.type_);
             System.out.println("Type Mismatch");
         }
