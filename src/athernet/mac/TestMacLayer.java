@@ -25,9 +25,11 @@ class TestMacLayer{
 			receive_file();
 		} else if (args[0].equals("--csma-test")) {
 			if (args.length < 2) {
-				System.err.println("A TEXT01 formatted file is required to test CSMA.");
+				System.err.println("A TEXT01 formatted file is required to test CSMA. ");
+			} else if (args.length < 3) {
+				System.err.println("You need to specify who is client.");
 			} else { 
-				;//csma_test(args[1].equals("--client")); 
+				csma_test(args[1], args[2].equals("--client") || args[2].equals("-C")); 
 			}
 		} else {
 			System.err.println("No such option.");
