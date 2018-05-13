@@ -1,8 +1,6 @@
 package athernet.mac;
 
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /***
  * The package definition:
@@ -139,8 +137,8 @@ public class MacPacket {
         return (type_ == TYPE_DATA)? data_: new byte[0];
     }
 
-    public long get_timestamp_macping(){
-        return (type_ == TYPE_MACPING_REQST)? timestamp_macping_: -1;
+    public long getTimestampMacping(){
+        return ((type_ == TYPE_MACPING_REQST)||(type_ == TYPE_MACPING_REPLY))? timestamp_macping_: -1;
     }
 
     public int getPacketID(){ return ((int)pack_id_) & 0xff; }
@@ -228,8 +226,10 @@ public class MacPacket {
         // for ACK packet
         byte ack_packet_id = (byte)240;
 
+        long timestamp_test = 12004830;
+
         // create a new package
-        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, System.nanoTime() );
+        MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, timestamp_test );
         // MacPacket pack_1 = new MacPacket(dest_addr_test,src_addr_test, data );
 
         // for reply packet test only
@@ -265,6 +265,9 @@ public class MacPacket {
         }
         else if(pack_recv.getACKPacketID() != -1){
             System.out.println("ACKPacketID Mismatch");
+        }
+        else if (pack_recv.getTimestampMacping() != timestamp_test){
+            System.out.println("Timestamp mismatch");
         }
 //        else if(!Arrays.equals(pack_recv.getData(),data)){
 //            System.out.println("--------Data Mismatch---------");

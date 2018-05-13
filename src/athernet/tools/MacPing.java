@@ -43,10 +43,10 @@ public class MacPing {
                 try {
                     MacPacket received_pack = mac_layer_.getOnePack();
                     long curr_time = System.nanoTime();
-                    long rtt = curr_time - received_pack.get_timestamp_macping();
+                    long rtt = curr_time - received_pack.getTimestampMacping();
                     System.out.printf(
                         "Received packid: %d, RTT: %d\n", 
-                        received_pack.getPacketID(), rtt);
+                        received_pack.getPacketID(), (int)(rtt/1e9));
 
                     // print timeout
                     while (unconfirmed_ids.get(0) != received_pack.getPacketID()){
@@ -105,7 +105,7 @@ public class MacPing {
 
         // save the packet_id
         unconfirmed_ids.add((byte) packet.getPacketID());
-        unconfirmed_time.add(packet.get_timestamp_macping());
+        unconfirmed_time.add(packet.getTimestampMacping());
     }
 
     public static void main(String[] args) throws Exception{
