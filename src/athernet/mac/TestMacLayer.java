@@ -167,7 +167,7 @@ class TestMacLayer{
 	}
 	public static void transmit_file() throws Exception{
 		// Start the mac layer.
-		MacLayer mac_layer = new MacLayer(src_addr, dst_addr);
+		MacLayer mac_layer = new MacLayer(src_addr, dst_addr, 25);
 		mac_layer.startMacLayer();
 
 		transmit_file("./I", mac_layer);
@@ -213,7 +213,7 @@ class TestMacLayer{
 	}
 	private static byte[] data = new byte[0];
 	public static void receive_file() throws Exception{
-		MacLayer mac_layer = new MacLayer(dst_addr, src_addr);
+		MacLayer mac_layer = new MacLayer(dst_addr, src_addr, 25);
 		mac_layer.startMacLayer();
 		
 		data = receive_file(mac_layer);

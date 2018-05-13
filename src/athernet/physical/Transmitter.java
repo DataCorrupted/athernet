@@ -34,7 +34,7 @@ public class Transmitter{
 	}
 
 	public void transmitOnePack(byte[] data) throws Exception{
-		mutex_.lock();
+		//mutex_.lock();
 		// check the length of the input array
 		if (data.length > 255){
 			throw new RuntimeException(
@@ -54,7 +54,7 @@ public class Transmitter{
 		o_sound_.sound(wave);
 		// Reset CRC8
 		crc8_.reset();	
-		mutex_.unlock();
+		//mutex_.unlock();
 	}
 
 	static public void main(String[] args) throws Exception{
