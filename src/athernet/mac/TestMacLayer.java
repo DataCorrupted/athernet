@@ -231,6 +231,7 @@ class TestMacLayer{
 			mac_layer = new MacLayer(dst_addr, src_addr);
 		}
 		mac_layer.startMacLayer();
+		Thread.sleep(1000);
 		transmit_file(file, mac_layer);
 		data = receive_file(mac_layer);
 /*		
@@ -246,11 +247,7 @@ class TestMacLayer{
 		});
 
 		// Turn on csma.
-<<<<<<< HEAD
-		//mac_layer.turnCSMA();
-=======
 		// mac_layer.turnCSMA();
->>>>>>> 0a00f36b4a0473f2f3d172010863219d95f5b971
 		mac_layer.startMacLayer();
 
 		double tic = System.nanoTime() / 1e9;
