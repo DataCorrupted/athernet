@@ -231,6 +231,7 @@ class TestMacLayer{
 		}
 ///////////////////////////////////////////////////////////////////////
 		mac_layer.startMacLayer();
+		Thread.sleep(1000);
 		// Prepare file.
 		FileI i_file_ = new FileI(file, FileI.TEXT01);
 		int total_size = i_file_.getSize();
