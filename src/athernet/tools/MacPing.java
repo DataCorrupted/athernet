@@ -45,8 +45,8 @@ public class MacPing {
                     long curr_time = System.nanoTime();
                     long rtt = curr_time - received_pack.getTimestampMacping();
                     System.out.printf(
-                        "Received packid: %d, RTT: %d\n", 
-                        received_pack.getPacketID(), (int)(rtt/1e9));
+                        "Received packid: %d, RTT: %.9f\n",
+                        received_pack.getPacketID(), (rtt/1e9));
 
                     // print timeout
                     while (unconfirmed_ids.get(0) != received_pack.getPacketID()){
