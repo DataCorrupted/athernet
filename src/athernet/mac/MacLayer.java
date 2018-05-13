@@ -310,7 +310,7 @@ public class MacLayer{
 					"Packet #%4d received, I got a reply for your request.\n",
 					mac_pack.getPacketID()
 				);}
-				mac_pack.setTimestampMs(System.currentTimeMillis() - mac_pack.getTimestampMs());
+				mac_pack.setReceivedMS(System.currentTimeMillis());
 				data_q_.offer(mac_pack);
 			}
 		}
