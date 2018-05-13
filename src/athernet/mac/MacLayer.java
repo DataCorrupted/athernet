@@ -136,7 +136,8 @@ public class MacLayer{
 		// Using take, we have to wait if necessary.
 		int id = available_q_.take();
 		if (pack.getType() != MacPacket.TYPE_ACK &&
-		  pack.getType() != MacPacket.TYPE_MACPING_REPLY) {
+		  pack.getType() != MacPacket.TYPE_MACPING_REPLY && 
+		  pack.getType() != MacPacket.TYPE_MACPING_REQST) {
 			sending_list_.add(id);
 		} else {
 			sending_list_.add(0, id);
