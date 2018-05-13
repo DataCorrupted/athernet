@@ -180,7 +180,7 @@ public class MacLayer{
 					trans_.transmitOnePack(packet_array_[id].toArray());
 					if (echo_){ System.err.printf("Packet #%4d sent.\n", id); }
 					packet_array_[id].setTimeStamp(curr_time);
-					packet_array_[id].setTimestampMs(System.currentTimeMillis());
+					//packet_array_[id].setTimestampMs(System.currentTimeMillis());
 				} else if (
 				  status == MacPacket.STATUS_SENT &&
 				  curr_time - packet_array_[id].getTimeStamp() > timeout_){
