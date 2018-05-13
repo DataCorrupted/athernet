@@ -141,6 +141,7 @@ class TestMacLayer{
 			Thread.sleep(20);
 		}
 
+		Thread.sleep(1000);
 		int pack_size = 125;
 		byte[] out_data = new byte[pack_size];
 		int r = 0;
@@ -167,7 +168,7 @@ class TestMacLayer{
 	}
 	public static void transmit_file() throws Exception{
 		// Start the mac layer.
-		MacLayer mac_layer = new MacLayer(src_addr, dst_addr, 10);
+		MacLayer mac_layer = new MacLayer(src_addr, dst_addr, 50);
 		mac_layer.startMacLayer();
 
 		transmit_file("./I", mac_layer);
@@ -242,7 +243,7 @@ class TestMacLayer{
 		});
 
 		// Turn on csma.
-		mac_layer.turnCSMA();
+		// mac_layer.turnCSMA();
 		mac_layer.startMacLayer();
 
 		double tic = System.nanoTime() / 1e9;
