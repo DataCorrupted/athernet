@@ -50,11 +50,7 @@ public class MacPing {
                 System.out.println("mac_layer countDataPack != 0");
                 try {
                     MacPacket received_pack = mac_layer_.getOnePack();
-                    long rtt = received_pack.getTimestampMacping();
-                    System.out.printf("System Time: %ld", System.currentTimeMillis());
                     int packid = received_pack.getPacketID();
-                    System.out.printf(
-                        "Received packid: %d, RTT: %.9f\n", packid, (rtt/1e3));
 
                     // print timeout
                     while ((unconfirmed_ids.size() > 0) && unconfirmed_ids.get(0) != received_pack.getPacketID()){
@@ -62,6 +58,11 @@ public class MacPing {
                         unconfirmed_ids.remove(0);
                         unconfirmed_time.remove(0);
                     }
+
+                    double rtt = (System.currentTimeMillis() - unconfirmed_time.get(0))/1e3;
+
+                    System.out.printf(
+                        "Received packid: %d, RTT: %.9f\n", packid, rtt);
 
                     // remove the received one
                     unconfirmed_ids.remove(0);
