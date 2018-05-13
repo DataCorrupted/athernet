@@ -293,7 +293,7 @@ public class MacLayer{
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
 				if (echo_){ 
 					System.out.printf(
-						"Packet #%4d received, it's a mac request packet... ", 
+						"Packet #%4d received, it's a mac request packet.\n", 
 						mac_pack.getPacketID()
 					);
 				}
