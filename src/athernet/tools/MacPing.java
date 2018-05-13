@@ -52,9 +52,9 @@ public class MacPing {
                     MacPacket received_pack = mac_layer_.getOnePack();
                     long rtt = received_pack.getTimestampMacping();
                     System.out.printf("System Time: %ld", System.currentTimeMillis());
+                    int packid = received_pack.getPacketID();
                     System.out.printf(
-                        "Received packid: %d, RTT: %.9f\n",
-                        received_pack.getPacketID(), (rtt/1e3));
+                        "Received packid: %d, RTT: %.9f\n", packid, (rtt/1e3));
 
                     // print timeout
                     while ((unconfirmed_ids.size() > 0) && unconfirmed_ids.get(0) != received_pack.getPacketID()){
