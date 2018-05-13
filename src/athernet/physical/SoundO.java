@@ -38,7 +38,7 @@ public class SoundO {
 		this.setUpDevice();		
 	}
 	private void setUpDevice() throws Exception{
-		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_);
+		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_, 772);
 		
 		if (!AudioSystem.isLineSupported(this.o_info_)){
 			System.out.println(
@@ -46,7 +46,6 @@ public class SoundO {
 			throw new LineUnavailableException();
 		}
 		this.o_line_ = (SourceDataLine)AudioSystem.getLine(o_info_);
-
 		o_line_.open(this.format_);
 		// Now this is disturbing. 
 		// I should shut the lines down by calling close() in the

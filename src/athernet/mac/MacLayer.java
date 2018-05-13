@@ -241,6 +241,7 @@ public class MacLayer{
 				continue;
 			}
 
+
 			// An ACK packet.
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
