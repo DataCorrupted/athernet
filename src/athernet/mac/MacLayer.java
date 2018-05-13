@@ -171,10 +171,12 @@ public class MacLayer{
 						// By default we consider it being acked.
 						packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
 					}
-					// Sleep for 0.5ms;
 					// Backoff.
-					Thread.sleep(0, 5000);
-					while (csma_ && recv_.hasSignal()) {Thread.sleep(backoff_time_);}
+					if (csma_) {
+						// Sleep for 0.5ms;
+						Thread.sleep(0, 5000);
+						while (recv_.hasSignal()) {Thread.sleep(backoff_time_);}
+					}
 					// Should it be a Ping packet, add a time stamp.
 					if (packet_array_[id].getType() == MacPacket.TYPE_MACPING_REQST){
 						packet_array_[id].setTimestampMacping();
@@ -298,7 +300,7 @@ public class MacLayer{
 				if (echo_){ 
 					double passed_time = 
 						(System.currentTimeMillis() - mac_pack.getTimestampMacping()) 
-						/ 1e9;
+						/ 1e3;
 					/*System.out.printf(
 						"Packet #%4d received, " + 
 						"it's a mac request packet sent at %3.2f. "+
@@ -306,6 +308,8 @@ public class MacLayer{
 						mac_pack.getPacketID(), mac_pack.getTimestampMacping() / 1e9,
 						passed_time, passed_time * 2
 				);*/
+					System.out.println(mac_pack.getTimestampMacping());
+					System.out.println(System.currentTimeMillis());
 					System.out.println(passed_time);
 					System.out.printf(
 						"Packet #%4d received, it's a mac request packet.\n", 
