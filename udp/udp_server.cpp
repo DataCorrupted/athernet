@@ -2,7 +2,7 @@
 #include "UDPServer.h"
 
 int main(int argc, const char * argv[]) {
-    if (argc != 1){
+    if (argc != 2){
         std::cerr << "[ERROR] invalid usage" << std::endl;
         return 1;
     }
@@ -11,6 +11,7 @@ int main(int argc, const char * argv[]) {
 
     // create a new UDP server
     UDPServer server(server_port);
+    std::cout << "[INFO] Server started" << std::endl;
 
     // receive 10 frames
     for (int i = 0; i < 10; i++){

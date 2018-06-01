@@ -2,7 +2,7 @@
 #include "UDPClient.h"
 
 int main(int argc, const char * argv[]) {
-    if (argc != 2){
+    if (argc != 3){
         std::cerr << "[ERROR] invalid usage" << std::endl;
         return 1;
     }
