@@ -1,8 +1,16 @@
 #include <iostream>
 #include "UDPClient.h"
 
-int main() {
-    UDPClient client("127.0.0.1",8888);
+int main(int argc, const char * argv[]) {
+    if (argc != 2){
+        std::cerr << "[ERROR] invalid usage" << std::endl;
+        return 1;
+    }
+
+    std::string server_ip = std::string(argv[1]);
+    int server_port = atoi(argv[2]);
+
+    UDPClient client(server_ip,server_port);
 
     for (int i = 0; i < 10; i++){
         std::string content = "Hello world";
