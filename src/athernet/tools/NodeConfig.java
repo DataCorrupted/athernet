@@ -32,7 +32,7 @@ public class NodeConfig {
 
     public static void main(String args[]){
         NodeConfig test_config = new NodeConfig(args);
-        System.out.printf("src_addr: %d\n", test_config.get_src_addr());
-        System.out.printf("dest_addr: %d\n", test_config.get_dest_addr());
+        System.err.printf("src_addr: %d\n", test_config.get_src_addr());
+        System.err.printf("dest_addr: %d\n", test_config.get_dest_addr());
     }
 }

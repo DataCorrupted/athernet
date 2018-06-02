@@ -317,11 +317,11 @@ public class Ping {
               .append(packet.getSequenceNumber())
               .append(" ttl=").append(packet.getTTL()).append(" time=")
               .append(rtt).append(" ms");
-            System.out.println(buffer.toString());
+            System.err.println(buffer.toString());
           }
         });
 
-      System.out.println("PING " + hostname + " (" + hostaddr + ") " +
+      System.err.println("PING " + hostname + " (" + hostaddr + ") " +
                          ping.getRequestDataLength() + "(" +
                          ping.getRequestPacketLength() + ") bytes of data).");
 

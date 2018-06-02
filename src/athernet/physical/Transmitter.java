@@ -84,6 +84,6 @@ public class Transmitter{
 		transmitter.o_sound_.drain();
 		double end_time = System.nanoTime() / 1e9;
 
-		System.out.println("Time used for transmition: " + (end_time - start_time));
+		System.err.println("Time used for transmition: " + (end_time - start_time));
 	}
 }

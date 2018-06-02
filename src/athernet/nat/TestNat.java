@@ -11,7 +11,7 @@ public class TestNat {
         BufferedReader reader = new BufferedReader(file_reader);
         for(int i  = 0; i < 2; i++){
             String out = reader.readLine();
-            System.out.println(out);
+            System.err.println(out);
         }
     }
 }

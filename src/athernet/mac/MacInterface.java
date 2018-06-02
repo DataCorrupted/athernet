@@ -7,7 +7,7 @@ import java.io.*;
 class MacInterface{
 	static public void main(String[] args) throws Exception{
 		if (args.length == 0){
-			System.out.println("No input. You have to give me something!");
+			System.err.println("No input. You have to give me something!");
 		} else {
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			String line;

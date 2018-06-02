@@ -49,14 +49,14 @@ public class NatPacket {
         NatPacket recv_packet = new NatPacket(encoded_frame);
         int[] ip_recv = recv_packet.GetIP();
         for (int i = 0; i < ip_recv.length; i++){
-            System.out.println(ip_recv[i]);
+            System.err.println(ip_recv[i]);
         }
 
-        System.out.println();
+        System.err.println();
 
         byte[] recv_content = recv_packet.GetContent();
         for (int i = 0; i < recv_content.length; i++){
-            System.out.println(recv_content[i]);
+            System.err.println(recv_content[i]);
         }
     }
 
