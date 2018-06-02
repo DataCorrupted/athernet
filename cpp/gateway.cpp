@@ -48,23 +48,29 @@ void send(){
 }
 
 void receive(){
-    ReceivedData nat_pack = gateway.nat_recv();
-    int len = 4 + 2 + nat_pack.get_content.size();
-    cout << len;
+    ReceivedData received = gateway.nat_recv();
+    NatPacket nat_pack(
+        received.get_src_ip(), received.get_src_port(), received.get_content());
 
-    string data = nat_pack.encoded_frame();
+    int len = 4 + 2 + nat_pack.get_content().size();
+    
+    std::cerr << "Received a UDP packet with length: " << len << endl;
+    cout << len << " " ;
+    string data = nat_pack.encode_frame();
     for (int i=0; i<len; i++){
-        cout << (unsigned int) data[i] << " ";
+        cout << (unsigned int) (data[i] & 0xff) << " ";
     }
 }
 
 int main(int argc, char *argv[]){
     if (argc < 2) {
         std::cerr << "Please provide enough args." << endl;        
-    } else if (argv[1] == "toAthernet"){
+    } else if (std::string(argv[1]) == "toAthernet"){
         while (1){ receive(); }
-    } else if (argv[1] == "toInternet"){
+    } else if (std::string(argv[1]) == "toInternet"){
         while (1){ send(); }        
+    } else {
+        std::cerr << "Unrecognized args.\n";
     }
 
     return 0;

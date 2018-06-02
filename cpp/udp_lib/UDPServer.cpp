@@ -32,6 +32,7 @@ bool UDPServer::send_data(std::string content) {
 
 
 ReceivedData UDPServer::recv_data() {
+//    std::cerr << "[DEBUG, udp_server] start receiving" << std::endl;
     ReceivedData received_data;
     char recv_buffer[1024];
 
@@ -52,6 +53,8 @@ ReceivedData UDPServer::recv_data() {
 
     // get the client port
     received_data.set_src_port(ntohs(client_addr.sin_port));
+
+//    std::cerr << "[DEBUG, udp_server] receiving done" << std::endl;
 
     return received_data;
 }

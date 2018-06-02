@@ -8,15 +8,19 @@ import java.io.*;
 import java.util.Scanner;
 
 class MacInterface{
-	static public int getUnsignedByte(){
-		Scanner in = new Scanner(System.in);
+	public static final Scanner in = new Scanner(System.in);
+	static public int getUnsignedByte() throws Exception{
+		while (!in.hasNextInt()) { Thread.sleep(1); }
 		return in.nextInt();
 	}
 	static public void receive(MacLayer mac_layer) throws Exception{
-		int len = (getUnsignedByte() << 8) + getUnsignedByte();
+		int len = getUnsignedByte();
+		System.err.println("Received a pack with length: " + len);
+
 		byte[] data = new byte[len];
 		for (int i=0; i<len; i++){
 			data[i] = (byte) getUnsignedByte();
+			System.err.println(((int) data[i]) & 0xff);
 		}
 		mac_layer.requestSend(data);
 	}
@@ -27,13 +31,12 @@ class MacInterface{
 		System.out.print(((len & 0xff00) >> 8) + " ");
 		System.out.print((len & 0x00ff) + " ");
 
-		System.err.println();
 		for (int i=0; i<data.length; i++){
 			System.out.print((int) data[i] + " ");
 		}
 	}
 	static public void main(String[] args) throws Exception{
-		if (args.length < 1) {
+		if (args.length == 0) {
 			System.err.println("Please provide enough args.");
 		}
 		MacLayer mac_layer = new MacLayer((byte) 0x2, (byte) 0x1);
