@@ -71,7 +71,7 @@ public class NatPacket {
         for (int i = 0; i < recv_content.length; i++){
             System.err.print((char) recv_content[i]);
         }
-        System.out.println();
+        System.err.println();
     }
 
 }
