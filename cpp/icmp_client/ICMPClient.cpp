@@ -4,15 +4,14 @@
 
 #include "ICMPClient.h"
 
-static unsigned short get_identifier();
 
 ICMPClient::ICMPClient(boost::asio::io_service &io_service):socket_(io_service, icmp::v4()),
                                                             sequence_number_(0) {
-
 }
 
 bool ICMPClient::send_data(std::string ip, std::string content) {
     send_icmp(ip,content);
+    return true;
 }
 
 void ICMPClient::send_icmp(std::string ip, std::string body) {
@@ -77,7 +76,7 @@ ReceivedData ICMPClient::recv_icmp() {
 }
 
 
-static unsigned short get_identifier()
+unsigned short get_identifier()
 {
 #if defined(BOOST_WINDOWS)
     return static_cast<unsigned short>(::GetCurrentProcessId());

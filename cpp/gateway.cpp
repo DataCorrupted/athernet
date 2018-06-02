@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Gateway gateway;
+Gateway gateway(false);
 
 int getUnsignedByte(){
     int tmp;
