@@ -11,15 +11,14 @@
 class Gateway {
 
 public:
-    Gateway(std::string ip, int port);
+    Gateway();
+    ~Gateway();
 
     // send out the nat frame by UDP after receiving it
-    bool nat_send(std::string encoded_frame);
+    bool nat_send(std::string ip, int port, std::string content);
 
 private:
-    UDPClient client_;
-    std::string server_ip_;
-    int server_port_;
+    UDPClient * client_;
 
 };
 
