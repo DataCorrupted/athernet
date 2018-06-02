@@ -47,9 +47,24 @@ void send(){
     gateway.nat_send(nat_pack.get_ip(), nat_pack.get_port(), nat_pack.get_content());
 }
 
+void receive(){
+    ReceivedData nat_pack = gateway.nat_recv();
+    int len = 4 + 2 + nat_pack.get_content.size();
+    cout << len;
+
+    string data = nat_pack.encoded_frame();
+    for (int i=0; i<len; i++){
+        cout << (unsigned int) data[i] << " ";
+    }
+}
+
 int main(int argc, char *argv[]){
-    while (1){
-        send();
+    if (argc < 2) {
+        std::cerr << "Please provide enough args." << endl;        
+    } else if (argv[1] == "toAthernet"){
+        while (1){ receive(); }
+    } else if (argv[1] == "toInternet"){
+        while (1){ send(); }        
     }
 
     return 0;

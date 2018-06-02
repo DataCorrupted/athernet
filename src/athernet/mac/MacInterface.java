@@ -5,14 +5,18 @@ import athernet.mac.MacPacket;
 
 import athernet.nat.NatPacket;
 import java.io.*;
+import java.util.Scanner;
 
 class MacInterface{
-	public void receive(MacLayer mac_layer) throws Exception{
-		byte c = (byte) System.in.read();
-		int len = c << 8 + (int) (System.in.read() & 0xff);
+	static public int getUnsignedByte(){
+		Scanner in = new Scanner(System.in);
+		return in.nextInt();
+	}
+	static public void receive(MacLayer mac_layer) throws Exception{
+		int len = (getUnsignedByte() << 8) + getUnsignedByte();
 		byte[] data = new byte[len];
 		for (int i=0; i<len; i++){
-			data[i] = (byte) (System.in.read() & 0xff);
+			data[i] = (byte) getUnsignedByte();
 		}
 		mac_layer.requestSend(data);
 	}
@@ -26,18 +30,27 @@ class MacInterface{
 		System.err.println();
 		for (int i=0; i<data.length; i++){
 			System.out.print((int) data[i] + " ");
-			System.err.print("Java gives: " + data[i] + "\n");
 		}
 	}
 	static public void main(String[] args) throws Exception{
+		if (args.length < 1) {
+			System.err.println("Please provide enough args.");
+		}
 		MacLayer mac_layer = new MacLayer((byte) 0x2, (byte) 0x1);
 		mac_layer.startMacLayer();
 
-		for (int i=0; i<50; i++){
-			byte[] data = mac_layer.getOnePack().getData();
-			send(data);
+		if (args[0].equals("toInternet")) {
+			while (true){
+				byte[] data = mac_layer.getOnePack().getData();
+				send(data);
+			}
+		} else if (args[0].equals("toAthernet")){
+			while (true){
+				receive(mac_layer);
+			}
+		} else {
+			System.err.println("Unrecognized argument.")
 		}
-
 		mac_layer.stopMacLayer();
 	}
 }
