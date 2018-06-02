@@ -33,6 +33,7 @@ int main(int argc, const char * argv[]){
 
         // send out the data
         client.send_data(line);
+        std::cerr << "[INFO] data sent" << std::endl;
     }
 
     return 0;
