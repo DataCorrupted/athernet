@@ -10,6 +10,8 @@
 #include <cstring>
 #include <cerrno>
 
+#include "ReceivedData.h"
+
 class UDPClient {
 public:
     UDPClient(std::string ip, int port);
@@ -17,7 +19,7 @@ public:
 
     bool send_data(std::string content);
 
-    std::string recv_data();
+    ReceivedData recv_data();
 
 private:
     int socket_;

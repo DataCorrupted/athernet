@@ -29,3 +29,28 @@ bool UDPClient::send_data(std::string content) {
     }
     return true;
 }
+
+ReceivedData UDPClient::recv_data() {
+    ReceivedData received_data;
+    char recv_buffer[1024];
+
+    // receive data
+    struct sockaddr_in client_addr;
+    int client_len = sizeof(client_addr);
+    unsigned long recv_len = (unsigned long) recvfrom(socket_, recv_buffer, sizeof(recv_buffer),
+                                                      0,(struct sockaddr *) &client_addr,(socklen_t *)&client_len);
+
+    // get the content
+    std::string recv_content = std::string(recv_buffer, recv_len);
+    received_data.set_content(recv_content);
+
+    // get the client ip
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, INET_ADDRSTRLEN);
+    received_data.set_src_ip(client_ip);
+
+    // get the client port
+    received_data.set_src_port(ntohs(client_addr.sin_port));
+
+    return received_data;
+}
