@@ -1,9 +1,6 @@
 #ifndef UDP_RECEIVEDDATA_H
 #define UDP_RECEIVEDDATA_H
 
-#endif //UDP_RECEIVEDDATA_H
-
-
 class ReceivedData{
 public:
     ReceivedData(){
@@ -24,3 +21,5 @@ private:
     int src_port_;
     std::string content_;
 };
+
+#endif //UDP_RECEIVEDDATA_H

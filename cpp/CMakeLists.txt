@@ -16,5 +16,6 @@ include_directories(gateway)
 add_executable(udp_client udp_client.cpp ${UDP_SRC} ${NAT_SRC})
 add_executable(udp_server udp_server.cpp ${UDP_SRC} ${NAT_SRC})
 add_executable(gateway gateway.cpp ${UDP_SRC} ${NAT_SRC} ${GATE_SRC})
+# add_executable(nat_client nat_client.cpp)
 
 add_executable(nat_test test/nat_test.cpp ${NAT_SRC})

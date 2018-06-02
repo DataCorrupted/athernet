@@ -6,7 +6,6 @@
 #include <iostream>
 #include <cassert>
 #include <unistd.h>
-
 #include "Gateway.h"
 
 using namespace std;
