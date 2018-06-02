@@ -22,8 +22,8 @@ class MacInterface{
 	}
 
 	static public void send(byte[] data) throws Exception{
+		// Send the length first.
 		int len = data.length;
-
 		System.out.print(((len & 0xff00) >> 8) + " ");
 		System.out.print((len & 0x00ff) + " ");
 
@@ -40,16 +40,16 @@ class MacInterface{
 		mac_layer.startMacLayer();
 
 		if (args[0].equals("toInternet")) {
-			while (true){
+			for (int i=0; i<50; i++){
 				byte[] data = mac_layer.getOnePack().getData();
 				send(data);
 			}
 		} else if (args[0].equals("toAthernet")){
-			while (true){
+			for (int i=0; i<50; i++){
 				receive(mac_layer);
 			}
 		} else {
-			System.err.println("Unrecognized argument.")
+			System.err.println("Unrecognized argument.");
 		}
 		mac_layer.stopMacLayer();
 	}

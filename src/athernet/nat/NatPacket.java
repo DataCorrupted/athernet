@@ -44,8 +44,17 @@ public class NatPacket {
         return out;
     }
 
+    public String getIPString(){
+        int[] ip = getIPByteArray();
+        return ip[0] + "." + ip[1] + "." + ip[2] + "." + ip[3];
+    }
+
     public byte[] getContent(){
         return content_;
+    }
+
+    public String getContentString(){
+        return new String(content_);
     }
 
     public int getPort(){ return port_; }
