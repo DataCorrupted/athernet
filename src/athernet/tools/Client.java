@@ -24,8 +24,7 @@ class Client{
 			nat_packet = new NatPacket(addr, 16384, line.getBytes());
 			mac_layer.requestSend(nat_packet.toArray());
 		}
-
-		mac_layer.stopMacLayer();
+		Thread.sleep(1000);
 	}
 
 	static public void pingUsingICMP(

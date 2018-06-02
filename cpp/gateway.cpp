@@ -43,15 +43,6 @@ void send(){
 }
 
 int main(int argc, char *argv[]){
-    string str;
-    putchar(argc);
-    char c;
-    cerr << "I am cpp. I received a str from Java:\n  ";
-    for (int i=0; i<3; i++){
-        cerr << getchar() << " ";
-    }
-    cerr << endl;
-
     while (1){
         send();
     }
