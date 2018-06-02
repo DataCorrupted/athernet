@@ -20,12 +20,13 @@ class MacInterface{
 	static public void send(byte[] data) throws Exception{
 		int len = data.length;
 
-		System.out.write(((len & 0xff00) >> 8));
-		System.out.write((len & 0x00ff));
+		System.out.print(((len & 0xff00) >> 8) + " ");
+		System.out.print((len & 0x00ff) + " ");
 
 		System.err.println();
 		for (int i=0; i<data.length; i++){
-			System.out.write(data[i]);
+			System.out.print((int) data[i] + " ");
+			System.err.print("Java gives: " + data[i] + "\n");
 		}
 	}
 	static public void main(String[] args) throws Exception{

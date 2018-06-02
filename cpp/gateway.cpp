@@ -13,8 +13,9 @@ using namespace std;
 Gateway gateway;
 
 int getUnsignedByte(){
-    int tmp = getchar() & 0xff;
-    return tmp;
+    int tmp;
+    cin >> tmp;
+    return tmp & 0xff;
 }
 void send(){
     // Receive a pack from athernet.
