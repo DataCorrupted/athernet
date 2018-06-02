@@ -7,28 +7,17 @@ import athernet.nat.NatPacket;
 import java.io.*;
 
 class MacInterface{
-	private byte src_addr_;
-	private byte dst_addr_;
-	private MacLayer mac_layer_;
-
-	public MacInterface(byte src, byte dst) throws Exception{
-		src_addr_ = src;
-		dst_addr_ = dst;
-		mac_layer_ = new MacLayer(src_addr_, dst_addr_);
-	} 
-	public void send() throws Exception{
+	public void receive(MacLayer mac_layer) throws Exception{
 		byte c = (byte) System.in.read();
 		int len = c << 8 + (int) (System.in.read() & 0xff);
 		byte[] data = new byte[len];
 		for (int i=0; i<len; i++){
 			data[i] = (byte) (System.in.read() & 0xff);
 		}
-		mac_layer_.requestSend(data);
+		mac_layer.requestSend(data);
 	}
 
-	public void receive() throws Exception{
-		MacPacket mac_pack = mac_layer_.getOnePack();
-		byte[] data = mac_pack.getData();
+	static public void send(byte[] data) throws Exception{
 		int len = data.length;
 
 		System.out.print((char) ((len & 0xff00) >> 8));
@@ -39,16 +28,14 @@ class MacInterface{
 		}
 	}
 	static public void main(String[] args) throws Exception{
-		if (args.length == 0){
-			System.err.println("No input. You have to give me something!");
-		} else {
-			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			char c = (char) System.in.read();
-			System.err.println("I am Java, I received a str from cpp:\n  " + (int)c);
-			for (int i=0; i<args.length; i++){
-				System.out.print(((char) i));
-			}
-			System.out.println();
+		MacLayer mac_layer = new MacLayer((byte) 0x2, (byte) 0x1);
+		mac_layer.startMacLayer();
+
+		for (int i=0; i<50; i++){
+			byte[] data = mac_layer.getOnePack().getData();
+			send(data);
 		}
+
+		mac_layer.stopMacLayer();
 	}
 }
