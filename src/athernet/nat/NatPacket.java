@@ -20,8 +20,14 @@ public class NatPacket {
 
     public NatPacket(byte[] encoded_data){
         ip_ = new byte[4];
-        port_ = ((((int) encoded_data[4]) & 0xff) << 8) + ((int) encoded_data[5]) & 0xff;
+        port_ = ((((int) encoded_data[4]) & 0xff) << 8) + (((int) encoded_data[5]) & 0xff);
         content_ = new byte[encoded_data.length - 6];
+
+        System.err.println("[DEBUG, NatPacket.java]");
+        System.err.println(encoded_data[4]);
+        System.err.println(encoded_data[5]);
+        System.err.println(port_);
+
 
         System.arraycopy(encoded_data,0,ip_,0,ip_.length);
         System.arraycopy(encoded_data,6,content_,0,content_.length);
