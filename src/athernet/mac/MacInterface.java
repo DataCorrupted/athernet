@@ -20,7 +20,6 @@ class MacInterface{
 		byte[] data = new byte[len];
 		for (int i=0; i<len; i++){
 			data[i] = (byte) getUnsignedByte();
-			System.err.println(((int) data[i]) & 0xff);
 		}
 		mac_layer.requestSend(data);
 	}
