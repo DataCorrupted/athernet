@@ -20,6 +20,17 @@ UDPServer::~UDPServer() {
     close(socket_);
 }
 
+bool UDPServer::send_data(std::string content) {
+    if (send(socket_, content.c_str(), content.length(), 0) == -1) {
+        std::cerr << "send failed" << std::endl;
+        std::cerr << strerror(errno) << std::endl;
+        return false;
+    }
+    return true;
+}
+
+
+
 ReceivedData UDPServer::recv_data() {
     ReceivedData received_data;
     char recv_buffer[1024];
