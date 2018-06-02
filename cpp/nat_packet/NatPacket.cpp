@@ -25,7 +25,7 @@ NatPacket::NatPacket(std::string encoded_frame) {
         }
     }
 
-    port_ = (((int)encoded_frame[4] & 0xFF) << 8) + ((int)encoded_frame[5] & 0xFF);
+    port_ = (((unsigned int)encoded_frame[4] & 0xFF) << 8) + ((unsigned int)encoded_frame[5] & 0xFF);
 
     content_ = std::string(encoded_frame,6,encoded_frame.length()-6);
 }
@@ -53,8 +53,8 @@ std::string NatPacket::encode_frame() {
         }
     }
 
-    int port_high = ((port_  >> 8) & 0xFF);
-    int port_low = port_ & 0xFF;
+    unsigned int port_high = ((port_  >> 8) & 0xFF);
+    unsigned int port_low = port_ & 0xFF;
 
     out.push_back((char)port_high);
     out.push_back((char)port_low);
@@ -67,7 +67,7 @@ std::string NatPacket::get_content() {
     return content_;
 }
 
-int NatPacket::get_port() {
+unsigned int NatPacket::get_port() {
     return port_;
 }
 

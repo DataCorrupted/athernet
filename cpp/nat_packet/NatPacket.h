@@ -18,13 +18,13 @@ public:
     std::string encode_frame();
 
     std::string get_ip();
-    int get_port();
+    unsigned int get_port();
     std::string get_content();
 
 private:
 
     std::string ip_;
-    int port_;
+    unsigned int port_;
     std::string content_;
 
 };
