@@ -53,7 +53,7 @@ public class NatPacket {
     public static void main(String args[]){
         int[] ip_test = {192, 168, 1, 2};
         int port = 8888;
-        byte[] content_test = {'6','7','U','I','7','8'};
+        byte[] content_test = {'6', 0x25, (byte)0xf8, 0x02, 0x11,'8', (byte)0xff, 0x00};
         NatPacket test_packet = new NatPacket(ip_test, port, content_test);
         byte[] encoded_frame = test_packet.toArray();
 
