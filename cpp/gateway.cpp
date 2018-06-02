@@ -54,7 +54,10 @@ void receive(){
 
     int len = 4 + 2 + nat_pack.get_content().size();
     
-    std::cerr << "Received a UDP packet with length: " << len << endl;
+    std::cerr 
+        << "Received a UDP packet from " 
+        << received.get_src_ip() << ":" << received.get_src_port() 
+        << " with length: " << len << endl;
     cout << len << " " ;
     string data = nat_pack.encode_frame();
     for (int i=0; i<len; i++){
