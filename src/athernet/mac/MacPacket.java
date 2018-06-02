@@ -249,38 +249,38 @@ public class MacPacket {
         MacPacket pack_recv = new MacPacket(pack_1_str);
 
         for (int i = 0; i < pack_1_str.length; i++) {
-            System.out.println(String.format("%02X ", pack_1_str[i]));
+            System.err.println(String.format("%02X ", pack_1_str[i]));
         }
 
         if (pack_recv.getDestAddr() != dest_addr_test){
-            System.out.println("DestAddr Mismatch");
+            System.err.println("DestAddr Mismatch");
         }
         else if(pack_recv.getSrcAddr() != src_addr_test){
-            System.out.println("SrcAddr Mismatch");
+            System.err.println("SrcAddr Mismatch");
         }
         else if(pack_recv.getType() != MacPacket.TYPE_MACPING_REQST){
-            System.out.println(pack_recv.type_);
-            System.out.println("Type Mismatch");
+            System.err.println(pack_recv.type_);
+            System.err.println("Type Mismatch");
         }
         else if(pack_recv.getPacketID() != 0){
-            System.out.println("PacketID Mismatch");
+            System.err.println("PacketID Mismatch");
         }
         else if(pack_recv.getTotalLength() != -1){
-            System.out.println("TotalLength Mismatch");
+            System.err.println("TotalLength Mismatch");
         }
         else if(pack_recv.getACKPacketID() != -1){
-            System.out.println("ACKPacketID Mismatch");
+            System.err.println("ACKPacketID Mismatch");
         }
 //        else if(!Arrays.equals(pack_recv.getData(),data)){
-//            System.out.println("--------Data Mismatch---------");
+//            System.err.println("--------Data Mismatch---------");
 //            byte[] tmp = pack_recv.getData();
 //            for (int i = 0; i < tmp.length; i++){
-//                System.out.println(tmp[i]);
+//                System.err.println(tmp[i]);
 //            }
-//            System.out.println("Data Mismatch");
+//            System.err.println("Data Mismatch");
 //        }
         else {
-            System.out.println("Success");
+            System.err.println("Success");
         }
     }
 }

@@ -102,20 +102,20 @@ public class MacLayer{
 	public int getStatus(){ return status_; }
 	public void startMacLayer(){
 		recv_thread_.start();
-		System.out.println("\nThread receive() started.");
+		System.err.println("\nThread receive() started.");
 		recv_.startReceive();
-		System.out.println("Thread record() started.");
+		System.err.println("Thread record() started.");
 		send_thread_.start();
-		System.out.println("Thread send() started.\n");
+		System.err.println("Thread send() started.\n");
 	}
 	public void stopMacLayer() throws Exception{ 
 		stop_ = true; 
 		recv_thread_.join();
-		System.out.println("\nThread receive() finished.");
+		System.err.println("\nThread receive() finished.");
 		recv_.stopReceive();
-		System.out.println("Thread record() finished.");
+		System.err.println("Thread record() finished.");
 		send_thread_.join();
-		System.out.println("Thread send() finished.\n");
+		System.err.println("Thread send() finished.\n");
 	}
 
 	// Send data pack.
@@ -213,7 +213,7 @@ public class MacLayer{
 			if (packet_array_[head].getResendCounter() == max_resend_){
 				packet_array_[head].setStatus(MacPacket.STATUS_LOST);
 				status_ = MacLayer.LINKERR;
-				System.out.printf(
+				System.err.printf(
 					"Packet #%4d cannot be delivered due to link error.\n", 
 					packet_array_[head].getPacketID());
 			}
@@ -234,8 +234,8 @@ public class MacLayer{
 				continue;
 			} 
 			mac_pack = new MacPacket(data);
-			//System.out.println(mac_pack.getDestAddr() + " "  +  mac_pack.getSrcAddr());
-			//System.out.println(src_addr_ + " "  +  dst_addr_);
+			//System.err.println(mac_pack.getDestAddr() + " "  +  mac_pack.getSrcAddr());
+			//System.err.println(src_addr_ + " "  +  dst_addr_);
 
 			// Meaning this is sender's receiver.
 			if (mac_pack.getDestAddr() != src_addr_ 
@@ -247,7 +247,7 @@ public class MacLayer{
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
-				if (echo_) { System.out.printf(
+				if (echo_) { System.err.printf(
 					"Packet #%4d ACK received.\n",
 					mac_pack.getACKPacketID()
 				);}
@@ -255,7 +255,7 @@ public class MacLayer{
 			// Data or Init.
 			} else if (mac_pack.getType() == MacPacket.TYPE_INIT ||
 			  mac_pack.getType() == MacPacket.TYPE_DATA){
-				if (echo_){ System.out.printf(
+				if (echo_){ System.err.printf(
 					"Packet #%4d received.", mac_pack.getPacketID()); 
 				}
 				// Throws it away if the queue if full.
@@ -268,7 +268,7 @@ public class MacLayer{
 							(byte) mac_pack.getPacketID()
 					));
 
-					if (echo_) { System.out.printf(
+					if (echo_) { System.err.printf(
 						"Packet type %s confirmed. ACK packet #%d sending.\n", 
 						(mac_pack.getType() == MacPacket.TYPE_INIT) ? 
 							"Init": "Data",
@@ -289,14 +289,14 @@ public class MacLayer{
 						}
 					}
 				} else {
-					System.out.println(
+					System.err.println(
 						"Data queue is full, ignoring this packet.");
 				}
 
 			// Mac request.
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
 				if (echo_){ 
-					System.out.printf(
+					System.err.printf(
 						"Packet #%4d received, it's a mac request packet.\n", 
 						mac_pack.getPacketID()
 					);
@@ -306,7 +306,7 @@ public class MacLayer{
 
 			// Mac reply. 
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REPLY) {
-				if (echo_) { System.out.printf(
+				if (echo_) { System.err.printf(
 					"Packet #%4d received, I got a reply for your request.\n",
 					mac_pack.getPacketID()
 				);}

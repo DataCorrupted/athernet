@@ -101,21 +101,21 @@ public class CheckIO{
 			if (args[i].equals("-i")){
 				i++;
 				if (i==args.length){
-					System.out.println("No file given. Quit.");
+					System.err.println("No file given. Quit.");
 				}
 				i_file = args[i];
 			} else if (args[i].equals("-o")){
 				i++;
 				if (i==args.length){
-					System.out.println("No file given. Quit.");
+					System.err.println("No file given. Quit.");
 				}
 				o_file = args[i];
 			} else {
-				System.out.println("No such command.\n -i <ground-truth>\n -o <your-file>");
+				System.err.println("No such command.\n -i <ground-truth>\n -o <your-file>");
 			}
 			i++;
 		}
 		CheckIO c = new CheckIO(i_file, o_file);
-		System.out.println(c.summary());
+		System.err.println(c.summary());
 	}
 }

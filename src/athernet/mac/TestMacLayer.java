@@ -57,7 +57,7 @@ class TestMacLayer{
 			return;
 		}
 		int length = mac_pack.getTotalLength();
-		System.out.printf(
+		System.err.printf(
 			"Received sending request for %d bytes.\n", 
 			length);
 
@@ -77,14 +77,14 @@ class TestMacLayer{
 		double toc = System.nanoTime() / 1e9;
 
 		String received_str = new String(data);
-		System.out.println(
+		System.err.println(
 			"Receiving completed. You should receive the following sentence: \n");
-		System.out.println(test_str_);
-		System.out.println("\nYou received: \n");
-		System.out.println(received_str + "\n");
+		System.err.println(test_str_);
+		System.err.println("\nYou received: \n");
+		System.err.println(received_str + "\n");
 
 		Thread.sleep(3000);
-		System.out.printf("Transmition took: %3.3fs\n", (toc - tic));
+		System.err.printf("Transmition took: %3.3fs\n", (toc - tic));
 		mac_layer.stopMacLayer();
 	}
 	public static void transmit_test() throws Exception{
@@ -174,7 +174,7 @@ class TestMacLayer{
 		transmit_file("./I", mac_layer);
 
 		mac_layer.stopMacLayer();
-		System.out.println("Time used for transmition: " + (toc - tic));
+		System.err.println("Time used for transmition: " + (toc - tic));
 	}
 
 	public static byte[] receive_file(MacLayer mac_layer) throws Exception{		
@@ -186,7 +186,7 @@ class TestMacLayer{
 			return new byte[0];
 		}
 		int length = mac_pack.getTotalLength();
-		System.out.printf(
+		System.err.printf(
 			"Received sending request for %d bytes.\n", 
 			length);
 		// Receive each and every chunk of data.
@@ -220,7 +220,7 @@ class TestMacLayer{
 		data = receive_file(mac_layer);
 
 		mac_layer.stopMacLayer();
-		System.out.println("Time used for transmition: " + (toc - tic));
+		System.err.println("Time used for transmition: " + (toc - tic));
 		saveAndCheckData();	
 	}
 	public static void csma_test(String file, boolean is_client) throws Exception{
@@ -253,22 +253,22 @@ class TestMacLayer{
 		double tic = System.nanoTime() / 1e9;
 
 		receive_thread.start();
-		System.out.println("Receive thread started.");
+		System.err.println("Receive thread started.");
 		// Wait for the other side to start 
 		Thread.sleep(1000);
 		transmit_thread.start();
-		System.out.println("Transmit thread started.");
+		System.err.println("Transmit thread started.");
 
 		transmit_thread.join();
-		System.out.println("Transmit thread stoped.");
+		System.err.println("Transmit thread stoped.");
 		receive_thread.join();
-		System.out.println("Receive thread stopped.");
+		System.err.println("Receive thread stopped.");
 		
 		double toc = System.nanoTime() / 1e9;
 */
 		mac_layer.stopMacLayer();
 
-		System.out.println("Time used for transmition: " + (toc - tic));
+		System.err.println("Time used for transmition: " + (toc - tic));
 		saveAndCheckData();
 	}
 
@@ -282,6 +282,6 @@ class TestMacLayer{
 		FileO o_file = new FileO("./O", FileO.TEXT01);
 		o_file.write(data, 0, data.length);
 		CheckIO checker = new CheckIO();
-		System.out.println(checker.summary());	
+		System.err.println(checker.summary());	
 	}
 }

@@ -86,7 +86,7 @@ public class Receiver{
 			// I suppose to get a full length packet, 
 			// but something unexpected happened.
 			if (echo_) {
-				System.out.println(
+				System.err.println(
 					"No packet found, possibly time out when waiting for one.");
 			}
 			return new byte[0];
@@ -96,7 +96,7 @@ public class Receiver{
 		byte[] rcvd_data;
 		if ((byte) crc8_.getValue() == i_stream[0]){
 			if (echo_) {
-				System.out.printf("Packet #%4d received.\n", ((int) i_stream[1]) & 0xff);
+				System.err.printf("Packet #%4d received.\n", ((int) i_stream[1]) & 0xff);
 			}
 			rcvd_data = new byte[i_stream.length -1];
 			System.arraycopy(i_stream, 1, rcvd_data, 0, rcvd_data.length);
@@ -104,7 +104,7 @@ public class Receiver{
 			// No useful byte in a broken pack.
 			rcvd_data = new byte[0];
 			if (echo_) {
-				System.out.printf(
+				System.err.printf(
 					"Failed to receive packet. CRC8 checksum wrong.\n");
 			}
 		}
@@ -127,7 +127,7 @@ public class Receiver{
 		o_file.write(f, 0, f.length);
 
 		CheckIO checker = new CheckIO();
-		System.out.println(checker.summary());
+		System.err.println(checker.summary());
 	}
 	private byte[] testReceive(int byte_cnt, double timeout) throws Exception{
 		byte[] frame = new byte[byte_cnt];

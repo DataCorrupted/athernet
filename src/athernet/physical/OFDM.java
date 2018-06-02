@@ -100,10 +100,10 @@ public class OFDM{
 		packet_ = new byte[0];
 
 //		if ((c & 0x1) == 1){
-//			System.out.println("Warn[OFDM.OFDM(double, double, double)]: odd channel count given.");
+//			System.err.println("Warn[OFDM.OFDM(double, double, double)]: odd channel count given.");
 //		}
 		if (start_frequency+bandwidth > MAXFREQ || start_frequency < MINFREQ){
-			System.out.println("Warn[OFDM.OFDM(double, double, double)]: illegal bandwidth and frequency given.");
+			System.err.println("Warn[OFDM.OFDM(double, double, double)]: illegal bandwidth and frequency given.");
 		} 
 		freq_arr_ = new double[channel_cnt_];
 		carrier_arr_ = new double[channel_cnt_][bit_len_];
@@ -183,7 +183,7 @@ public class OFDM{
 			processing_header_.add(sample);
 			if (checkSyncHeader()){
 				state_ ++;                  // next state
-//                System.out.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
+//                System.err.println("sync_header check passed once, entering confirming state. at bit: " + bit_counter_);
 				return CNFIRMING;
 			}
 			return NOTHING;
@@ -197,7 +197,7 @@ public class OFDM{
 
 			// call for recheck
 			if (checkSyncHeader()){
-//				System.out.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
+//				System.err.println("\tHeader reconfirmed at bit: " + bit_counter_ + " " + (bit_counter_ - last_bit_counter_));
 				last_bit_counter_ = bit_counter_;
 				unconfirmed_data_.clear();
 				count_down_ = init_count_down_;
@@ -217,7 +217,7 @@ public class OFDM{
 				processing_header_.clear();
 
 				// change state
-                //System.out.println("Header confirmed, goto receiving data");
+                //System.err.println("Header confirmed, goto receiving data");
 				state_ ++;
 			}
 			return (state_ == CNFIRMING)? CNFIRMING: RCVINGDAT;
@@ -245,7 +245,7 @@ public class OFDM{
 				return RCVINGDAT;               // not enough data to decode
 			}
 
-//            System.out.println("Get all data, start demodulation");
+//            System.err.println("Get all data, start demodulation");
 			// decode the waveform to get the bits
 			// process and clear the buffer
 			state_ = 0;
@@ -374,7 +374,7 @@ public class OFDM{
 	// @output: a^Tb
 	private double dot(double[] a, double[] b){
 		if (a.length != b.length){
-			System.out.println("Warning[OFDM.dot(double[], double[])]: the length of arrays differ.");
+			System.err.println("Warning[OFDM.dot(double[], double[])]: the length of arrays differ.");
 			return 0;
 		}
 		double sum = 0;
@@ -494,7 +494,7 @@ public class OFDM{
 
 		byte[] recv_dat = ofdm.getPacket();
 		for (int i=0; i<data.length; i++){
-			System.out.println(recv_dat[i] + " " + data[i] + " " + (recv_dat[i] == data[i]));
+			System.err.println(recv_dat[i] + " " + data[i] + " " + (recv_dat[i] == data[i]));
 		}
 
 	}
