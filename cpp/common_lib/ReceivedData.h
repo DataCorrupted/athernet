@@ -1,6 +1,10 @@
 #ifndef UDP_RECEIVEDDATA_H
 #define UDP_RECEIVEDDATA_H
 
+/*
+ * port: 0 stands for ICMP
+ */
+
 class ReceivedData{
 public:
     ReceivedData(){
