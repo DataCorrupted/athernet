@@ -6,7 +6,7 @@
 
 int main(int argc, const char * argv[]){
     // create one nat packet
-    std::string ip_test = "192.0.0.1";
+    std::string ip_test = "10.20.207.255";
     int port_test = 8888;
     std::string content_test = "Hello world";
     NatPacket natpack(ip_test,port_test,content_test);

@@ -13,7 +13,7 @@ using namespace std;
 Gateway gateway;
 
 int getUnsignedByte(){
-    int tmp = (int)(getchar() & 0xff);
+    int tmp = getchar() & 0xff;
     return tmp;
 }
 void send(){
@@ -21,7 +21,7 @@ void send(){
     int len = (getUnsignedByte() << 8) + getUnsignedByte();
     int data[len];
     for (int i=0; i<len; i++){
-        data[len] = getUnsignedByte();
+        data[i] = getUnsignedByte();
     }
 
     // convert int to std::string
@@ -38,6 +38,7 @@ void send(){
     // Port: data[4] << 8 + data[5]
     // Data: data[6:]
     NatPacket nat_pack(encoded_frame);
+    std::cerr << nat_pack.get_ip() << std::endl;
 
     std::cerr << "[DEBUG, gateway] decode NAT compelted" << std::endl;
 
