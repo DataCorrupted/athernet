@@ -5,20 +5,36 @@
 #include "Gateway.h"
 
 
-Gateway::Gateway(bool is_icmp): client_(NULL), server_(NULL), icmp_client_(NULL), is_icmp_(is_icmp) {
-    if (!is_icmp){
-        // initialize a UDP server on port 8889 (if it is not icmp_server)
-        server_ = new UDPServer(8889);
+Gateway::Gateway(bool is_icmp, bool is_tcp): udp_client_(NULL), udp_server_(NULL), icmp_client_(NULL), is_icmp_(is_icmp) {
+    if (is_icmp){
+        // ICMP need to call init_icmp
+        return;
+    }
+    else{
+        if (!is_tcp){
+            udp_server_ = new UDPServer(8889);
+        }
+        else{
+            tcp_server_ = new TCPServer(8889);
+        }
     }
 }
 
 Gateway::~Gateway() {
-    if (client_ != NULL){
-        delete client_;
+    if (udp_client_ != NULL){
+        delete udp_client_;
     }
 
-    if (server_ != NULL){
-        delete server_;
+    if (udp_server_ != NULL){
+        delete udp_server_;
+    }
+
+    if (tcp_client_ != NULL){
+        delete tcp_client_;
+    }
+
+    if (tcp_server_ != NULL){
+        delete tcp_server_;
     }
 
     if (icmp_client_ != NULL){
@@ -37,26 +53,40 @@ void Gateway::icmp_init(boost::asio::io_service &io_service) {
 bool Gateway::nat_send(std::string ip, int port, std::string content) {
     // TODO: check if the packet is ICMP packet
     if (port == 0){
+        // deal with ICMP
         std::cerr << "[DEBUG, Gateway.cpp] Sending ICMP Packet." << std::endl;
         icmp_client_->send_data(ip,content);
         std::cerr << "[DEBUG, Gateway.cpp] ICMP Packet Sent." << std::endl;
     }
     else{
-        // deal with UDP
-        // if client has not been initialized, initialize it now
-        if (client_ == NULL){
-            client_ = new UDPClient(ip,port);
+        if (!is_tcp_) {
+            // deal with UDP
+            // if client has not been initialized, initialize it now
+            if (udp_client_ == NULL) {
+                udp_client_ = new UDPClient(ip, port);
+            }
+            return udp_client_->send_data(content);
         }
-        return client_->send_data(content);
+        else{
+            // deal with UDP
+            // if client has not been initialized, initialize it now
+            if (tcp_client_ == NULL) {
+                tcp_client_ = new TCPClient(ip, port);
+            }
+            return tcp_client_->send_data(content);
+        }
     }
 }
 
 ReceivedData Gateway::nat_recv() {
 //    std::cerr << "[DEBUG, nat_recv] nat_recv got called once" << std::endl;
-    if (!is_icmp_) {
-        return server_->recv_data();
+    if (is_icmp_) {
+        return icmp_client_->recv_data();
+    }
+    else if (!is_tcp_){
+        return udp_server_->recv_data();
     }
     else{
-        return icmp_client_->recv_data();
+        return tcp_server_->recv_data();
     }
 }

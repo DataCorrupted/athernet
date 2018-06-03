@@ -5,9 +5,11 @@
 
 #include <string>
 #include <boost/asio.hpp>
-#include "UDPServer.h"
 #include "NatPacket.h"
 #include "UDPClient.h"
+#include "UDPServer.h"
+#include "TCPClient.h"
+#include "TCPServer.h"
 #include "ICMPClient.h"
 
 enum GatewayMode{
@@ -19,7 +21,7 @@ enum GatewayMode{
 class Gateway {
 
 public:
-    Gateway(bool is_icmp);
+    Gateway(bool is_icmp, bool is_tcp);
     ~Gateway();
 
     void icmp_init(boost::asio::io_service& io_service);
@@ -29,11 +31,15 @@ public:
 
     ReceivedData nat_recv();
 private:
-    UDPClient * client_;
-    UDPServer * server_;
+    UDPClient * udp_client_;
+    UDPServer * udp_server_;
+
+    TCPClient * tcp_client_;
+    TCPServer * tcp_server_;
 
     ICMPClient * icmp_client_;
     bool is_icmp_;
+    bool is_tcp_;
 };
 
 
