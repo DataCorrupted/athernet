@@ -46,6 +46,7 @@ void send(){
 
     // Send the UDP Packet.
     gateway->nat_send(nat_pack.get_ip(), nat_pack.get_port(), nat_pack.get_content());
+    sleep(0.25);
 }
 
 void receive(){
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]){
     gateway = new Gateway(ping, is_tcp);
 
     if (ping){
-        std::cerr << "Using ICMP to ping." << endl;
+        std::cerr << "Using ICMP." << endl;
         gateway->icmp_init(io_service);
     }
     if (is_tcp){
