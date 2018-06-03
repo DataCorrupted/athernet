@@ -63,6 +63,7 @@ void receive(){
     for (int i=0; i<len; i++){
         cout << (unsigned int) (data[i] & 0xff) << " ";
     }
+    cout << endl;
 }
 
 int main(int argc, char *argv[]){

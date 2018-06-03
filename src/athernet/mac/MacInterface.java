@@ -15,7 +15,6 @@ class MacInterface{
 	}
 	static public void toAthernet(MacLayer mac_layer) throws Exception{
 		int len = getUnsignedByte();
-
 		byte[] data = new byte[len];
 		for (int i=0; i<len; i++){
 			data[i] = (byte) getUnsignedByte();

@@ -30,7 +30,7 @@ class Client{
 	static public void pingUsingICMP(
 	  int cnt, int[] addr, MacLayer mac_layer) throws Exception{
 		// Setting up Nat Packet.
-		byte[] content = new byte[1];
+		byte[] content = String.valueOf(System.nanoTime()).getBytes();
 
 		NatPacket nat_packet = new NatPacket(addr, 0, content);
 		
