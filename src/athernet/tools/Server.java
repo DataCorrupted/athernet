@@ -10,7 +10,7 @@ class Server{
 	  	byte[] data = mac_layer.getOnePack().getData();
 	  	NatPacket nat_pack = new NatPacket(data);
 	  	System.err.println(
-	  		"Received a UDP packet from " + 
+	  		"[INFO] Received a UDP packet from " +
 	  		nat_pack.getIPString() + ":" + nat_pack.getPort() +
 	  		" with the following content: " + nat_pack.getContentString()
 	  	);

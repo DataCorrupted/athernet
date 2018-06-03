@@ -23,10 +23,10 @@ public class NatPacket {
         port_ = ((((int) encoded_data[4]) & 0xff) << 8) + (((int) encoded_data[5]) & 0xff);
         content_ = new byte[encoded_data.length - 6];
 
-        System.err.println("[DEBUG, NatPacket.java]");
-        System.err.println(encoded_data[4]);
-        System.err.println(encoded_data[5]);
-        System.err.println(port_);
+        // System.err.println("[DEBUG, NatPacket.java]");
+        // System.err.println(encoded_data[4]);
+        // System.err.println(encoded_data[5]);
+        // System.err.println(port_);
 
 
         System.arraycopy(encoded_data,0,ip_,0,ip_.length);
