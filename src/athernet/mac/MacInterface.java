@@ -13,9 +13,8 @@ class MacInterface{
 		while (!in.hasNextInt()) { Thread.sleep(1); }
 		return in.nextInt();
 	}
-	static public void receive(MacLayer mac_layer) throws Exception{
+	static public void toAthernet(MacLayer mac_layer) throws Exception{
 		int len = getUnsignedByte();
-		System.err.println("Received a pack with length: " + len);
 
 		byte[] data = new byte[len];
 		for (int i=0; i<len; i++){
@@ -24,7 +23,7 @@ class MacInterface{
 		mac_layer.requestSend(data);
 	}
 
-	static public void send(byte[] data) throws Exception{
+	static public void toInternet(byte[] data) throws Exception{
 		// Send the length first.
 		int len = data.length;
 		System.out.print(((len & 0xff00) >> 8) + " ");
@@ -44,11 +43,11 @@ class MacInterface{
 		if (args[0].equals("toInternet")) {
 			for (int i=0; i<50; i++){
 				byte[] data = mac_layer.getOnePack().getData();
-				send(data);
+				toInternet(data);
 			}
 		} else if (args[0].equals("toAthernet")){
 			for (int i=0; i<50; i++){
-				receive(mac_layer);
+				toAthernet(mac_layer);
 			}
 		} else {
 			System.err.println("Unrecognized argument.");

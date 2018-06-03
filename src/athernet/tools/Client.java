@@ -41,6 +41,29 @@ class Client{
 		}
 	}
 
+	static public void pingWaitReply(int cnt, int[] addr, MacLayer mac_layer) throws Exception{
+		for (int i=0; i<cnt; i++){
+			byte[] data = mac_layer.getOnePack().getData();
+			NatPacket nat_packet = new NatPacket(data);
+
+			byte[] content = nat_packet.getContent();
+			
+			// Get the following from the content. 
+			int ttl = 0;
+			int icmp_seq = 0;
+			long send_time = 0;
+
+			long recv_time = System.nanoTime();
+			System.err.println(
+				"Ping to " + 
+				addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3] +
+				" icmp_seq=" + icmp_seq + 
+				" ttl=" + ttl + 
+				" time=" + recv_time - send_times
+			); 
+		}
+	}
+
 	static public void main(String[] args) throws Exception{
 		if (args.length < 3){
 			System.err.println("You have to provided args.");
@@ -56,7 +79,30 @@ class Client{
 		if (args[0].equals("file")){
 			sendFileUsingUDP(args[1], int_addr, mac_layer);
 		} else if (args[0].equals("ping")){
-			pingUsingICMP(Integer.parseInt(args[1]), int_addr, mac_layer);
+			// Split receive thread and ping thread.
+			int cnt = Integer.parseInt(args[1])
+			ping_thread = new Thread(new Runnable(){
+				public void run(){
+					System.err.println("Ping request thread started.");
+					try { pingUsingICMP(cnt, int_addr, mac_layer); }
+					catch (Exception e) {;}
+					System.err.println("Ping request thread stopped.");
+				}
+			});
+			recv_thread = new Thread(new Runnable(){
+				public void run() { 
+					System.err.println("Ping receive thread started.");
+					try { pingWaitReply(cnt, int_addr, mac_layer); } 
+					catch (Exception e){;} 
+					System.err.println("Ping receive thread stopped.");
+				}
+			});
+
+			recv_thread.start();
+			ping_thread.start();
+
+			ping_thread.join();
+			recv_thread.join();
 		}
 
 		mac_layer.stopMacLayer();

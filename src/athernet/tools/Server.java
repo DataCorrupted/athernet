@@ -17,8 +17,10 @@ class Server{
 	}
 	static public void replyICMP(int[] addr, MacLayer mac_layer) 
 	  throws Exception{
+	  	// Get one packet, send it right away.
 		mac_layer.requestSend(mac_layer.getOnePack().getData());
 	}
+
 	static public void main(String[] args) throws Exception{
 		if (args.length < 2){
 			System.err.println("You have to provid args.");
