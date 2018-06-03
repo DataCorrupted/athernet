@@ -30,7 +30,7 @@ class Client{
 	static public void pingUsingICMP(
 	  int cnt, int[] addr, MacLayer mac_layer) throws Exception{
 		// Setting up Nat Packet.
-		byte[] content = "Hello World.".getBytes();
+		byte[] content = new byte[1];
 
 		NatPacket nat_packet = new NatPacket(addr, 0, content);
 		
@@ -55,7 +55,7 @@ class Client{
 			System.err.println(
 				"Ping to " + 
 				addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3] +
-				" time=" + recv_time - send_times
+				" time=" + (recv_time - send_time)
 			); 
 		}
 	}
@@ -76,8 +76,8 @@ class Client{
 			sendFileUsingUDP(args[1], int_addr, mac_layer);
 		} else if (args[0].equals("ping")){
 			// Split receive thread and ping thread.
-			int cnt = Integer.parseInt(args[1])
-			ping_thread = new Thread(new Runnable(){
+			int cnt = Integer.parseInt(args[1]);
+			Thread ping_thread = new Thread(new Runnable(){
 				public void run(){
 					System.err.println("Ping request thread started.");
 					try { pingUsingICMP(cnt, int_addr, mac_layer); }
@@ -85,7 +85,7 @@ class Client{
 					System.err.println("Ping request thread stopped.");
 				}
 			});
-			recv_thread = new Thread(new Runnable(){
+			Thread recv_thread = new Thread(new Runnable(){
 				public void run() { 
 					System.err.println("Ping receive thread started.");
 					try { pingWaitReply(cnt, int_addr, mac_layer); } 
