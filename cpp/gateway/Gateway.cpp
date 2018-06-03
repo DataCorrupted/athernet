@@ -36,12 +36,18 @@ void Gateway::icmp_init(boost::asio::io_service &io_service) {
 
 bool Gateway::nat_send(std::string ip, int port, std::string content) {
     // TODO: check if the packet is ICMP packet
-
-    // if client has not been initialized, initialize it now
-    if (client_ == NULL){
-        client_ = new UDPClient(ip,port);
+    if (port == 0){
+        std::cerr << "[DEBUG, Gateway.cpp] Sending ICMP Packet." << std::endl;
+        icmp_client_->send_data(ip,content);
     }
-    return client_->send_data(content);
+    else{
+        // deal with UDP
+        // if client has not been initialized, initialize it now
+        if (client_ == NULL){
+            client_ = new UDPClient(ip,port);
+        }
+        return client_->send_data(content);
+    }
 }
 
 ReceivedData Gateway::nat_recv() {
