@@ -288,7 +288,6 @@ public class MacLayer{
 							// Move window.
 							head_idx_ = (head_idx_ + 1) % 256;
 						}
-						System.err.println(countDataPack());
 					}
 				} else {
 					System.err.println(
