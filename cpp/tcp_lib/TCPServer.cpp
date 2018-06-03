@@ -76,7 +76,9 @@ ReceivedData TCPServer::recv_data() {
             // verify data length
             unsigned int data_length = (unsigned int)reply_buffer_[0];
             if (data_length < (reply_buffer_.length() - 1)){
+                std::cerr << "[DEBUG, TCPClient] required data_length:" << data_length << std::endl;
                 // not enough data, wait for the next packet
+                std::cerr << "[DEBUG, TCPClient] received data_length:" << reply_buffer_.length() - 1 << std::endl;
                 std::cerr << "[DEBUG, TCPClient] received data_length < required, continue listening" << std::endl;
                 continue;
             }
@@ -87,8 +89,10 @@ ReceivedData TCPServer::recv_data() {
             received_data.set_content(recv_content);
             // empty the buffer
             // std::cerr << "[DEBUG] length before empty: " << reply_buffer_.length() << std::endl;
+            // reply_buffer_ = "";
+            // std::cerr << "[DEBUG, TCPServer] reply_buffer_.length() - data_length - 1: " << reply_buffer_.length() - data_length - 1 << std::endl;
             reply_buffer_ = std::string(reply_buffer_,data_length+1,reply_buffer_.length() - data_length - 1);
-            // std::cerr << "[DEBUG] length after empty: " << reply_buffer_.length() << std::endl;
+            std::cerr << "[DEBUG, TCPServer] length after empty: " << reply_buffer_.length() << std::endl;
 
             // set src_ip and port
             received_data.set_src_ip(src_ip_);
