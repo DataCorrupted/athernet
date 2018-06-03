@@ -49,16 +49,12 @@ class Client{
 			byte[] content = nat_packet.getContent();
 			
 			// Get the following from the content. 
-			int ttl = 0;
-			int icmp_seq = 0;
 			long send_time = 0;
 
 			long recv_time = System.nanoTime();
 			System.err.println(
 				"Ping to " + 
 				addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3] +
-				" icmp_seq=" + icmp_seq + 
-				" ttl=" + ttl + 
 				" time=" + recv_time - send_times
 			); 
 		}
