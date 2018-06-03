@@ -40,12 +40,12 @@ class MacInterface{
 		mac_layer.startMacLayer();
 
 		if (args[0].equals("toInternet")) {
-			for (int i=0; i<50; i++){
+			for (int i=0; i<40; i++){
 				byte[] data = mac_layer.getOnePack().getData();
 				toInternet(data);
 			}
 		} else if (args[0].equals("toAthernet")){
-			for (int i=0; i<50; i++){
+			for (int i=0; i<40; i++){
 				toAthernet(mac_layer);
 			}
 		} else {

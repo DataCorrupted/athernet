@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Gateway gateway(false);
+Gateway* gateway;
 
 int getUnsignedByte(){
     int tmp;
@@ -44,18 +44,18 @@ void send(){
     std::cerr << "[DEBUG, gateway] decode NAT compelted" << std::endl;
 
     // Send the UDP Packet.
-    gateway.nat_send(nat_pack.get_ip(), nat_pack.get_port(), nat_pack.get_content());
+    gateway->nat_send(nat_pack.get_ip(), nat_pack.get_port(), nat_pack.get_content());
 }
 
 void receive(){
-    ReceivedData received = gateway.nat_recv();
+    ReceivedData received = gateway->nat_recv();
     NatPacket nat_pack(
         received.get_src_ip(), received.get_src_port(), received.get_content());
 
     int len = 4 + 2 + nat_pack.get_content().size();
     
     std::cerr 
-        << "Received a UDP packet from " 
+        << "Received a NAT packet from " 
         << received.get_src_ip() << ":" << received.get_src_port() 
         << " with length: " << len << endl;
     cout << len << " " ;
@@ -69,13 +69,27 @@ void receive(){
 int main(int argc, char *argv[]){
     if (argc < 2) {
         std::cerr << "Please provide enough args." << endl;        
-    } else if (std::string(argv[1]) == "toAthernet"){
+    } 
+
+    bool ping = argc >=3 && std::string(argv[2]) == "icmp";
+    if (ping){
+        std::cerr << "Using ICMP to ping." << endl;
+    }
+    gateway = new Gateway(ping);
+
+    if (std::string(argv[1]) == "toAthernet"){
         while (1){ receive(); }
     } else if (std::string(argv[1]) == "toInternet"){
         while (1){ send(); }        
+    } else if (ping) {
+        while (1){ 
+            send();
+            receive();
+        }
     } else {
         std::cerr << "Unrecognized args.\n";
     }
 
+    delete gateway;
     return 0;
 }
