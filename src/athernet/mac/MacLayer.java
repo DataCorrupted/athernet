@@ -282,14 +282,13 @@ public class MacLayer{
 								// Put it to data q.
 								data_q_.offer(received_array_[head_idx_]);
 								window_pack_cnt --;
-							}
-
+							}							
 							// Remove it from window
 							received_array_[head_idx_] = null;
-							
 							// Move window.
 							head_idx_ = (head_idx_ + 1) % 256;
 						}
+						System.err.println(countDataPack());
 					}
 				} else {
 					System.err.println(

@@ -29,14 +29,12 @@ class Client{
 
 	static public void pingUsingICMP(
 	  int cnt, int[] addr, MacLayer mac_layer) throws Exception{
-		// Setting up Nat Packet.
-		byte[] content = String.valueOf(System.nanoTime()).getBytes();
-
-		NatPacket nat_packet = new NatPacket(addr, 0, content);
-		
-		byte[] data = nat_packet.toArray();
-
 		for (int i=0; i<cnt; i++){
+			// Setting up Nat Packet.
+			byte[] content = String.valueOf(System.nanoTime()).getBytes();
+			NatPacket nat_packet = new NatPacket(addr, 0, content);
+			byte[] data = nat_packet.toArray();
+			
 			mac_layer.requestSend(data);
 			Thread.sleep(1000);
 		}
@@ -44,7 +42,9 @@ class Client{
 
 	static public void pingWaitReply(int cnt, int[] addr, MacLayer mac_layer) throws Exception{
 		for (int i=0; i<cnt; i++){
+			System.err.println("begin");
 			byte[] data = mac_layer.getOnePack().getData();
+			System.err.println("received");
 			NatPacket nat_packet = new NatPacket(data);
 
 			byte[] content = nat_packet.getContent();
