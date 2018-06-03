@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]){
 //    std::cerr << "[INFO] src_port: " << recv_data.get_src_port() << std::endl;
 //    std::cerr << "[INFO] content: " << recv_data.get_content() << std::endl;
 
-    Gateway gateway_(true);
+    Gateway gateway_(true, false);
     boost::asio::io_service io_service;
     gateway_.icmp_init(io_service);
     gateway_.nat_send("220.181.111.188",0,"Hello World");
