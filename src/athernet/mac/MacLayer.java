@@ -245,6 +245,7 @@ public class MacLayer{
 			if (mac_pack.getType() == MacPacket.TYPE_ACK){
 				int id = mac_pack.getACKPacketID();
 				packet_array_[id].setStatus(MacPacket.STATUS_ACKED);
+				received_array_[id] = mac_pack;
 				if (echo_) { System.err.printf(
 					"Packet #%4d ACK received.\n",
 					mac_pack.getACKPacketID()
@@ -277,11 +278,15 @@ public class MacLayer{
 						window_pack_cnt ++;
 						// Windows head received.
 						while (received_array_[head_idx_] != null){
-							// Put it to data q.
-							data_q_.offer(received_array_[head_idx_]);
+							if (received_array_[head_idx_].getType() != MacPacket.TYPE_ACK){
+								// Put it to data q.
+								data_q_.offer(received_array_[head_idx_]);
+								window_pack_cnt --;
+							}
+
 							// Remove it from window
 							received_array_[head_idx_] = null;
-							window_pack_cnt --;
+							
 							// Move window.
 							head_idx_ = (head_idx_ + 1) % 256;
 						}

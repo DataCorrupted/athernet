@@ -38,6 +38,7 @@ class Client{
 
 		for (int i=0; i<cnt; i++){
 			mac_layer.requestSend(data);
+			Thread.sleep(1000);
 		}
 	}
 
@@ -55,7 +56,8 @@ class Client{
 			System.err.println(
 				"Ping to " + 
 				addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3] +
-				" time=" + (recv_time - send_time)
+				" time=" + (recv_time - send_time) / 1e9 +
+				" payload=" + content.length
 			); 
 		}
 	}
