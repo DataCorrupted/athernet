@@ -75,6 +75,7 @@ int main(int argc, char *argv[]){
     bool ping = std::string(argv[1]) == "ping";
     bool is_tcp = (argc >=3 && std::string(argv[2]) == "tcp");
     gateway = new Gateway(ping, is_tcp);
+    
     if (ping){
         std::cerr << "Using ICMP to ping." << endl;
         gateway->icmp_init(io_service);

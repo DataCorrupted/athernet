@@ -6,7 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 
 class Client{
-	static public void sendFileUsingUDP(
+	static public void sendFileUsingNAT(
 	  String file_name, int[] addr, MacLayer mac_layer) throws Exception{
 		//Create object of FileReader
 		FileReader input_file = new FileReader(file_name);
@@ -17,7 +17,7 @@ class Client{
 		//Variable to hold the one line data
 		String line;
 		
-		NatPacket nat_packet;		
+		NatPacket nat_packet;
 
 		// Read file line by line and print on the console
 		while ((line = buffer_reader.readLine()) != null)   {
@@ -75,7 +75,7 @@ class Client{
 		mac_layer.startMacLayer();
 
 		if (args[0].equals("file")){
-			sendFileUsingUDP(args[1], int_addr, mac_layer);
+			sendFileUsingNAT(args[1], int_addr, mac_layer);
 		} else if (args[0].equals("ping")){
 			// Split receive thread and ping thread.
 			int cnt = Integer.parseInt(args[1]);
