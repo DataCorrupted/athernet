@@ -53,11 +53,12 @@ class Client{
 			long send_time = Long.valueOf(new String(content)).longValue();
 
 			long recv_time = System.nanoTime();
+			String tmp = new String(content);
 			System.err.println(
 				"Ping to " + 
 				addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3] +
 				" time=" + (recv_time - send_time) / 1e9 +
-				" payload=" + content.length
+				" payload= " + tmp
 			); 
 		}
 	}

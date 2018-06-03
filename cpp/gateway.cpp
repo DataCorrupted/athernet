@@ -7,6 +7,7 @@
 #include <cassert>
 #include <unistd.h>
 #include "Gateway.h"
+#include <thread>
 
 using namespace std;
 
@@ -68,12 +69,20 @@ void receive(){
     cout << endl;
 }
 
+void infSend(){
+    while(true){ send(); }
+}
+
+void infRecv(){
+    while(true){ receive(); }
+}
+
 int main(int argc, char *argv[]){
     if (argc < 2) {
         std::cerr << "Please provide enough args." << endl;        
     } 
 
-    bool ping = std::string(argv[1]) == "ping";
+    bool ping = (std::string(argv[1]) == "ping");
     bool is_tcp = ((argc >=3) && (std::string(argv[2]) == "tcp"));
     gateway = new Gateway(ping, is_tcp);
 
@@ -90,11 +99,12 @@ int main(int argc, char *argv[]){
         while (1){ receive(); }
     } else if (std::string(argv[1]) == "toInternet"){
         while (1){ send(); }        
-    } else if (ping) {
-        while (1){ 
-            send();
-            receive();
-        }
+    } else if (ping) {     
+        std::thread send_thread(infSend);
+        std::thread recv_thread(infRecv);
+
+        send_thread.join();
+        recv_thread.join();
     } else {
         std::cerr << "Unrecognized args.\n";
     }
