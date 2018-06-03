@@ -39,6 +39,7 @@ bool Gateway::nat_send(std::string ip, int port, std::string content) {
     if (port == 0){
         std::cerr << "[DEBUG, Gateway.cpp] Sending ICMP Packet." << std::endl;
         icmp_client_->send_data(ip,content);
+        std::cerr << "[DEBUG, Gateway.cpp] ICMP Packet Sent." << std::endl;
     }
     else{
         // deal with UDP

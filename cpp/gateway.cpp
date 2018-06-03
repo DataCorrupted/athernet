@@ -11,6 +11,7 @@
 using namespace std;
 
 Gateway* gateway;
+boost::asio::io_service io_service;
 
 int getUnsignedByte(){
     int tmp;
@@ -72,10 +73,12 @@ int main(int argc, char *argv[]){
     } 
 
     bool ping = argc >=3 && std::string(argv[2]) == "icmp";
+    gateway = new Gateway(ping);
     if (ping){
         std::cerr << "Using ICMP to ping." << endl;
+        gateway->icmp_init(io_service);
     }
-    gateway = new Gateway(ping);
+    
 
     if (std::string(argv[1]) == "toAthernet"){
         while (1){ receive(); }
