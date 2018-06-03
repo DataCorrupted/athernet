@@ -62,20 +62,35 @@ ReceivedData TCPServer::recv_data() {
         // receive data
         struct sockaddr_in client_addr;
         int client_len = sizeof(client_addr);
-        int recv_len = recvfrom(socket_, recv_buffer, sizeof(recv_buffer),
-                                0, (struct sockaddr *) &client_addr,
-                                (socklen_t *) &client_len);
 
-        // get the content
-        std::string raw_content = std::string(recv_buffer, recv_len);
-        // save the content to the buffer
-        reply_buffer_ = reply_buffer_ + raw_content;
+
+        bool wait_flag = true;
+        if (reply_buffer_.length() > 0) {
+            unsigned int data_length = (unsigned int)reply_buffer_[0];
+            if (data_length <= (reply_buffer_.length() - 1)){
+                // no need to wait
+                wait_flag = false;
+            }
+        }
+
+        // wait on necessary
+        if (wait_flag) {
+            // sync recv
+            int recv_len = recvfrom(socket_, recv_buffer, sizeof(recv_buffer),
+                                    0, (struct sockaddr *) &client_addr,
+                                    (socklen_t *) &client_len);
+
+            // get the content
+            std::string raw_content = std::string(recv_buffer, recv_len);
+            // save the content to the buffer
+            reply_buffer_ = reply_buffer_ + raw_content;
+        }
 
         if (reply_buffer_.length() > 0) {
             // std::cerr << "[DEBUG] TCP buffer size: " << reply_buffer_.size() << std::endl;
             // verify data length
             unsigned int data_length = (unsigned int)reply_buffer_[0];
-            if (data_length < (reply_buffer_.length() - 1)){
+            if (data_length > (reply_buffer_.length() - 1)){
                 std::cerr << "[DEBUG, TCPClient] required data_length:" << data_length << std::endl;
                 // not enough data, wait for the next packet
                 std::cerr << "[DEBUG, TCPClient] received data_length:" << reply_buffer_.length() - 1 << std::endl;
