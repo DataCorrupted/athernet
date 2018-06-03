@@ -50,7 +50,7 @@ ReceivedData ICMPClient::recv_icmp() {
         icmp_header icmp_hdr;
         is >> ipv4_hdr >> icmp_hdr;
 
-        if ((recv_len > 0) && (icmp_hdr.type() == icmp_header::echo_reply)) {
+        if ((recv_len > 0) /*&& (icmp_hdr.type() == icmp_header::echo_reply)*/) {
 
             // std::cerr << "[DEBUG] ICMP reply received" << std::endl;
             // std::cerr << "[DEBUG] ip: " << ipv4_hdr.source_address() << std::endl;

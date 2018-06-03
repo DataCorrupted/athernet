@@ -17,8 +17,9 @@ class Server{
 	}
 	static public void replyICMP(int[] addr, MacLayer mac_layer) 
 	  throws Exception{
-	  	// Get one packet, send it right away.
+		// Get one packet, send it right away.
 		mac_layer.requestSend(mac_layer.getOnePack().getData());
+		System.err.println("Received a ICMP Request, reply sent.");
 	}
 
 	static public void main(String[] args) throws Exception{
