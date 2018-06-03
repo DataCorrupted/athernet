@@ -13,6 +13,7 @@ file(GLOB NAT_SRC nat_packet/*(.h|.cpp))
 file(GLOB GATE_SRC gateway/*(.h|.cpp))
 file(GLOB ICMP_SRC icmp_client/*(.h|.cpp))
 file(GLOB COMMON_SRC common_lib/*(.h|.cpp))
+file(GLOB TCP_SRC tcp_lib/*(.h|.cpp))
 
 
 include_directories(udp_lib)
@@ -20,6 +21,7 @@ include_directories(nat_packet)
 include_directories(gateway)
 include_directories(icmp_client)
 include_directories(common_lib)
+include_directories(tcp_lib)
 
 
 add_executable(udp_client udp_client.cpp ${UDP_SRC} ${NAT_SRC} ${COMMON_SRC})
@@ -30,7 +32,7 @@ add_executable(gateway gateway.cpp ${UDP_SRC} ${NAT_SRC} ${GATE_SRC} ${COMMON_SR
 target_link_libraries(gateway ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 
-add_executable(icmp_example icmp_example.cpp ${ICMP_SRC} ${COMMON_SRC})
+add_executable(icmp_example icmp_example.cpp ${UDP_SRC} ${NAT_SRC} ${GATE_SRC} ${COMMON_SRC} ${ICMP_SRC})
 target_link_libraries(icmp_example ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 #------------------- For test only----------------------
