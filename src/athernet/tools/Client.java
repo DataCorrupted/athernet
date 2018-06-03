@@ -49,7 +49,7 @@ class Client{
 			byte[] content = nat_packet.getContent();
 			
 			// Get the following from the content. 
-			long send_time = 0;
+			long send_time = Long.valueOf(new String(content)).longValue();
 
 			long recv_time = System.nanoTime();
 			System.err.println(
