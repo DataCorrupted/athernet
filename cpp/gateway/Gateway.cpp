@@ -5,7 +5,8 @@
 #include "Gateway.h"
 
 
-Gateway::Gateway(bool is_icmp, bool is_tcp): udp_client_(NULL), udp_server_(NULL), icmp_client_(NULL), is_icmp_(is_icmp) {
+Gateway::Gateway(bool is_icmp, bool is_tcp): udp_client_(NULL), udp_server_(NULL), icmp_client_(NULL),
+                                             is_icmp_(is_icmp), tcp_client_(NULL), tcp_server_(NULL) {
     if (is_icmp){
         // ICMP need to call init_icmp
         return;
@@ -15,7 +16,7 @@ Gateway::Gateway(bool is_icmp, bool is_tcp): udp_client_(NULL), udp_server_(NULL
             udp_server_ = new UDPServer(8889);
         }
         else{
-            tcp_server_ = new TCPServer(8889);
+            tcp_server_ = NULL;
         }
     }
 }
@@ -87,6 +88,11 @@ ReceivedData Gateway::nat_recv() {
         return udp_server_->recv_data();
     }
     else{
+        if (tcp_server_ == NULL){
+            std::cerr << "[DEBUG, nat_recv] server not initialized, initializing " << std::endl;
+            tcp_server_ = new TCPServer(8889);
+            std::cerr << "[DEBUG, nat_recv] server initialized " << std::endl;
+        }
         return tcp_server_->recv_data();
     }
 }

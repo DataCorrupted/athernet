@@ -14,7 +14,7 @@ int main(int argc, const char * argv[]) {
     std::cout << "[INFO] Server started" << std::endl;
 
     // receive 10 frames
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 40; i++){
         ReceivedData recv_data = server.recv_data();
         printf("[INFO] Received data. src_ip = %s, src_port = %d, dest_port = %d, content: %s\n",
                recv_data.get_src_ip().c_str(), recv_data.get_src_port(), server_port, recv_data.get_content().c_str());

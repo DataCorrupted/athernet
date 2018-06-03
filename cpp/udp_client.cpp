@@ -12,7 +12,7 @@ int main(int argc, const char * argv[]) {
 
     UDPClient client(server_ip,server_port);
 
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 40; i++){
         std::string content = "Hello world";
         client.send_data(content);
         std::cerr << "[INFO] data sent" << std::endl;
