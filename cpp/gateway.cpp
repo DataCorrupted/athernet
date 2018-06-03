@@ -25,7 +25,7 @@ void send(){
     for (int i=0; i<len; i++){
         data[i] = getUnsignedByte();
     }
-
+    if (len > 100 || len <= 0) { return; }
     // convert int to std::string
     char buf[len];
     for (int i = 0; i < len; i++){

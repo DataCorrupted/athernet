@@ -6,7 +6,7 @@
 
 
 Gateway::Gateway(bool is_icmp, bool is_tcp): udp_client_(NULL), udp_server_(NULL), icmp_client_(NULL),
-                                             is_icmp_(is_icmp), tcp_client_(NULL), tcp_server_(NULL) {
+                                             is_icmp_(is_icmp), tcp_client_(NULL), tcp_server_(NULL), is_tcp_(is_tcp) {
     if (is_icmp){
         // ICMP need to call init_icmp
         return;
@@ -71,8 +71,11 @@ bool Gateway::nat_send(std::string ip, int port, std::string content) {
         else{
             // deal with UDP
             // if client has not been initialized, initialize it now
+            std::cerr << "[DEBUG, Gateway.cpp] sending packet through TCP" << std::endl;
             if (tcp_client_ == NULL) {
+                std::cerr << "[DEBUG, Gateway.cpp] initializing server" << std::endl;
                 tcp_client_ = new TCPClient(ip, port);
+                std::cerr << "[DEBUG, Gateway.cpp] initialized" << std::endl;
             }
             return tcp_client_->send_data(content);
         }
