@@ -19,7 +19,5 @@ int main(int argc, const char * argv[]){
     std::cerr << "[INFO] src_port: " << recv_data.get_src_port() << std::endl;
     std::cerr << "[INFO] content: " << recv_data.get_content() << std::endl;
 
-    io_service.run();
-
     return 0;
 }

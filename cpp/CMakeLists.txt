@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(udp)
 
 set(CMAKE_CXX_STANDARD 11)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread")
 
 find_package(Boost 1.40.0 REQUIRED system)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -24,8 +24,11 @@ include_directories(common_lib)
 
 add_executable(udp_client udp_client.cpp ${UDP_SRC} ${NAT_SRC} ${COMMON_SRC})
 add_executable(udp_server udp_server.cpp ${UDP_SRC} ${NAT_SRC} ${COMMON_SRC})
-add_executable(gateway gateway.cpp ${UDP_SRC} ${NAT_SRC} ${GATE_SRC} ${COMMON_SRC})
 add_executable(nat_client nat_client.cpp ${UDP_SRC} ${COMMON_SRC})
+
+add_executable(gateway gateway.cpp ${UDP_SRC} ${NAT_SRC} ${GATE_SRC} ${COMMON_SRC} ${ICMP_SRC})
+target_link_libraries(gateway ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
 
 add_executable(icmp_example icmp_example.cpp ${ICMP_SRC} ${COMMON_SRC})
 target_link_libraries(icmp_example ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
