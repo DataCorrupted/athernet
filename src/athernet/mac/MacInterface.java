@@ -39,15 +39,35 @@ class MacInterface{
 		MacLayer mac_layer = new MacLayer((byte) 0x2, (byte) 0x1);
 		mac_layer.startMacLayer();
 
+		Thread to_internet = new Thread(new Runnable(){
+			public void run(){
+				try { for (int i=0; i<40; i++){
+					byte[] data = mac_layer.getOnePack().getData();
+					toInternet(data);
+				}}
+				catch (Exception e) {; }			
+			}
+		});
+		Thread to_athernet = new Thread(new Runnable(){
+			public void run(){
+				try{ for (int i=0; i<40; i++){
+					toAthernet(mac_layer);
+				}}
+				catch (Exception e) {; }
+			}
+		});
+
 		if (args[0].equals("toInternet")) {
-			for (int i=0; i<40; i++){
-				byte[] data = mac_layer.getOnePack().getData();
-				toInternet(data);
-			}
+			to_internet.start();
+			to_internet.join();
 		} else if (args[0].equals("toAthernet")){
-			for (int i=0; i<40; i++){
-				toAthernet(mac_layer);
-			}
+			to_athernet.start();
+			to_athernet.join();
+		} else if (args[0].equals("ping")) {
+			to_athernet.start();
+			to_internet.start();
+			to_internet.join();
+			to_athernet.join();
 		} else {
 			System.err.println("Unrecognized argument.");
 		}

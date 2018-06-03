@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
         std::cerr << "Please provide enough args." << endl;        
     } 
 
-    bool ping = argc >=3 && std::string(argv[2]) == "icmp";
+    bool ping = std::string(argv[1]) == "ping";
     gateway = new Gateway(ping);
     if (ping){
         std::cerr << "Using ICMP to ping." << endl;
