@@ -4,3 +4,4 @@ out/*
 *.fig
 *.class
 wav/*
+gateway

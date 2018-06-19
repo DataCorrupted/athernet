@@ -45,7 +45,7 @@ public class SoundI implements Runnable {
 				avg_power_ = avg_power_ * 23 / 24 + wave[i] * wave[i] / 24;
 				while (!double_q_.offer(wave[i])){
 					// Overflow.
-					// System.out.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
+					// System.err.println("Warning[SoundI.run()]: Bufferoverflowed, the latested data just been throwed.");
 					// Retrive the oldest one from the queue,
 					// Regardless the queue is empty or not.
 					double_q_.poll();
@@ -83,7 +83,7 @@ public class SoundI implements Runnable {
 		this.i_info_ = new DataLine.Info(TargetDataLine.class, format_);
 		
 		if (!AudioSystem.isLineSupported(this.i_info_)){
-			System.out.println(
+			System.err.println(
 				"Line matching " + this.i_info_ + " is not supported.");
 			throw new LineUnavailableException();
 		}
@@ -109,7 +109,7 @@ public class SoundI implements Runnable {
 
 	public double[] record(int sample_cnt){
 		if (sample_cnt < 200) { 
-			System.out.println(
+			System.err.println(
 				"Warning[SoundI.record(int)]: Too few samples to record. "+
 				"Did you mean " + sample_cnt + " seconds or " +
 				+sample_cnt + " samples? To record for certain duration, use SoundI.record(double)");
@@ -117,11 +117,11 @@ public class SoundI implements Runnable {
 		int byte_cnt = sample_cnt * this.FRAMESIZE;
 		ByteBuffer in = ByteBuffer.allocate(byte_cnt);
 		i_line_.start();
-		System.out.printf(
+		System.err.printf(
 			"Recording for %3.2fs...\n",
 			(double) sample_cnt / sample_rate_);
 		i_line_.read(in.array(), 0, byte_cnt);
-		System.out.println("Recording finished.");
+		System.err.println("Recording finished.");
 		i_line_.close();
 		return byteBufToDouble(in);
 	}
@@ -141,7 +141,7 @@ public class SoundI implements Runnable {
 		ByteBuffer buf = ByteBuffer.allocate(byte_cnt);
 		
 		int r = dst.read(buf.array(), 0, byte_cnt);
-		System.out.printf(
+		System.err.printf(
 			"%d samples(%3.2fs) read from file.\n",
 			r / FRAMESIZE, 
 			(double)r / sample_rate_ / FRAMESIZE);

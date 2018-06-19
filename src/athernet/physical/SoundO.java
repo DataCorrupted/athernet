@@ -41,7 +41,7 @@ public class SoundO {
 		this.o_info_ = new DataLine.Info(SourceDataLine.class, format_);
 		
 		if (!AudioSystem.isLineSupported(this.o_info_)){
-			System.out.println(
+			System.err.println(
 				"Line matching " + this.o_info_ + " is not supported.");
 			throw new LineUnavailableException();
 		}
@@ -51,16 +51,17 @@ public class SoundO {
 		// I should shut the lines down by calling close() in the
 		// descructor, but funny thing is, there is no such a thing
 		// in Java, as memory is managed by java, not the programmer.
-		this.o_line_.start();
+		
+		// this.o_line_.start();
 	}
 
 	// Given a ByteBuffer, play it.
 	private void play(ByteBuffer out) throws LineUnavailableException {
-		//this.o_line_.start();
-		// System.out.printf("[SoundO] SystemTime: %d\n",System.currentTimeMillis());
+		this.o_line_.start();
+		// System.err.printf("[SoundO] SystemTime: %d\n",System.currentTimeMillis());
 		this.o_line_.write(out.array(), 0, out.capacity());
-		//this.o_line_.drain();
-		//this.o_line_.stop();
+		this.o_line_.drain();
+		this.o_line_.stop();
 	}
 
 	private ByteBuffer doubleToByteBuf(double[] arr) throws Exception{
@@ -69,7 +70,7 @@ public class SoundO {
 		for (int i=0; i<sampele_cnt; i++){
 			if (Math.abs(arr[i]) > 1){
 				arr[i] = (arr[i] < 0) ? -1:1;
-				System.out.printf("Warn on data frame %d, value too large, fixed to MAX value\n", i);
+				System.err.printf("Warn on data frame %d, value too large, fixed to MAX value\n", i);
 			}
 			out.putShort((short) (Short.MAX_VALUE * arr[i]));
 		}
