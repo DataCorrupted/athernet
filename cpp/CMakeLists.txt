@@ -38,5 +38,7 @@ target_link_libraries(icmp_example ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY
 add_executable(tcp_client tcp_client.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
 add_executable(tcp_server tcp_server.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
 
+add_executable(ftp_client ftp_client.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
+
 #------------------- For test only----------------------
 add_executable(nat_test test/nat_test.cpp ${NAT_SRC})
