@@ -27,6 +27,7 @@ public:
 
 private:
     int receiving_and_disp();
+    int receiving_data_and_disp();
 
     // a mutex lock to prevent race condition between tcp_client and data_client
     std::mutex mutex_;

@@ -103,7 +103,7 @@ int FTPClient::wait() {
 int FTPClient::receiving_and_disp(){
     while(!is_shutdown_){
         std::string recv_reply = control_client_->recv_data().get_content();
-        std::cerr << "[INFO, FTPClient.cpp] received: " << recv_reply << std::endl;
+        std::cerr << "[INFO, FTPClient.cpp] control received: " << recv_reply << std::endl;
 
         mutex_.lock();
         // handling reply for special commands
@@ -131,7 +131,7 @@ int FTPClient::receiving_and_disp(){
 
                 // connect to the passive port
                 data_client_ = new TCPClient(ip,port);
-                data_child_ = std::thread(&FTPClient::receiving_and_disp, this);
+                data_child_ = std::thread(&FTPClient::receiving_data_and_disp, this);
 
 //                // send PORT
 //                std::string est_content = "PORT ";
@@ -151,4 +151,16 @@ int FTPClient::receiving_and_disp(){
 
     }
     return 0;
+}
+
+
+int FTPClient::receiving_data_and_disp() {
+    while (!is_shutdown_){
+        std::string recv_reply = data_client_->recv_data().get_content();
+
+        mutex_.lock();
+        std::cerr << "[INFO, FTPClient.cpp] data received: " << recv_reply << std::endl;
+
+        mutex_.unlock();
+    }
 }
