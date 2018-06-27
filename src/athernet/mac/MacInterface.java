@@ -63,7 +63,7 @@ class MacInterface{
 		} else if (args[0].equals("toAthernet")){
 			to_athernet.start();
 			to_athernet.join();
-		} else if (args[0].equals("ping")) {
+		} else if (args[0].equals("toBoth")) {
 			to_athernet.start();
 			to_internet.start();
 			to_internet.join();
