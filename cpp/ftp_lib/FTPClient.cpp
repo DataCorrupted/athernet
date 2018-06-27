@@ -38,6 +38,29 @@ bool FTPClient::cmd_pwd() {
     }
 }
 
+bool FTPClient::cmd_cwd(std::string pathname) {
+    std::string content = "CWD ";
+    content = content + pathname + "\n";
+    if (tcp_client_->send_data(content)){
+        return true;
+    }
+    else{
+        std::cerr << "[INFO, FTPClient.cpp] cmd_cwd: failed" << std::endl;
+        return false;
+    }
+}
+
+bool FTPClient::cmd_pasv() {
+    std::string content = "PASV \n";
+    if (tcp_client_->send_data(content)){
+        return true;
+    }
+    else{
+        std::cerr << "[INFO, FTPClient.cpp] cmd_pasv: failed" << std::endl;
+        return false;
+    }
+}
+
 bool FTPClient::cmd_pass(std::string password) {
     std::string content = "PASS ";
     content = content + password + "\n";

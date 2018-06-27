@@ -19,6 +19,8 @@ public:
     bool cmd_user(std::string username);
     bool cmd_pass(std::string password);
     bool cmd_pwd();
+    bool cmd_cwd(std::string pathname);
+    bool cmd_pasv();
 
 private:
     int receiving_and_disp();
