@@ -14,6 +14,7 @@ file(GLOB GATE_SRC gateway/*(.h|.cpp))
 file(GLOB ICMP_SRC icmp_client/*(.h|.cpp))
 file(GLOB COMMON_SRC common_lib/*(.h|.cpp))
 file(GLOB TCP_SRC tcp_lib/*(.h|.cpp))
+file(GLOB FTP_SRC ftp_lib/*(.h|.cpp))
 
 
 include_directories(udp_lib)
@@ -22,6 +23,7 @@ include_directories(gateway)
 include_directories(icmp_client)
 include_directories(common_lib)
 include_directories(tcp_lib)
+include_directories(ftp_lib)
 
 
 add_executable(udp_client udp_client.cpp ${UDP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
@@ -38,7 +40,7 @@ target_link_libraries(icmp_example ${Boost_LIBRARIES} ${Boost_FILESYSTEM_LIBRARY
 add_executable(tcp_client tcp_client.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
 add_executable(tcp_server tcp_server.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
 
-add_executable(ftp_client ftp_client.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC})
+add_executable(ftp_client ftp_client.cpp ${TCP_SRC} ${NAT_SRC} ${COMMON_SRC} ${TCP_SRC} ${FTP_SRC})
 
 #------------------- For test only----------------------
 add_executable(nat_test test/nat_test.cpp ${NAT_SRC})

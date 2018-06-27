@@ -1,19 +1,9 @@
 #include <iostream>
 #include <thread>
-#include "TCPClient.h"
+#include "FTPClient.h"
 
 // 163.22.12.51 21
 
-TCPClient * client = NULL;
-bool is_shutdown = false;
-
-int receiving_and_disp(){
-    while(!is_shutdown){
-        std::string recv_reply = client->recv_data().get_content();
-        std::cerr << "[INFO] received: " << recv_reply << std::endl;
-    }
-    return 0;
-}
 
 int main(int argc, const char * argv[]) {
     if (argc != 3){
@@ -24,18 +14,17 @@ int main(int argc, const char * argv[]) {
     std::string server_ip = std::string(argv[1]);
     int server_port = atoi(argv[2]);
 
-    client = new TCPClient(server_ip,server_port);
+    auto client = new FTPClient(server_ip,server_port);
 
-    std::thread child(receiving_and_disp);
-
+    // wait for one second for connection establish
     sleep(1);
-    std::string content = "USER\n";
-    client->send_data(content);
-    std::cerr << "[INFO] data sent" << std::endl;
-    // sleep(5);
+    client->cmd_user("anonymous");
+    sleep(2);
+    client->cmd_pass("anonymous");
+    sleep(2);
+    client->cmd_pwd();
 
-    child.join();
-
+    client->wait();
 
     return 0;
 }
