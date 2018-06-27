@@ -14,7 +14,7 @@
 
 class TCPClient {
 public:
-    TCPClient(std::string ip, int port);
+    TCPClient(std::string ip, unsigned long port);
     ~TCPClient();
 
     bool send_data(std::string content);
@@ -25,7 +25,7 @@ private:
     int socket_;
 
     std::string src_ip_;
-    int src_port_;
+    unsigned long src_port_;
 
     std::string reply_buffer_;
 };

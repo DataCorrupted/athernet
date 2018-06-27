@@ -1,7 +1,7 @@
 #include "TCPClient.h"
 
 
-TCPClient::TCPClient(std::string ip, int port) {
+TCPClient::TCPClient(std::string ip, unsigned long port) {
     socket_ = socket(AF_INET,SOCK_STREAM, 0);
 
     // get address
