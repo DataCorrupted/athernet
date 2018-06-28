@@ -90,6 +90,17 @@ bool FTPClient::cmd_list(std::string pathname) {
     }
 }
 
+bool FTPClient::cmd_retr(std::string pathname) {
+    std::string content = "RETR ";
+    content = content + pathname + "\n";
+    if (control_client_->send_data(content)){
+        return true;
+    }
+    else{
+        std::cerr << "[INFO, FTPClient.cpp] cmd_retr: failed" << std::endl;
+        return false;
+    }
+}
 
 
 int FTPClient::wait() {

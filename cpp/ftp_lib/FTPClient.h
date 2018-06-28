@@ -24,6 +24,7 @@ public:
     bool cmd_cwd(std::string pathname);
     bool cmd_pasv();
     bool cmd_list(std::string pathname="");
+    bool cmd_retr(std::string pathname);
 
 private:
     int receiving_and_disp();

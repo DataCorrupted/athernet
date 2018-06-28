@@ -30,13 +30,22 @@ int main(int argc, const char * argv[]) {
     std::cerr << "[INFO] CWD: /" << std::endl;
     client->cmd_cwd("/");
     sleep(2);
+//    std::cerr << "[INFO] PASV" << std::endl;
+//    client->cmd_pasv();
+//    sleep(2);
+//
+//    std::cerr << "[INFO] LIST" << std::endl;
+//    client->cmd_list("/");
+//    sleep(2);
+
     std::cerr << "[INFO] PASV" << std::endl;
     client->cmd_pasv();
     sleep(2);
 
-    std::cerr << "[INFO] LIST" << std::endl;
-    client->cmd_list("/");
+    std::cerr << "[INFO] RETR: robots.txt" << std::endl;
+    client->cmd_retr("robots.txt");
     sleep(2);
+
 
     client->wait();
 
