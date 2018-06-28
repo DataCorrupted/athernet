@@ -8,6 +8,10 @@
 \documentclass[conference,compsoc]{IEEEtran}
 \usepackage{cite}
 \usepackage{listings}
+\usepackage{mathtools}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+
+
 \begin{document}
 \title{
 	Computer Networks Course Report
@@ -62,6 +66,12 @@ A quick brown fox jumps over a lazy dog.
 \section{Project 2: mac layer}
 	
 	%TODO
+	\subsection{Design}
+		\subsubsection{Request}
+		\subsubsection{Send}
+		\subsubsection{Receive}
+
+	%TODO
 	\subsection{Thread pool}
 		Mention we have two threads and how they help with each other.
 		How do we manage to prevent thread bugs.
@@ -73,10 +83,26 @@ A quick brown fox jumps over a lazy dog.
 	\subsection{Mac Packet}
 		Ernest please fill this part.
 	
-	%TODO
+	%DOING
 	\subsection{Signal Detection}
-		Mention the use of moving average.
-	
+		Whenever sending a frame, the sender must make sure that the channel is clean and is good for transmittion.
+		The process is somewhat similar to CSMA/CD, yet there is no detecting while sending.
+		\par
+		The sending process will start only when the moving average power of the channel is low enough. The avg power should satisfy:
+		\begin{equation}\begin{aligned}
+		avg_k \\
+		& = 
+			\frac{win\_size-1}{win\_size}avg_{k-1} + 
+			\frac{1}{win\_size} * power_k \\
+		& > thr
+		\end{aligned}\end{equation}
+		where in our implementation, we have:
+		\begin{equation*}\begin{aligned} 
+			& win\_size = 24 \\
+			& thr = 0.3 
+		\end{aligned}\end{equation*}
+		\par
+		If the power is	greater than the threshold we set, we will wait sometime, by default we wait 10ms.
 	%TODO
 	\subsection{Java experience: reference and package}
 		Peter please fill this part.
