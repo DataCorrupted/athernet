@@ -52,8 +52,11 @@ class FTPClient{
 		for (int i=0; i<100; i++){
 			String cmd = ftp_client.getCommand();
 			ftp_client.sendCommand(cmd);
-			String ret = ftp_client.getResult();
-			System.out.println(ret);
+			do { 
+				String ret = ftp_client.getResult();
+				System.out.println(ret);
+				Thread.sleep(10);
+			} while (mac_layer.countDataPack() != 0);
 		}
 
 		mac_layer.stopMacLayer();
