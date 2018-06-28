@@ -6,11 +6,14 @@
 #include <thread>
 #include <mutex>
 #include <sstream>
+#include <queue>
+#include "ReceivedData.h"
 #include "TCPClient.h"
+#include "NatPacket.h"
 
 class FTPClient {
 public:
-    FTPClient(const std::string& ip, int port);
+    FTPClient(const std::string& ip, unsigned int port);
 
     ~FTPClient();
 
@@ -26,6 +29,8 @@ public:
     bool cmd_list(std::string pathname="");
     bool cmd_retr(std::string pathname);
 
+    ReceivedData nat_recv();
+
 private:
     int receiving_and_disp();
     int receiving_data_and_disp();
@@ -40,6 +45,15 @@ private:
 
     std::thread control_child_;
     std::thread data_child_;
+
+    // for storing the result
+    std::queue<ReceivedData> recv_packets_;
+
+    // some helper variablers
+    std::string control_ip_;
+    unsigned int control_port_;
+    std::string data_ip_;
+    unsigned int data_port_;
 };
 
 
