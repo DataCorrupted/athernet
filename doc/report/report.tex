@@ -67,12 +67,13 @@ A quick brown fox jumps over a lazy dog.
 	
 	%TODO
 	\subsection{Design}
+		The mac layer has 3 main components, corresponding to 3 independent thread. The thread detail will be tackled in \ref{Thread pool}. Here, we will only talk about what each component do.
 		\subsubsection{Request}
 		\subsubsection{Send}
 		\subsubsection{Receive}
 
 	%TODO
-	\subsection{Thread pool}
+	\subsection{Thread pool}\label{Thread pool}
 		Mention we have two threads and how they help with each other.
 		How do we manage to prevent thread bugs.
 	
@@ -83,7 +84,7 @@ A quick brown fox jumps over a lazy dog.
 	\subsection{Mac Packet}
 		Ernest please fill this part.
 	
-	%DOING
+	%TOCHECK
 	\subsection{Signal Detection}
 		Whenever sending a frame, the sender must make sure that the channel is clean and is good for transmittion.
 		The process is somewhat similar to CSMA/CD, yet there is no detecting while sending.
@@ -103,6 +104,8 @@ A quick brown fox jumps over a lazy dog.
 		\end{aligned}\end{equation*}
 		\par
 		If the power is	greater than the threshold we set, we will wait sometime, by default we wait 10ms.
+		\par 
+		We didn't add collection detection in out implemtation due to one design flaw. We split the physical layer to two independent part: sender and receiver. The fact that these two components cannot communate leads to the hardship when writing collection detection. We hold one assumption while doing this project, that once the transmittion is started, no one will interupted because other senders should be listening the channel and hold off sending only when the average power goes down.
 	%TODO
 	\subsection{Java experience: reference and package}
 		Peter please fill this part.
