@@ -4,7 +4,8 @@
 #include "FTPClient.h"
 
 FTPClient::FTPClient(const std::string &ip, unsigned int port):is_shutdown_(false),control_client_(NULL),data_client_(NULL),
-                                                      control_ip_(ip),control_port_(port), data_ip_(),data_port_(0) {
+                                                      control_ip_(ip),control_port_(port), data_ip_(),data_port_(0),
+                                                               data_child_initized(false) {
     control_client_ = new TCPClient(ip,port);
     control_child_ = std::thread(&FTPClient::receiving_and_disp,this);
 }
@@ -83,7 +84,12 @@ bool FTPClient::cmd_list(std::string pathname) {
     std::string content = "LIST ";
     content = content + pathname + "\n";
     if (control_client_->send_data(content)){
-        return true;
+        // wait for the child to finish
+        if (data_child_initized) {
+            data_child_.join();
+            data_child_initized = false;
+            delete data_client_;
+        }
     }
     else{
         std::cerr << "[INFO, FTPClient.cpp] cmd_list: failed" << std::endl;
@@ -105,9 +111,9 @@ bool FTPClient::cmd_retr(std::string pathname) {
 
 
 int FTPClient::wait() {
-    if (data_client_ != NULL){
-        data_child_.join();
-    }
+//    if (data_client_ != NULL){
+//        data_child_.join();
+//    }
 
     control_child_.join();
 }
@@ -158,6 +164,7 @@ int FTPClient::receiving_and_disp(){
                 // connect to the passive port
                 data_client_ = new TCPClient(ip,port);
                 data_child_ = std::thread(&FTPClient::receiving_data_and_disp, this);
+                data_child_initized = true;
 
 //                // send PORT
 //                std::string est_content = "PORT ";
@@ -181,7 +188,7 @@ int FTPClient::receiving_and_disp(){
 
 
 int FTPClient::receiving_data_and_disp() {
-    while (!is_shutdown_){
+    // while (!is_shutdown_){
         std::string recv_reply = data_client_->recv_data().get_content();
 
         mutex_.lock();
@@ -194,11 +201,20 @@ int FTPClient::receiving_data_and_disp() {
         recv_packets_.push(recv_data);
 
         mutex_.unlock();
-    }
+
+        return 0;
+    // }
 }
 
 
 ReceivedData FTPClient::nat_recv() {
+//    // wait for this to be initialized
+//    while(this == NULL){
+//        sleep(0.1);
+//    }
+//
+//    std::cerr << "[DEBUG,FTPClient.cpp] entering stage 2 " << std::endl;
+
     // wait for incoming packets
     while (recv_packets_.size() == 0){
         sleep(0.1);
