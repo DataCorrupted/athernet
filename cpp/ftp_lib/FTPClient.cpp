@@ -110,10 +110,24 @@ bool FTPClient::cmd_retr(std::string pathname) {
     std::string content = "RETR ";
     content = content + pathname + "\n";
     if (control_client_->send_data(content)){
-        return true;
+        // connect to the passive port
+        if (data_ip_set_) {
+            data_client_ = new TCPClient(data_ip_, data_port_);
+            data_child_ = std::thread(&FTPClient::receiving_data_and_disp, this);
+            data_child_initized = true;
+            data_ip_set_ = false;
+        }
+
+
+        // wait for the child to finish
+        if (data_child_initized) {
+            data_child_.join();
+            data_child_initized = false;
+            delete data_client_;
+        }
     }
     else{
-        std::cerr << "[INFO, FTPClient.cpp] cmd_retr: failed" << std::endl;
+        std::cerr << "[INFO, FTPClient.cpp] cmd_list: failed" << std::endl;
         return false;
     }
 }

@@ -27,28 +27,44 @@ int main(int argc, const char * argv[]) {
     std::cerr << "[INFO] PWD " << std::endl;
     client->cmd_pwd();
     sleep(2);
-    std::cerr << "[INFO] CWD: /" << std::endl;
-    client->cmd_cwd("/");
-    sleep(2);
-    std::cerr << "[INFO] PASV" << std::endl;
-    client->cmd_pasv();
-    sleep(2);
-
-    std::cerr << "[INFO] LIST" << std::endl;
-    client->cmd_list("/");
-    sleep(2);
 
     std::cerr << "[INFO] PASV" << std::endl;
     client->cmd_pasv();
-    sleep(2);
-
-    std::cerr << "[INFO] duplicated PASV" << std::endl;
-    client->cmd_pasv();
-    sleep(2);
+    sleep(1);
 
     std::cerr << "[INFO] LIST" << std::endl;
-    client->cmd_list("/");
+    client->cmd_list("");
     sleep(2);
+
+    std::cerr << "[INFO] CWD: Writeable" << std::endl;
+    client->cmd_cwd("Writeable");
+    sleep(2);
+    std::cerr << "[INFO] PWD" << std::endl;
+    client->cmd_pwd();
+    sleep(2);
+    std::cerr << "[INFO] PASV" << std::endl;
+    client->cmd_pasv();
+    sleep(1);
+
+    std::cerr << "[INFO] RETR" << std::endl;
+    client->cmd_retr("README.md");
+    sleep(2);
+
+//    std::cerr << "[INFO] LIST" << std::endl;
+//    client->cmd_list("/");
+//    sleep(2);
+//
+//    std::cerr << "[INFO] PASV" << std::endl;
+//    client->cmd_pasv();
+//    sleep(2);
+//
+//    std::cerr << "[INFO] duplicated PASV" << std::endl;
+//    client->cmd_pasv();
+//    sleep(2);
+//
+//    std::cerr << "[INFO] LIST" << std::endl;
+//    client->cmd_list("/");
+//    sleep(2);
 
 
     std::cerr << "[INFO] DONE" << std::endl;
