@@ -45,6 +45,8 @@ private:
 
     std::thread control_child_;
     std::thread data_child_;
+
+    bool data_ip_set_;
     bool data_child_initized;
 
     // for storing the result

@@ -42,10 +42,16 @@ int main(int argc, const char * argv[]) {
     client->cmd_pasv();
     sleep(2);
 
+    std::cerr << "[INFO] duplicated PASV" << std::endl;
+    client->cmd_pasv();
+    sleep(2);
+
     std::cerr << "[INFO] LIST" << std::endl;
     client->cmd_list("/");
     sleep(2);
 
+
+    std::cerr << "[INFO] DONE" << std::endl;
 //    std::cerr << "[INFO] PASV" << std::endl;
 //    client->cmd_pasv();
 //    sleep(2);

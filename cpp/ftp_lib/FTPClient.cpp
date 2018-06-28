@@ -5,7 +5,7 @@
 
 FTPClient::FTPClient(const std::string &ip, unsigned int port):is_shutdown_(false),control_client_(NULL),data_client_(NULL),
                                                       control_ip_(ip),control_port_(port), data_ip_(),data_port_(0),
-                                                               data_child_initized(false) {
+                                                               data_child_initized(false), data_ip_set_(false) {
     control_client_ = new TCPClient(ip,port);
     control_child_ = std::thread(&FTPClient::receiving_and_disp,this);
 }
@@ -84,6 +84,15 @@ bool FTPClient::cmd_list(std::string pathname) {
     std::string content = "LIST ";
     content = content + pathname + "\n";
     if (control_client_->send_data(content)){
+        // connect to the passive port
+        if (data_ip_set_) {
+            data_client_ = new TCPClient(data_ip_, data_port_);
+            data_child_ = std::thread(&FTPClient::receiving_data_and_disp, this);
+            data_child_initized = true;
+            data_ip_set_ = false;
+        }
+
+
         // wait for the child to finish
         if (data_child_initized) {
             data_child_.join();
@@ -160,11 +169,8 @@ int FTPClient::receiving_and_disp(){
                 // save data_ip and data_port
                 data_ip_ = ip;
                 data_port_ = port;
+                data_ip_set_ = true;
 
-                // connect to the passive port
-                data_client_ = new TCPClient(ip,port);
-                data_child_ = std::thread(&FTPClient::receiving_data_and_disp, this);
-                data_child_initized = true;
 
 //                // send PORT
 //                std::string est_content = "PORT ";
