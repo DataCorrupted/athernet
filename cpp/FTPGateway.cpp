@@ -72,6 +72,10 @@ void send(){
 }
 
 void receive(){
+    while(ftp_client_ == NULL){
+        sleep(0.2);
+    }
+
     ReceivedData received = ftp_client_->nat_recv();
     NatPacket nat_pack(
         received.get_src_ip(), received.get_src_port(), received.get_content());
