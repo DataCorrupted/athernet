@@ -7,18 +7,35 @@
 #include <cassert>
 #include <unistd.h>
 #include "Gateway.h"
+#include "FTPClient.h"
 #include <thread>
+#include <sstream>
 
 using namespace std;
 
-Gateway* gateway;
-boost::asio::io_service io_service;
+
+FTPClient * ftp_client_ = NULL;
 
 int getUnsignedByte(){
     int tmp;
     cin >> tmp;
     return tmp & 0xff;
 }
+
+void send_ftp_cmd(const std::string& content){
+    std::istringstream iss(content);
+    std::string cmd;
+    iss >> cmd;
+
+    if (cmd == "USER"){
+        std::string username;
+        iss >> username;
+        ftp_client_->cmd_user(username);
+    }
+
+    // more function to support
+}
+
 void send(){
     // Receive a pack from athernet.
     int len = (getUnsignedByte() << 8) + getUnsignedByte();
@@ -42,16 +59,20 @@ void send(){
     // Data: data[6:]
     NatPacket nat_pack(encoded_frame);
 
+    // setup FTP connection if needed
+    if (ftp_client_ == NULL) {
+        std::cerr << "[INFO] estiblish connection with " << nat_pack.get_ip() << ":" << nat_pack.get_port() << std::endl;
+        ftp_client_ = new FTPClient(nat_pack.get_ip(), nat_pack.get_port());
+    }
+
     // Call all the FTP functions.
-    //
-    //
-    //
+    send_ftp_cmd(nat_pack.get_content());
 
     sleep(0.25);
 }
 
 void receive(){
-    ReceivedData received = gateway->nat_recv();
+    ReceivedData received = ftp_client_->nat_recv();
     NatPacket nat_pack(
         received.get_src_ip(), received.get_src_port(), received.get_content());
 
@@ -78,7 +99,7 @@ void infRecv(){
 }
 
 int main(int argc, char *argv[]){
-    gateway = new Gateway(true, false);
+    ftp_client_ = NULL;
 
     std::thread send_thread(infSend);
     std::thread recv_thread(infRecv);
@@ -86,6 +107,8 @@ int main(int argc, char *argv[]){
     send_thread.join();
     recv_thread.join();
 
-    delete gateway;
+    if (ftp_client_ != NULL) {
+        delete ftp_client_;
+    }
     return 0;
 }

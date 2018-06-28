@@ -3,7 +3,8 @@
 //
 #include "FTPClient.h"
 
-FTPClient::FTPClient(const std::string &ip, int port):is_shutdown_(false),control_client_(NULL),data_client_(NULL) {
+FTPClient::FTPClient(const std::string &ip, unsigned int port):is_shutdown_(false),control_client_(NULL),data_client_(NULL),
+                                                      control_ip_(ip),control_port_(port), data_ip_(),data_port_(0) {
     control_client_ = new TCPClient(ip,port);
     control_child_ = std::thread(&FTPClient::receiving_and_disp,this);
 }
@@ -117,6 +118,16 @@ int FTPClient::receiving_and_disp(){
         std::cerr << "[INFO, FTPClient.cpp] control received: " << recv_reply << std::endl;
 
         mutex_.lock();
+
+        // give the reply to athenet
+        ReceivedData recv_data;
+        recv_data.set_src_ip(control_ip_);
+        recv_data.set_src_port(control_port_);
+        recv_data.set_content(recv_reply);
+        recv_packets_.push(recv_data);
+
+
+
         // handling reply for special commands
         // get reply_code
         std::istringstream iss(recv_reply);
@@ -139,6 +150,10 @@ int FTPClient::receiving_and_disp(){
                 std::string ip = std::to_string(ip_1) + "." + std::to_string(ip_2) + "."
                                  + std::to_string(ip_3) + "." + std::to_string(ip_4);
                 std::cerr << "[INFO, FTPClient.cpp] passive ip: " << ip << std::endl;
+
+                // save data_ip and data_port
+                data_ip_ = ip;
+                data_port_ = port;
 
                 // connect to the passive port
                 data_client_ = new TCPClient(ip,port);
@@ -172,6 +187,32 @@ int FTPClient::receiving_data_and_disp() {
         mutex_.lock();
         std::cerr << "[INFO, FTPClient.cpp] data received: " << recv_reply << std::endl;
 
+        ReceivedData recv_data;
+        recv_data.set_src_ip(data_ip_);
+        recv_data.set_src_port(data_port_);
+        recv_data.set_content(recv_reply);
+        recv_packets_.push(recv_data);
+
         mutex_.unlock();
     }
+}
+
+
+ReceivedData FTPClient::nat_recv() {
+    // wait for incoming packets
+    while (recv_packets_.size() == 0){
+        sleep(0.1);
+    }
+
+
+    // only one agent call nat_recv()
+    mutex_.lock();
+
+    // get the packet
+    ReceivedData recv_data = recv_packets_.front();
+    recv_packets_.pop();
+
+    mutex_.unlock();
+
+    return recv_data;
 }
