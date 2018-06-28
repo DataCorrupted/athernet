@@ -28,10 +28,38 @@ void send_ftp_cmd(const std::string& content){
     iss >> cmd;
 
     if (cmd == "USER"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling USER" << std::endl;
         std::string username;
         iss >> username;
         ftp_client_->cmd_user(username);
     }
+    else if (cmd == "PASS"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling PASS" << std::endl;
+        std::string password;
+        iss >> password;
+        ftp_client_->cmd_pass(password);
+    }
+    else if (cmd == "PWD"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling PWD" << std::endl;
+        ftp_client_->cmd_pwd();
+    }
+    else if (cmd == "CWD"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling CWD" << std::endl;
+        std::string pathname;
+        iss >> pathname;
+        ftp_client_->cmd_cwd(pathname);
+    }
+    else if (cmd == "PASV"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling PASV" << std::endl;
+        ftp_client_->cmd_pasv();
+    }
+    else if (cmd == "LIST"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling LIST" << std::endl;
+        std::string pathname;
+        iss >> pathname;
+        ftp_client_->cmd_list(pathname);
+    }
+
 
     // more function to support
 }
