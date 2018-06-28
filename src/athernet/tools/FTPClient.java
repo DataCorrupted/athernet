@@ -47,18 +47,24 @@ class FTPClient{
 
 		FTPClient ftp_client = new FTPClient(int_addr, mac_layer);
 
+		Thread result_thread = new Thread(new Runnable(){
+			public void run(){
+				try{ for (int i=0; i<1000; i++){
+					String ret = ftp_client.getResult();
+					System.err.println(ret);
+				}} catch (Exception e) {; }
+			}
+		});
+
 		mac_layer.startMacLayer();
+		result_thread.start();
 
 		for (int i=0; i<100; i++){
 			String cmd = ftp_client.getCommand();
 			ftp_client.sendCommand(cmd);
-			do { 
-				String ret = ftp_client.getResult();
-				System.out.println(ret);
-				Thread.sleep(10);
-			} while (mac_layer.countDataPack() != 0);
 		}
 
+		result_thread.join();
 		mac_layer.stopMacLayer();
 	}
 }
