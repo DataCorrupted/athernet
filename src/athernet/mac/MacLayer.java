@@ -257,6 +257,43 @@ public class MacLayer{
 				if (echo_){ System.err.printf(
 					"Packet #%4d received.", mac_pack.getPacketID()); 
 				}
+/*				// Throws it away if the queue if full.
+				if (countDataPack() + window_pack_cnt <= 256){
+					// Or send an ACK to reply.
+					int id = requestSend(
+						new MacPacket(
+							dst_addr_, 
+							src_addr_, 
+							(byte) mac_pack.getPacketID()
+					));
+
+					if (echo_) { System.err.printf(
+						"Packet type %s confirmed. ACK packet #%d sending.\n", 
+						(mac_pack.getType() == MacPacket.TYPE_INIT) ? 
+							"Init": "Data",
+						id
+					);}
+					if (getIdxInWindow(mac_pack.getPacketID()) < window_size_){
+						received_array_[mac_pack.getPacketID()] = mac_pack;
+						window_pack_cnt ++;
+						// Windows head received.
+						while (received_array_[head_idx_] != null){
+							if (received_array_[head_idx_].getType() != MacPacket.TYPE_ACK){
+								// Put it to data q.
+								data_q_.offer(received_array_[head_idx_]);
+								window_pack_cnt --;
+							}							
+							// Remove it from window
+							received_array_[head_idx_] = null;
+							// Move window.
+							head_idx_ = (head_idx_ + 1) % 256;
+						}
+					}
+				} else {
+					System.err.println(
+						"Data queue is full, ignoring this packet.");
+				}
+*/
 				int id = requestSend(
 					new MacPacket(
 						dst_addr_, 
@@ -271,7 +308,6 @@ public class MacLayer{
 					id
 				);}
 				data_q_.offer(mac_pack);
-
 
 			// Mac request.
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
