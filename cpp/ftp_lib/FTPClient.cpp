@@ -228,6 +228,9 @@ void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string
         }
         std::string tmp_content = std::string(recv_reply,i,tmp_len);
 
+        // the first serveral bytes are offset.
+        tmp_content = std::to_string(i) + " " + tmp_content;
+
         ReceivedData recv_data;
         recv_data.set_src_ip(ip);
         recv_data.set_src_port(port);
