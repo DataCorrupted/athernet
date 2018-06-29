@@ -117,6 +117,8 @@ A quick brown fox jumps over a lazy dog.
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 3: gateway}
+
+%TODO: insert a graph to illistrate the overall layout in this part
 	
 	%TODO
 	\subsection{JNI}
@@ -125,10 +127,20 @@ A quick brown fox jumps over a lazy dog.
 	%TODO
 	\subsection{Pipe}
 		Peter please fill this part.
+		
+		%TODO: maybe nat_pack should be mentioned here? 
 	
 	%TODO
-	\subsection{C++ experience: Boost}
-		Ernest please fill this part.
+	\subsection{C++ experience: Socket Programming}
+		\paragraph{\textbf{gateway on the c++ side}}
+		The c++ need to handle all Internet Communication and provide I/O service for the java gateway agent. In other words, the c++ gateway need to send out IP packets whenever the java gateway request sending, and give received packet from Internet to Java Interface (with some pre-pocessing).
+		
+		
+		\paragraph{\textbf{TCP, UDP and ICMP}}
+		For TCP and UDP, we are calling the interfaces provided by linux keneral interface, inlcuding \emph{socket}, \emph{binding}, \emph{connect}, \emph{sendto} and \emph{recefrom}. For ICMP, we are using the ICMP provided by Boost Libraries. 
+		\paragraph{\textbf{TCP Receiving Buffer}}
+		 One tricky part here is that TCP is streaming rather than transmitting packets, which results in that one frame may split into two frames when sending out. In order to solve the problem, for some application scenarioes, we use first several bytes to encode the length of the frame on sending and receiver store the current frame to buffer if it need to wait for the next frame.
+		
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -136,8 +148,10 @@ A quick brown fox jumps over a lazy dog.
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 4: FTP application}
-	%TODO
-	Ernest please fill this part.
+	\subsection{Overview}	
+	The FTP connection is handled mainly at the gateway side. The node A (athernet FTP client) is connected to node B through athernet. The node B (FTP gateway) is connected to FTP Server via Internet.
+	\subsection{Passive Mode}
+	For \emph{LIST} and \emph{RETR} command, passive mode need to be supported. The gateway parses every reply from FTP server before redirecting that to java client. Once the gateway received a reply starting with code 227, the reply from server with expected passive ports, the gateway records it as \emph{data\_port}. Then, if the gateway received a sending request of \emph{LIST} or \emph{RETR}, it immediately start a new TCP connection to the server with \emph{data\_port}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
