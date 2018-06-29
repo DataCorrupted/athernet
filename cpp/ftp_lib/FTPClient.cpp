@@ -99,6 +99,7 @@ bool FTPClient::cmd_list(std::string pathname) {
             data_child_initized = false;
             delete data_client_;
         }
+        return true;
     }
     else{
         std::cerr << "[INFO, FTPClient.cpp] cmd_list: failed" << std::endl;
@@ -125,6 +126,7 @@ bool FTPClient::cmd_retr(std::string pathname) {
             data_child_initized = false;
             delete data_client_;
         }
+        return true;
     }
     else{
         std::cerr << "[INFO, FTPClient.cpp] cmd_list: failed" << std::endl;
@@ -139,6 +141,7 @@ int FTPClient::wait() {
 //    }
 
     control_child_.join();
+    return 0;
 }
 
 int FTPClient::receiving_and_disp(){
