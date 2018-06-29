@@ -56,8 +56,8 @@ class FTPClient{
 				try{ for (int i=0; i<1000; i++){
 					String ret = ftp_client.getResult();
 					// handle data segement (need to asseble the segaments)
-					if (ret.charAt(0) == '1'){
-						System.err.println("Data segement detected");
+					if (ret.charAt(9) == '1'){
+						System.err.println("Data segement detected\n");
 					}
 
 
