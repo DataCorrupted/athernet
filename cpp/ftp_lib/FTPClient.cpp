@@ -151,12 +151,7 @@ int FTPClient::receiving_and_disp(){
 
         mutex_.lock();
 
-        // give the reply to athenet
-        ReceivedData recv_data;
-        recv_data.set_src_ip(control_ip_);
-        recv_data.set_src_port(control_port_);
-        recv_data.set_content(recv_reply);
-        recv_packets_.push(recv_data);
+        save_recv_reply(recv_reply,control_ip_,control_port_);
 
 
 
@@ -211,22 +206,34 @@ int FTPClient::receiving_and_disp(){
 
 
 int FTPClient::receiving_data_and_disp() {
-    // while (!is_shutdown_){
-        std::string recv_reply = data_client_->recv_data().get_content();
+    std::string recv_reply = data_client_->recv_data().get_content();
 
-        mutex_.lock();
-        std::cerr << "[INFO, FTPClient.cpp] data received: " << recv_reply << std::endl;
+    mutex_.lock();
+    std::cerr << "[INFO, FTPClient.cpp] data received: " << recv_reply << std::endl;
+
+    save_recv_reply(recv_reply,data_ip_,data_port_);
+
+    mutex_.unlock();
+
+    return 0;
+}
+
+void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string &ip, unsigned int port) {
+    // for some reason, the data content can't be too huge
+    size_t max_packet_len = 200;
+    for (size_t i = 0; i < recv_reply.size(); i+=max_packet_len) {
+        size_t tmp_len = max_packet_len;
+        if ((recv_reply.size() - i) < max_packet_len){
+            tmp_len = recv_reply.size() - 1;
+        }
+        std::string tmp_content = std::string(recv_reply,i,tmp_len);
 
         ReceivedData recv_data;
-        recv_data.set_src_ip(data_ip_);
-        recv_data.set_src_port(data_port_);
-        recv_data.set_content(recv_reply);
+        recv_data.set_src_ip(ip);
+        recv_data.set_src_port(port);
+        recv_data.set_content(tmp_content);
         recv_packets_.push(recv_data);
-
-        mutex_.unlock();
-
-        return 0;
-    // }
+    }
 }
 
 

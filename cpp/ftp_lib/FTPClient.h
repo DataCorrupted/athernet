@@ -31,6 +31,8 @@ public:
 
     ReceivedData nat_recv();
 
+    void save_recv_reply(const std::string& recv_reply, const std::string& ip, unsigned int port);
+
 private:
     int receiving_and_disp();
     int receiving_data_and_disp();

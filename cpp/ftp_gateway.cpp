@@ -59,6 +59,15 @@ void send_ftp_cmd(const std::string& content){
         iss >> pathname;
         ftp_client_->cmd_list(pathname);
     }
+    else if (cmd == "RETR"){
+        std::cerr << "[INFO, ftp_gateway.cpp] calling RETR" << std::endl;
+        std::string pathname;
+        iss >> pathname;
+        ftp_client_->cmd_retr(pathname);
+    }
+    else{
+        std::cerr << "[ERROR, ftp_gateway.cpp] Invalid Command. " << std::endl;
+    }
 
 
     // more function to support
