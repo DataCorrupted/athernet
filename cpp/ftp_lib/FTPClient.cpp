@@ -228,6 +228,11 @@ void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string
         }
         std::string tmp_content = std::string(recv_reply,i,tmp_len);
 
+        // the first 5 bytes are offset.
+        char len_str[5];
+        sprintf(len_str,"%5lu",i);
+        tmp_content = std::string(len_str) + " " + tmp_content;
+
         // first byte indicate whether it's a data protocol
         if (data_flag){
             tmp_content = "1 " + tmp_content;
@@ -235,11 +240,6 @@ void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string
         else{
             tmp_content = "0 " + tmp_content;
         }
-
-        // the first 5 bytes are offset.
-        char len_str[5];
-        sprintf(len_str,"%5lu",i);
-        tmp_content = std::string(len_str) + " " + tmp_content;
 
         ReceivedData recv_data;
         recv_data.set_src_ip(ip);
