@@ -68,6 +68,8 @@ public class MacLayer{
 	// Time(in ms) to sleep between opeartions.
 	private int sleep_time_ = 20;
 
+	private boolean[] received_ = new boolean[256];
+
 	public MacLayer(byte src_address, byte dst_address) throws Exception{
 		this(src_address, dst_address, 1.5, 3, 50);
 	}
@@ -98,6 +100,10 @@ public class MacLayer{
 		recv_thread_ = new Thread(new Runnable(){
 			public void run() { try { receive(); } catch (Exception e){;} }
 		});
+
+		for (int i = 0; i<256; i++){
+			received_[i] = false;
+		}
 	}
 	public int getStatus(){ return status_; }
 	public void startMacLayer(){
@@ -307,7 +313,12 @@ public class MacLayer{
 						"Init": "Data",
 					id
 				);}
-				data_q_.offer(mac_pack);
+
+				int packet_id = mac_pack.getPacketID();
+				if (!received_[packet_id]){
+					data_q_.offer(mac_pack);
+					received_[packet_id] = true;
+				}
 
 			// Mac request.
 			} else if (mac_pack.getType() == MacPacket.TYPE_MACPING_REQST) {
