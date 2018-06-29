@@ -1,5 +1,7 @@
 package athernet.tools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import athernet.mac.*;
 import athernet.nat.NatPacket;
@@ -49,8 +51,17 @@ class FTPClient{
 
 		Thread result_thread = new Thread(new Runnable(){
 			public void run(){
+				List<String> data_buffer = new ArrayList<String>();
+				List<String> data_offset = new ArrayList<String>();
 				try{ for (int i=0; i<1000; i++){
 					String ret = ftp_client.getResult();
+					// handle data segement (need to asseble the segaments)
+					if (ret.charAt(0) == '1'){
+						System.err.println("Data segement detected");
+					}
+
+
+					// print out the rececived result
 					System.err.println(ret);
 				}} catch (Exception e) {; }
 			}
