@@ -51,8 +51,8 @@ class FTPClient{
 
 		Thread result_thread = new Thread(new Runnable(){
 			public void run(){
-				List<String> data_buffer = new ArrayList<String>();
-				List<String> data_offset = new ArrayList<String>();
+				// List<String> data_buffer = new ArrayList<String>();
+				// List<String> data_offset = new ArrayList<String>();
 				try{ for (int i=0; i<1000; i++){
 					String ret = ftp_client.getResult();
 					// handle data segement (need to asseble the segaments)
