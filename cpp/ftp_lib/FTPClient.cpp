@@ -211,14 +211,14 @@ int FTPClient::receiving_data_and_disp() {
     mutex_.lock();
     std::cerr << "[INFO, FTPClient.cpp] data received: " << recv_reply << std::endl;
 
-    save_recv_reply(recv_reply,data_ip_,data_port_);
+    save_recv_reply(recv_reply,data_ip_,data_port_,true);
 
     mutex_.unlock();
 
     return 0;
 }
 
-void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string &ip, unsigned int port) {
+void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string &ip, unsigned int port, bool data_flag) {
     // for some reason, the data content can't be too huge
     size_t max_packet_len = 200;
     for (size_t i = 0; i < recv_reply.size(); i+=max_packet_len) {
@@ -228,8 +228,18 @@ void FTPClient::save_recv_reply(const std::string &recv_reply, const std::string
         }
         std::string tmp_content = std::string(recv_reply,i,tmp_len);
 
-        // the first serveral bytes are offset.
-        tmp_content = std::to_string(i) + " " + tmp_content;
+        // first byte indicate whether it's a data protocol
+        if (data_flag){
+            tmp_content = "1 " + tmp_content;
+        }
+        else{
+            tmp_content = "0 " + tmp_content;
+        }
+
+        // the first 5 bytes are offset.
+        char len_str[5];
+        sprintf(len_str,"%5lu",i);
+        tmp_content = std::string(len_str) + " " + tmp_content;
 
         ReceivedData recv_data;
         recv_data.set_src_ip(ip);
