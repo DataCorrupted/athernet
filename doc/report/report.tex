@@ -10,7 +10,11 @@
 \usepackage{listings}
 \usepackage{mathtools}
 \usepackage{amsmath,amsthm,amssymb,amsfonts}
-
+\lstset{
+	basicstyle=\small\ttfamily,
+	columns=fullflexible,
+	tabsize=1
+}
 
 \begin{document}
 \title{
@@ -65,29 +69,76 @@ A quick brown fox jumps over a lazy dog.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 2: mac layer}
 	
-	%TODO
+	%TOCHECK
+	\subsection{Mac Packet}
+		The basic unit in mac layer is a new type of packet called \lstinline{MacPacket}. It contains all the data, the type of this packet, it's current status and the time it's been sent. The Mac address of the sender and the received will also be stored.
+
+	%TOCHECK
 	\subsection{Design}
 		The mac layer has 3 main components, corresponding to 3 independent thread. The thread detail will be tackled in \ref{Thread pool}. Here, we will only talk about what each component do.
 		\subsubsection{Request}
-			We can not allow packet to be send 
+			We can not allow packet to be send directly. To send a packet, the user has to call \lstinline{MacLayer.requestSend(...)} and then the mac layer can begin to process. As a matter of fact, user can not call \lstinline{MacLayer.send()} directly as it's a private function.
+			\par
+			The parameters in the function above varies. We provided a lot of interface so that it is handy in use. You can use an instance of \lstinline{MacPacket} to request send. 
+			\begin{lstlisting}[linewidth=\columnwidth,language=Java]
+				MacLayer.requestSend(MacPacket);
+			\end{lstlisting}
+			\par
+			Other methods to request a send service is to give a raw byte array if it is a data packet or just state the length of the incoming data if it is a control packet at the head of every data stream.
+			\begin{lstlisting}[linewidth=\columnwidth,language=Java]
+				MacLayer.requestSend(byte[] raw_data);
+				MacLayer.requestSend(int data_len);
+			\end{lstlisting}
+			In these two function, we will pack the data into a \lstinline{MacPacket} and call \lstinline{MacLayer.requestSend(MacPacket)}
+			\par
+			Once a packet is requested to be sent, first thing we do in \lstinline{MacLayer.requestSend(MacPacket)} is assign this packet an id. 
+			Packet ID is the identifier to guarantee that we don't receive the same packet.
+			(This is possible when the ACK we replied is lost.)
+			With id setup, we will put the packet in the waiting queue. We will determine whether it's a priority one(mainly ACK packet, we added another priority packet MACPING in project 3) or not. 
+			Priority packet will be placed at the head of the waiting queue so that it can be sent first, other packets will be placed at the tail of the queue and follow FIFO. 
+			\par
+			We may have a design flaw here. 
+			The fact that we reply ACK first may lead to normal data being chocked if we are receiving enormous packets and busy replying ACKs.
 		\subsubsection{Send}
-		\subsubsection{Receive}
+			\lstinline{MacLayer.send()} is a loop that only stops upon user's call.
+			In each iteration, it will take the a window of the waiting queue. For each packet in the window, our action depends on the label of the packet.
+			\par
+			If the label is \lstinline{MacPacket.STATUS_WAITING}, it will be converted to raw \lstinline{byte[]} and send it by calling \lstinline{Transmitter.transmitOnePack(byte[] data)}. The status of the packet will be labeled \lstinline{MacPacket.STATUS_ACKED} if this packet need no ACK(for example, ACK packet need no ACK, or it would be infinity of ACKs wondering in the channel busying ACK each other.). Packets that needs to be ACKed will be labeled \lstinline{MacPacket.STATUS_SENT}.
+			\par 
+			If the label is \lstinline{MacPacket.STATUS_SENT}. 
+			We will examine the time stamp in the packet and compare with the current to determine if the packet has time out. Upon timeout, we change the label to \lstinline{MacPacket.STATUS_WAITING} so that it can be resent. 
+			We will also add the counter inside the packet so that we know how many time it has been resent. 
+			If we have resend it too much, we will report a link error.
+			\par
+			When one window's packet have been processed, we will run a second pass on that window and re-examine the labels. 
+			This time we are looking for \lstinline{MacPacket.STATUS_ACKED}. 
+			We moves the window foreword if the head of the waiting queue has been ACKed. 
+			Also, we will take back the id of that ACKed packet so that late comers can re-use the id.
 
-	%TODO
+		%TOCHECK
+		\subsubsection{Receive}
+			\lstinline{MacLayer.receive()} is also a function that loops until the user stops it.
+			\par
+			At each iteration, it will try to receive a frame by calling \lstinline{Receiver.receiveOnePack()}.
+			The function may fail as there is nothing to be received and return an empty array, then the iteration ends and goes to next iteration.
+			Correct frame can be received, then we will transform the received \lstinline{byte[]} to \lstinline{MacPacket} without certain informations like time stamp, but that will not hurt.
+			With an instance of \lstinline{MacPacket} we will check the mac address of the packet. 
+			If the address is not correct, we will start the next iteration. 
+			We will send an ACK if this is a data packet and put it into data buffer. 
+			If the packet is and ACK packet, we will check the find the packet that is being ACKed and change it's label to \lstinline{MacPacket.STATUS_ACKED}.
+			A patch we added for MACPING is to either reply that MACPING or calculate the time eclipsed.
+
+	%TOCHECK
 	\subsection{Thread pool}\label{Thread pool}
-		Mention we have two threads and how they help with each other.
-		How do we manage to prevent thread bugs.
+		\lstinline{MacLayer.send()} and \lstinline{MacLayer.receive()} should be in two threads. We set up two threads. 
+		The user has to call \lstinline{MacLayer.startMacLayer()} to start them and use \lstinline{MacLayer.stopMacLayer} to stop the threads.
 	
 	%TODO
 	\subsection{Sequential arriving data}
 	
-	%TODO
-	\subsection{Mac Packet}
-		Ernest please fill this part.
-	
 	%TOCHECK
 	\subsection{Signal Detection}
-		Whenever sending a frame, the sender must make sure that the channel is clean and is good for transmittion.
+		Whenever sending a frame, the sender must make sure that the channel is clean and is good for transmission.
 		The process is somewhat similar to CSMA/CD, yet there is no detecting while sending.
 		\par
 		The sending process will start only when the moving average power of the channel is low enough. The avg power should satisfy:
