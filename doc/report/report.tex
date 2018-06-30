@@ -77,6 +77,36 @@ A quick brown fox jumps over a lazy dog.
 		The intuition is that if the length get wrong, the CRC check will still not pass.
 
 	%TODO
+	\subsection{Modulation \& Demodulation}
+		\subsubsection{Preamble} 
+			Before we can talk about modulation, we have to determine when the signal starts. We added a preamble to every packet and it's a signature sin wave defined below:
+			\begin{equation*}\begin{aligned}
+				& d_k = sin(2\pi\omega_k) \\
+				& \omega_k = \omega_{k-1} + \frac{f_k + f_{k-1}}{2\times sr} \\
+				& f_k = h - |k-\frac{1}{2}n|\frac{h-l}{n} \\
+				s.t. \\
+				& \omega_0 = 0 \\
+				& sr = 48,000 \text{(Samples/s)}\\
+				& h = 10,000 \text{(Hz), } l = 2,000 \text{(Hz)}
+			\end{aligned}\end{equation*}
+			\par
+			Such preamble will have a nice feature that the dot product is very small unless it's perfectly aligned. 
+			In practice, the alignment error will only shift by one or two samples.
+		\subsection{Modulation \& Demodulation}
+			We adopted PSK, where bit 0 and 1 corresponds to $cos(2\pi f)$ and $cos(2\pi f)$. 
+			But in reality it's easier to modulate as we has calculated $cos(2\pi f)$ in advance and we can multiply it by $-1$ and get $cos(2\pi f)$.
+			Thus the calculation of triangular functions is limited.
+			When demodulating, we take the bit and multiply it with $cos(2\pi f)$ we can get $1$ and $-1$ corresponding to 1 and 0.
+			\par
+			In practice, we cannot use arbitrarily long samples to represent a bit. We used only 24 samples. 
+			24 samples per bit allows us a bandwidth of 2kbps if we have 48,000 sample rate and don't consider preambles.
+			\par
+			We could have adopted QPSK and our bandwidth can boost to two times what we have now. 
+			However, we have to calculate more triangular functions. 
+			What's worse, when demodulating, we cannot distinguish $-1$ and $-0.5$ very well, leading higher risk of transfer failure.
+			This problem, however, can be tackled if we considered frequency shift caused by hardware and calibrate our software parameters automatically.
+
+	%TODO
 	\subsection{FDM}
 	% Ernest please fill this.
 
