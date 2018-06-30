@@ -55,9 +55,17 @@ A quick brown fox jumps over a lazy dog.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 1: physical layer}
 	
-	%TODO
+	%TOCHECK
 	\subsection{Sound card and DataLine}
-		A quick brown fox jumps over a lazy dog.
+		Java provides access to sound card and uses an abstract call data line. 
+		Difficult as it may to try to use this, we have finally finished this project and I can hardly remember how to use it:).
+		\par
+		However, there are problems we discovered and solved in terms of sound card.
+		One particular problem is that the sound card will keep replaying the content in the buffer if no new data is offered.
+		In project 2, we kept receiving the same ACK packet is caused by this feature.
+		To tackle with this problem, we choose to start the device only when we are transmitting something and shutdown it down once the transmission is done.
+		However, the downside of this solution is that accessing IO device has low priority in OS and thus takes long time. 
+		Such acquiring and releasing took 0.5 more second when sending 10,000 bits to the other side.
 
 	%TOCHECK
 	\subsection{Data Definition}
@@ -76,7 +84,7 @@ A quick brown fox jumps over a lazy dog.
 		It is worth noticing that the CRC8 will not include the first byte, but the data byte.
 		The intuition is that if the length get wrong, the CRC check will still not pass.
 
-	%TODO
+	%TOCHECK
 	\subsection{Modulation \& Demodulation}
 		\subsubsection{Preamble} 
 			Before we can talk about modulation, we have to determine when the signal starts. We added a preamble to every packet and it's a signature sin wave defined below:
@@ -191,10 +199,11 @@ A quick brown fox jumps over a lazy dog.
 
 	%TOCHECK
 	\subsection{Thread pool}\label{Thread pool}
-		\lstinline{MacLayer.send()} and \lstinline{MacLayer.receive()} should be in two threads. We set up two threads. 
+		\lstinline{MacLayer.send()} and \lstinline{MacLayer.receive()} should be in two threads. 
+		We set up a starter and a stopper to help user better handle these two threads at the same time.
 		The user has to call \lstinline{MacLayer.startMacLayer()} to start them and use \lstinline{MacLayer.stopMacLayer} to stop the threads.
 	
-	%TODO
+	%TOCHECK
 	\subsection{Sequential arriving data}
 		To transmit large file, we should use more packets and then assembly them after transmission. This is when sequential arrival become crucial. If the sequence of the data cannot be guaranteed, then we cannot correctly assemble the data.
 		\par  
