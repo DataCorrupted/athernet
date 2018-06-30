@@ -145,6 +145,16 @@ A quick brown fox jumps over a lazy dog.
 	
 	%TODO
 	\subsection{Sequential arriving data}
+		To transmit large file, we should use more packets and then assembly them after transmission. This is when sequential arrival become crucial. If the sequence of the data cannot be guaranteed, then we cannot correctly assemble the data.
+		\par  
+		Using ID to assemble the data may not be useful since the id can be broken and out of order because ACK packet and MACPING packet also takes id.
+		The solution we propose is to add a receiving window in \lstinline{MacLayer.receive()}. 
+		We store all the packet in a buffer that is invisible to the user(private buffer). 
+		Only when the data in the private buffer are in order do we transfer them to the public buffer for the user to take.
+		\par
+		However, in real, we didn't have a private buffer, but a private array using id to do the indexing. The public buffer, however, we used \lstinline{java.util.concurrent.ArrayBlockingQueue} This is a thread safe data structure where the taker will be preempted if the queue is empty since the taker is (probably) in the main thread the giver is always in the receive thread.
+		\par
+		Sadly, this design only worked in project 2 and 3. In project 3 we realized that this is a flawed design. If fails when the MacLayer is both sending and receiving. Then the window will be chocked by ACKs and the private buffer can never transfer anything to public buffer. In project 4, we removed this design.
 	
 	%TOCHECK
 	\subsection{Signal Detection}
@@ -167,10 +177,16 @@ A quick brown fox jumps over a lazy dog.
 		\par
 		If the power is	greater than the threshold we set, we will wait sometime, by default we wait 10ms.
 		\par 
-		We didn't add collection detection in out implemtation due to one design flaw. We split the physical layer to two independent part: sender and receiver. The fact that these two components cannot communate leads to the hardship when writing collection detection. We hold one assumption while doing this project, that once the transmittion is started, no one will interupted because other senders should be listening the channel and hold off sending only when the average power goes down.
-	%TODO
+		We didn't add collection detection in out implementation due to one design flaw. We split the physical layer to two independent part: sender and receiver. The fact that these two components cannot communicate leads to the hardship when writing collection detection. We hold one assumption while doing this project, that once the transmission is started, no one will interrupted because other senders should be listening the channel and hold off sending only when the average power goes down.
+	%TOCHECK
 	\subsection{Java experience: reference}
-		Peter please fill this part.
+		\subsubsection{Bit Shift} While we are converting byte array to \lstinline{MacPacket}, we were astonished to find that add and minus(+ / -) generally has more priority than shift(<< / >>).
+		\subsubsection{Reference} In Java, everything is a reference. 
+		We took the fall at the first time by accidentally change the value of a reference as we thought we are dealing with a new instance. 
+		However, once we realized this, we utilized this in project 3. 
+		In project 3, we have a waiting queue with 3 threads.
+		Using reference allows us to access the same instance across 3 threads with no problem.
+		Furthermore, in project 3 \& 4, when we have more instances of \lstinline{MacLayer}, reference allows us to only create one \lstinline{MacLayer} and use it in multiple threads.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
