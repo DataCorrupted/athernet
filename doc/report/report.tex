@@ -58,7 +58,28 @@ A quick brown fox jumps over a lazy dog.
 	%TODO
 	\subsection{Sound card and DataLine}
 		A quick brown fox jumps over a lazy dog.
-	
+
+	%TOCHECK
+	\subsection{Data Definition}
+		We defined the frame as shown in table \ref{PhyLayer_dataDef}.
+		\begin{table}[ht]
+		\begin{center}\begin{tabular}{m{1cm}m{1cm}m{1cm}m{1cm}}\label{PhyLayer_dataDef}
+		Offset                        & 0                        & 8                        & 12                        \\ \hline
+		\multicolumn{1}{|l|}{Content} & \multicolumn{1}{l|}{len} & \multicolumn{1}{l|}{crc8} & \multicolumn{1}{l|}{data} \\ \hline
+		\end{tabular}\end{center}
+		\caption{The Definition of a Physical packet}
+		\end{table}
+		\par
+		The first byte is used to indicate how long is the data part. 
+		This feature is not added until project 2. 
+		Using one byte to indicate length, we have a maximum length of physical packet of 256 bytes.
+		It is worth noticing that the CRC8 will not include the first byte, but the data byte.
+		The intuition is that if the length get wrong, the CRC check will still not pass.
+
+	%TODO
+	\subsection{FDM}
+	% Ernest please fill this.
+
 	%TODO
 	\subsection{Java experience: OOP}
 		A quick brown fox jumps over a lazy dog.
@@ -75,11 +96,11 @@ A quick brown fox jumps over a lazy dog.
 		The basic unit in mac layer is a new type of packet called \lstinline{MacPacket}. It contains all the data, the type of this packet, it's current status and the time it's been sent. The Mac address of the sender and the received will also be stored.
 		\subsubsection{Conversion between byte array and MacPacket}
 			We have to examine the definition of the byte array first. It is show in the table \ref{MacPacket_dataDef}
-			\begin{table}[h]
-			\begin{tabular}{m{0.5cm}m{2cm}m{0.5cm}m{0.5cm}m{1cm}m{1cm}}\label{MacPacket_dataDef}
+			\begin{table}[ht]
+			\begin{center}\begin{tabular}{m{0.5cm}m{2cm}m{0.5cm}m{0.5cm}m{1cm}m{1cm}}\label{MacPacket_dataDef}
 				Offset                        & 0                       & 8                        & 10                       & 12                        & 16                        \\ \hline
 				\multicolumn{1}{|l|}{Content} & \multicolumn{1}{l|}{ID} & \multicolumn{1}{l|}{src} & \multicolumn{1}{l|}{dst} & \multicolumn{1}{l|}{type} & \multicolumn{1}{l|}{data} \\ \hline
-			\end{tabular}
+			\end{tabular}\end{center}
 			\caption{The definition of a MacPacket}
 			\end{table}
 			\par
