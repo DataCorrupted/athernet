@@ -45,8 +45,9 @@
 
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
+%TOCHECK
 \begin{abstract}
-A quick brown fox jumps over a lazy dog.
+This document describes our implementation of 4 course projects. It contains five sections, the first four sections are coresponding to 4 projects, and the fifth section contains some feedback on the course itself.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,11 +56,9 @@ A quick brown fox jumps over a lazy dog.
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 1: physical layer}
-	
-	%TOCHECK
 	\subsection{Sound card and DataLine}
 		Java provides access to sound card and uses an abstract call data line. 
-		Difficult as it may to try to use this, we have finally finished this project and I can hardly remember how to use it:).
+		Difficult as it may to try to use this, we have finally finished this project and its detailed usage is beyond what this documentation wants to address.
 		\par
 		However, there are problems we discovered and solved in terms of sound card.
 		One particular problem is that the sound card will keep replaying the content in the buffer if no new data is offered.
@@ -68,7 +67,6 @@ A quick brown fox jumps over a lazy dog.
 		However, the downside of this solution is that accessing IO device has low priority in OS and thus takes long time. 
 		Such acquiring and releasing took 0.5 more second when sending 10,000 bits to the other side.
 
-	%TOCHECK
 	\subsection{Data Definition}
 		We defined the frame as shown in table \ref{PhyLayer_dataDef}.
 		\begin{table}[ht]
@@ -85,7 +83,6 @@ A quick brown fox jumps over a lazy dog.
 		It is worth noticing that the CRC8 will not include the first byte, but the data byte.
 		The intuition is that if the length get wrong, the CRC check will still not pass.
 
-	%TOCHECK
 	\subsection{Modulation \& Demodulation}
 		\subsubsection{Preamble} 
 			Before we can talk about modulation, we have to determine when the signal starts. We added a preamble to every packet and it's a signature sin wave defined below:
@@ -119,13 +116,11 @@ A quick brown fox jumps over a lazy dog.
 			What's worse, when demodulating, we cannot distinguish $-1$ and $-0.5$ very well, leading higher risk of transfer failure.
 			This problem, however, can be tackled if we considered frequency shift caused by hardware and calibrate our software parameters automatically.
 
-	%TOCHECK
 	\subsection{Frequency Shift}
 		At first attempts to create physical layer, we realized that although the command we issued was to make a sound of 10kHz, what we really got tend to have a 10Hz frequency shift.
 		We thought it is not a problem at first, but as the project went on, especially when we are dealing with FDM, this become more problematic.
-		We were suggested by Pang Anqi that there is a way to correct the frequency using software, but we never had time to finish that.
+		We were suggested by Pang Anqi that there is a way to correct the frequency using software, but we never had enough time to finish that.
 
-	%TOCHECK
 	\subsection{FDM}
 		Although we are given the option to implement OFDM, the involvement of FFT and all other Signal and System stuff was way too difficult for two poor student. 
 		So we adopted, or reinvented(true story, we were thinking how to improve the usage of each channel), FDM.
@@ -137,7 +132,6 @@ A quick brown fox jumps over a lazy dog.
 		\end{aligned} \end{equation*}
 		This formula implies that we can transmit data in 8 channels simultaneously, the demodulation process of one particular channel will not be interfered by the presence of other 7 channels as their signal will be canceled by the $cos$ function we applied.
 	
-	%TOCHECK
 	\subsection{Frequency Response and Channel picking}
 		We have to face the fact that the frequency response of the sound care is not a perfectly line, but a curved line where the amplititude will drop by almost a half as the frequency goes up to 10kHz.
 		We didn't realize this when we are not using FDM. 
@@ -147,9 +141,8 @@ A quick brown fox jumps over a lazy dog.
 		\par
 		We tried to add more channels without going over 10kHz, however, the minimum bandwidth we found is 700Hz, which made it impossible to have 16 channels without touching 10kHz.
 
-	%TOCHECK
 	\subsection{Java experience: OOP}
-		This course is challenging as this is our first time to write Java code.
+		This project is challenging as this is our first time to write Java code.
 		Before this, all we know about Java is it's spelling and it's a horrible language(so what? C is also a horrible language :) ).
 		As this project goes on, we also learned a lot about Java and it's design philosophy.
 		\par
@@ -172,7 +165,6 @@ A quick brown fox jumps over a lazy dog.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 2: mac layer}
 	
-	%TOCHECK
 	\subsection{Mac Packet}
 		The basic unit in mac layer is a new type of packet called \lstinline{MacPacket}. 
 		It contains all the data, the type of this packet, it's current status and the time it's been sent. 
@@ -232,7 +224,6 @@ A quick brown fox jumps over a lazy dog.
 		We moves the window foreword if the head of the waiting queue has been ACKed. 
 		Also, we will take back the id of that ACKed packet so that late comers can re-use the id.
 
-	%TOCHECK
 	\subsubsection{Receive}
 		\lstinline{MacLayer.receive()} is also a function that loops until the user stops it.
 		\par
@@ -245,13 +236,11 @@ A quick brown fox jumps over a lazy dog.
 		If the packet is and ACK packet, we will check the find the packet that is being ACKed and change it's label to \lstinline{MacPacket.STATUS_ACKED}.
 		A patch we added for MACPING is to either reply that MACPING or calculate the time eclipsed.
 
-	%TOCHECK
 	\subsection{Thread pool}\label{Thread pool}
 		\lstinline{MacLayer.send()} and \lstinline{MacLayer.receive()} should be in two threads. 
 		We set up a starter and a stopper to help user better handle these two threads at the same time.
 		The user has to call \lstinline{MacLayer.startMacLayer()} to start them and use \lstinline{MacLayer.stopMacLayer} to stop the threads.
 	
-	%TOCHECK
 	\subsection{Sequential arriving data}
 		To transmit large file, we should use more packets and then assembly them after transmission. 
 		This is when sequential arrival become crucial. If the sequence of the data cannot be guaranteed, then we cannot correctly assemble the data.
@@ -271,7 +260,6 @@ A quick brown fox jumps over a lazy dog.
 		Then the window will be chocked by ACKs and the private buffer can never transfer anything to public buffer. 
 		In project 4, we removed this design.
 	
-	%TOCHECK
 	\subsection{Signal Detection}
 		Whenever sending a frame, the sender must make sure that the channel is clean and is good for transmission.
 		The process is somewhat similar to CSMA/CD, yet there is no detecting while sending.
@@ -332,7 +320,6 @@ A quick brown fox jumps over a lazy dog.
 			(q_3) 	edge 	[bend left]			node 	{tcp} 	(q_2);
 	\end{tikzpicture}
 
-	%TOCHECK
 	\subsection{JNI}
 		The fact that there is no raw socket in Java requires us to use JNI to call c functions in Java.
 		To use JNI, we have to write a wrapper in C that follows Java standard so that Java compiler can recognize it.
@@ -348,7 +335,6 @@ A quick brown fox jumps over a lazy dog.
 		As a result, we gave up Java. 
 		We tried to do socket and TCP job using other languages and tries to communicate these two using some method.
 
-	%TOCHECK
 	\subsection{Pipe}
 		Finally we decided to use pipe for communication.
 		One way pipe is relatively easy where you can type:
@@ -367,11 +353,15 @@ A quick brown fox jumps over a lazy dog.
 		In practice, both Java and C++ read from and output to stdin and stdout. 
 		In this way, they can communicate with each other.
 
-	%TODO: maybe nat_pack should be mentioned here? 
 	\subsection{Nat Packet}
-		Ernest please fill this part.
+		The C++ define a packet called nat packet for communicating with Gateway-Java. The packet is define in following sequence:
+		\begin{enumerate}
+		\item ip (4 bytes)
+		\item port (2 bytes)
+		\item content (arbitrary bytes)
+		\item A newline character (\textbackslash n) 
+		\end{enumerate}
 	
-	%TOCHECK
 	\subsection{Java experience: Cross platform}
 		Before project 3 we did all the programming in Windows.
 		The requirement of root privilege forced us to change to Ubuntu.
@@ -397,6 +387,8 @@ A quick brown fox jumps over a lazy dog.
 \section{Project 4: FTP application}
 	\subsection{Overview}	
 	The FTP connection is handled mainly at the gateway side. The node A (athernet FTP client) is connected to node B through athernet. The node B (FTP gateway) is connected to FTP Server via Internet.
+	\par
+	Since TCP has been handled in project 3 (TCPClient), the major time of project 4 is used to take care of the passive mode.
 	\subsection{Passive Mode}
 	For \emph{LIST} and \emph{RETR} command, passive mode need to be supported. The gateway parses every reply from FTP server before redirecting that to java client. Once the gateway received a reply starting with code 227, the reply from server with expected passive ports, the gateway records it as \emph{data\_port}. Then, if the gateway received a sending request of \emph{LIST} or \emph{RETR}, it immediately start a new TCP connection to the server with \emph{data\_port}.
 
@@ -407,15 +399,14 @@ A quick brown fox jumps over a lazy dog.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Course}
 	
-	%TOCHECK
 	\subsection{Lectures}
 		The lectures are exciting. 
 		However, it would be better if the slides can be more self-explaning so that we can review faster.
 		Also, the pictures in slides, most of which are cited from the textbook, should have reference.
-		Such practices not only teaches students the importance of academic integrity, it would also help us track the content down in the textbook faster.
+		Such practice not only teaches students the importance of academic integrity, it would also help us track the content down in the textbook faster.
 		\par
 		I likes the lecture in the way it is. 
-		But I think we can improve but having take-home quizes(like Compilers taught by Song Fu) and have a 5 minutes quick discussion before each lecture.
+		But I think we can learn more by having take-home quizes(like Compilers taught by Song Fu) and have a 5 minutes quick discussion about that before each lecture. The quiz doesn't necessarily contribute to the grading, they are just some simple questions covering the lecture knowledge.
 		In this way, we get to participate more and you can know if we understands something.
 		\par
 		Furthermore, you skipped a lot about applications, I understand it's because of limited time.
@@ -424,12 +415,12 @@ A quick brown fox jumps over a lazy dog.
 		We have to admit that making presentations is also an important skill.
 		This presentation can be set at any time when everyone is available.
 
-	%TOCHECK
 	\subsection{Projects}
 		The projects are exhausting but fruitful. 
 		However, there are improvements that I would like to propose.
-		I think we should have all the projects planned ahead so that we can better design.
-		Not knowing what's coming later may lead to somewhat useless and even wrong design.
+		I think we should have all the projects planned ahead so that we can have a better design.
+		Not knowing what's coming later may lead to somewhat useless and even wrong design, since lower-level interfaces need to meet higher-level needs.
+		\par
 		Besides, I hope we can have more hints than we have now. 
 		The links attached at the end of each project's description file is very useful for self-teaching and for the project.
 
@@ -440,13 +431,12 @@ A quick brown fox jumps over a lazy dog.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %TOCHECK
 \section*{Acknowledgment}
-	Finally, we would like to thank Zhice for providing us with such a great course.
+	Finally, we would like to thank the professor for providing us with such a great course.
 	The projects you prepared is really exciting and challenging. 
 	We learned a lot during this course.
 	We would like thank Fengling and Cheng too. 
-	They spend 4 weekends to check out project and patiently waited for us until late.
-	Thanks for the effort.
-	Finally we would like to thank Anqi, who provided a lot of ideas to us.
+	Thanks for their effort and patient.
+	Finally we would like to thank Anqi, who shard a lot of design priciples with us.
 
 \bibliographystyle{IEEEtran}
 \bibliography{report}
