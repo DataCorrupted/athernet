@@ -11,7 +11,8 @@
 \usepackage{mathtools}
 \usepackage{amsmath,amsthm,amssymb,amsfonts}
 \usepackage{array}
-
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
 \lstset{
 	basicstyle=\small\ttfamily,
 	columns=fullflexible,
@@ -101,7 +102,7 @@ A quick brown fox jumps over a lazy dog.
 			Such preamble will have a nice feature that the dot product is very small unless it's perfectly aligned. 
 			In practice, the alignment error will only shift by one or two samples.
 		\subsection{Modulation \& Demodulation}
-			We adopted PSK, where bit 0 and 1 corresponds to $cos(2\pi f)$ and $cos(2\pi f)$. 
+			We adopted PSK, where bit 0 and 1 corresponds to $cos(2\pi f)$ and $cos(2\pi f + \pi)$. 
 			But in reality it's easier to modulate as we has calculated $cos(2\pi f)$ in advance and we can multiply it by $-1$ and get $cos(2\pi f)$.
 			Thus the calculation of triangular functions is limited.
 			When demodulating, we take the bit and multiply it with $cos(2\pi f)$ we can get $1$ and $-1$ corresponding to 1 and 0.
@@ -313,30 +314,74 @@ A quick brown fox jumps over a lazy dog.
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Project 3: gateway}
+	
+	Starting from project 3, we got involved into sockets, which is not provided in Java.
+	We tried some work around but finally we settled on Pipes. 
+	The overall structure of this project can be shown in the graph below: 
+	\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto]
+		\node[rectangle, draw]	(q_0) 									{Client};
+		\node[rectangle, draw] 	(q_1) 	[right=of q_0] 	{Gateway-Java};
+		\node[rectangle, draw] 	(q_2) 	[above=of q_1] 	{Gateway-cpp};
+		\node[rectangle, draw] 	(q_3) 	[right=of q_2] 	{Internet};
+		\path[->]
+			(q_0)		edge 	[bend left]			node 	{athernet} 	(q_1)
+			(q_1) 	edge 	[bend left]			node 	{pipe} 	(q_2)
+							edge 	[bend left]			node 	{athernet} 	(q_0)
+			(q_2) 	edge 	[bend left]			node 	{pipe} 	(q_1)
+							edge 	[bend left]			node 	{tcp} 	(q_3)
+			(q_3) 	edge 	[bend left]			node 	{tcp} 	(q_2);
+	\end{tikzpicture}
 
-%TODO: insert a graph to illistrate the overall layout in this part
-	
-	%TODO
+	%TOCHECK
 	\subsection{JNI}
-		Peter please fill this part.
-	
+		The fact that there is no raw socket in Java requires us to use JNI to call c functions in Java.
+		To use JNI, we have to write a wrapper in C that follows Java standard so that Java compiler can recognize it.
+		We will not talk about the details here. 
+		\par
+		We found a company savarese() that open sourced it's JNI and all TCP related packet wrapper. 
+		The work consists of two parts: the raw socket wrapper called Rocksaw(https://www.savarese.com/software/rocksaw/) and a TCP packet wrapper vserv(https://www.savarese.org/software/vserv-tcpip/).
+		\par
+		The major downfall of this method that directly lead us to bail is that raw socket requires root and that is not acceptable for a user application.
+		Also, the tcp wrapper provided by savarese was nasty. 
+		We reviewed the code to know the usage, that's when we found that the classes uses reference outside the object to do the job, which goes beyond the idea of the word "wrapper".
+		\par
+		As a result, we gave up Java. 
+		We tried to do socket and TCP job using other languages and tries to communicate these two using some method.
+
 	%TODO
 	\subsection{Pipe}
-		Peter please fill this part.
-		
+		Finally we decided to use pipe for communication.
+		One way pipe is relatively easy where you can type:
+		\begin{center}\begin{lstlisting}
+			program | another-program
+		\end{lstlisting}\end{center}
+		But to have a two way pipe is more difficult.
+		It is hard because it's easy for two program get caught in dead lock where each one of them will not output anything until they are feed with some input. 
+		Here we used Named Pipe which utilized file system to do the passing work.
+		To use a named pipe, you have to do:
+		\begin{lstlisting} 
+			mkfifo fifo
+			program1 <fifo | program 2 >fifo
+		\end{lstlisting}
+		\par
+		In practice, both Java and C++ read from and output to stdin and stdout. 
+		In this way, they can communicate with each other.
+
 	%TODO: maybe nat_pack should be mentioned here? 
 	\subsection{Nat Packet}
 		Ernest please fill this part.
 	
-	%TODO
+	%TOCHECK
 	\subsection{Java experience: Cross platform}
-		Peter please fill this part.
+		Before project 3 we did all the programming in Windows.
+		The requirement of root privilege forced us to change to Ubuntu.
+		However, we are happy to find that the code we wrote before can run directly with no problem on Ubuntu.
+		The experience of Java's cross platform ability is somewhat refreshing.
 
 	%TODO
 	\subsection{C++ experience: Socket Programming}
 		\paragraph{\textbf{gateway on the c++ side}}
 		The c++ need to handle all Internet Communication and provide I/O service for the java gateway agent. In other words, the c++ gateway need to send out IP packets whenever the java gateway request sending, and give received packet from Internet to Java Interface (with some pre-pocessing).
-		
 		
 		\paragraph{\textbf{TCP, UDP and ICMP}}
 		For TCP and UDP, we are calling the interfaces provided by linux keneral interface, inlcuding \emph{socket}, \emph{binding}, \emph{connect}, \emph{sendto} and \emph{recefrom}. For ICMP, we are using the ICMP provided by Boost Libraries. 
@@ -360,21 +405,31 @@ A quick brown fox jumps over a lazy dog.
 %% Course and Homework
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Course \& Homework}
+\section{Course}
 	
 	%TODO
-	\subsection{Course}
+	\subsection{Lectures}
 	
 	%TODO
 	\subsection{Homework}
+
+	%TODO
+	\subsection{Projects}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Acknowledgement
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TOCHECK
 \section*{Acknowledgment}
-	%TODO
+	Finally, we would like to thank Zhice for providing us with such a great course.
+	The projects you prepared is really exciting and challenging. 
+	We learned a lot during this course.
+	We would like thank Fengling and Cheng too. 
+	They spend 4 weekends to check out project and patiently waited for us until late.
+	Thanks for the effort.
+	Finally we would like to thank Anqi, who provided a lot of ideas to us.
 
 \bibliographystyle{IEEEtran}
 \bibliography{report}
